@@ -28,7 +28,7 @@ class SmallText extends StatelessWidget {
     return Text(
 
       text,
-      maxLines: 1,
+      maxLines: 5,
       overflow: overFlow,
       style: TextStyle(
         fontSize:size == 0?Dimensions.fontSmall12:size, fontWeight: FontWeight.w400,height: height,color: color

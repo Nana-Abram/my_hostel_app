@@ -39,7 +39,7 @@ class _AppBarScreenState extends State<AppBarScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90.h),
+        preferredSize: Size.fromHeight(120.h),
         child: Container(
           height: 120.h,
           padding: EdgeInsets.symmetric(horizontal: 40.w),
@@ -66,12 +66,12 @@ class _AppBarScreenState extends State<AppBarScreen> {
                       color: const Color(0xFF2563EB),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'H',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           color: Colors.white,
                         ),
                       ),
@@ -133,7 +133,7 @@ class _AppBarScreenState extends State<AppBarScreen> {
         ),
       ),
 
-      // ✅ This changes dynamically based on selected nav button
+      // This changes dynamically based on selected nav button
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _pages[_selectedIndex],
