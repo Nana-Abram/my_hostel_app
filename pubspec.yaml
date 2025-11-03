@@ -37,6 +37,7 @@ dependencies:
   firebase_core: ^4.2.0
   flutter_screenutil: ^5.9.3
   carousel_slider: ^5.1.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:

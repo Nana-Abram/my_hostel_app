@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:provider/provider.dart';
 
 class FilterSection extends StatefulWidget {
   const FilterSection({super.key});
@@ -59,18 +61,32 @@ class _FilterSectionState extends State<FilterSection> {
               label: "Campus",
               hint: "Select campus",
               isFilter: true,
-              items: ['UENR Sunyani campus',"UNER Dormaa campus",'KSTU Sunyani campus'],
+              items: [
+                'UENR Sunyani campus',
+                "UNER Dormaa campus",
+                'KSTU Sunyani campus',
+              ],
+              onChanged: (val) {
+                context.read<HostelProvider>().updateFilters(campus: val);
+              },
             ),
             SizedBox(height: 25.h),
 
             /// ROOM TYPE DROPDOWN
-          
             DropdownButtonWidget(
               icon: Icons.meeting_room_outlined,
               label: "Room Type",
               hint: "Single, Shared, etc.",
               isFilter: true,
-              items:["Single","Two in a room", "Three in a roow","four in a room"]
+              items: [
+                "One in a room",
+                "Two in a room",
+                "Three in a roow",
+                "Four in a room",
+              ],
+              onChanged: (val) {
+                context.read<HostelProvider>().updateFilters(campus: val);
+              },
             ),
             SizedBox(height: 25.h),
 
@@ -81,6 +97,9 @@ class _FilterSectionState extends State<FilterSection> {
               hint: "Select gender type",
               items: ["Male", "Female", "Mixed"],
               isFilter: true,
+              onChanged: (val) {
+                context.read<HostelProvider>().updateFilters(campus: val);
+              },
             ),
             SizedBox(height: 25.h),
 
@@ -139,13 +158,13 @@ class _FilterSectionState extends State<FilterSection> {
   }
 
   final Map<String, bool> _amenities = {
-  "Wi-Fi": false,
-  "Air Conditioning": false,
-  "Kitchen": false,
-  "Study Room": false,
-  "Security": false,
-  "Laundry": false,
-};
+    "Wi-Fi": false,
+    "Air Conditioning": false,
+    "Kitchen": false,
+    "Study Room": false,
+    "Security": false,
+    "Laundry": false,
+  };
 
   // Reusable amenity checkbox
   Widget amenityCheck(String title) {
@@ -158,7 +177,7 @@ class _FilterSectionState extends State<FilterSection> {
             value: _amenities[title],
             onChanged: (val) {
               setState(() {
-                _amenities[title] = val?? false;
+                _amenities[title] = val ?? false;
               });
             },
             activeColor: Colors.blueAccent,
