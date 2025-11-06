@@ -129,7 +129,7 @@ class AvailableRooms extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // handle booking click
+                          Navigator.pushNamed(context, '/booking_page');
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(

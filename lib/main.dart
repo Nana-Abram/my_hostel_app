@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
+import 'package:my_hostel_app/ui/booking/booking_screen.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_details_page.dart';
 import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           home: child,
           routes: {
              AppRoutes.hostelDetails:(context) => HostelDetailsPage(),
+             AppRoutes.bookingPage:(context)=> BookingScreen(roomType: "2 in a room",price: 400.8,imagePath: "assets/images/h1.jpg",),
           },
         );
       },

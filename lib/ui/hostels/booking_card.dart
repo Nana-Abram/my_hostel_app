@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 
 class BookingCardWidget extends StatelessWidget {
   final String price;
   final String duration;
-  final String roomType;
+  final String campus;
+  final String ratings;
+  final String availableRooms;
   final VoidCallback onBook;
 
   const BookingCardWidget({
     super.key,
     required this.price,
     required this.duration,
-    required this.roomType,
+    required this.campus,
+    required this.ratings,
+    required this.availableRooms,
     required this.onBook,
   });
 
@@ -30,7 +35,7 @@ class BookingCardWidget extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade300, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: .15),
             blurRadius: 8,
             offset: const Offset(2, 4),
           ),
@@ -39,33 +44,60 @@ class BookingCardWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: "Booking Summary", color: Colors.black, size: 14.sp),
+           SmallText(text: "Starting from", color: Colors.black54), 
+           BigText(text: "GHS $price", color: AppColors.blueColor, size: 16.sp),
+           SmallText(text: "Per semester", color: Colors.black54), 
+          SizedBox(height: 10.h,),
           Divider(height: 20.h, color: Colors.grey.shade300),
-
-          SmallText(text: "Room Type", color: Colors.black54),
-          SizedBox(height: 4.h),
-          SmallText(text: roomType, color: Colors.black, size: 12.sp),
-          SizedBox(height: 15.h),
-
-          SmallText(text: "Duration", color: Colors.black54),
-          SizedBox(height: 4.h),
+          SizedBox(height: 10.h,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SmallText(text: "Campus", color: Colors.black54),
+              SmallText(text: campus, color: Colors.black, size: 12.sp),
+            ],
+          ),
+           SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SmallText(text: "Duration", color: Colors.black54),        
           SmallText(text: duration, color: Colors.black, size: 12.sp),
-          SizedBox(height: 15.h),
+            ],
+          ),
+           SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+           
+          SmallText(text: "Available rooms", color: Colors.black54),
+         
+          BigText(text: availableRooms, color:Colors.black, size: 12.sp),
 
-          SmallText(text: "Total Price", color: Colors.black54),
-          SizedBox(height: 4.h),
-          BigText(
-            text: "GHS $price",
-            color: AppColors.blueColor,
-            size: 16.sp,
+            ],
+          ),
+           SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+           
+          SmallText(text: "Ratings", color: Colors.black54),
+          IconAndTextWidget(icon: Icons.star, text: ratings, iconColor:AppColors.orangeColor, textColor:Colors.black ,)
+
+            ],
           ),
 
           SizedBox(height: 25.h),
           Center(
-            child: ElvButtonWidget(
-              text: "Book Now",
-              isPrimary: true,
-              onPressed: onBook,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/booking_page');
+              },
+              child: ElvButtonWidget(
+                text: "Book Now",
+                isPrimary: true,
+                onPressed: onBook,
+              ),
             ),
           ),
 

@@ -83,6 +83,7 @@ class HostelDetailsPage extends StatelessWidget {
           ),
         ),
       ),
+      
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
         // margin: EdgeInsets.all(30.w),
@@ -253,9 +254,34 @@ class HostelDetailsPage extends StatelessWidget {
                 ],
               ),
             
-            BookingCardWidget(price: "3000", duration: "semester", roomType:"2 in a room", onBook: () {},)
+            BookingCardWidget(price: "3000", duration: "semester",campus: "UENR campus",availableRooms: "3",  ratings: "4.5", onBook: () {},)
             ],
               ),
+              SizedBox(height: 20.h,),
+              Container(
+                width: 0.65.sw,
+                height: 0.40.sh,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.r),
+                  color: Colors.blueGrey.shade300,
+                   boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey,
+                      blurRadius: 5.r,
+                      offset: Offset(1, 1),
+                    ),
+                   ]
+                ),
+                child:Column(
+                  // crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Icon(Icons.location_on_outlined,size: 50.sp, color: Colors.black,),
+                 Center(child: BigText(text: "Location on map")),
+                  ],
+                )
+              ),
+              SizedBox(height: 50.h,)
             ]
         
           ),
@@ -276,22 +302,20 @@ class RowIconAndText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          Container(
-            width: 40.w,
-            height: 40.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              color:AppColors.checkColor
-            ),
-            child: Icon(icon, size: 22.sp,color: AppColors.blueColor,),
+    return Row(
+      children: [
+        Container(
+          width: 40.w,
+          height: 40.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.r),
+            color:AppColors.checkColor
           ),
-          SizedBox(width: 10.w,),
-          SmallText(text:text,color: Colors.black,)
-        ],
-      ),
+          child: Icon(icon, size: 22.sp,color: AppColors.blueColor,),
+        ),
+        SizedBox(width: 10.w,),
+        SmallText(text:text,color: Colors.black,)
+      ],
     );
   }
 }

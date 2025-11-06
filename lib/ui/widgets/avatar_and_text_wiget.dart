@@ -9,11 +9,14 @@ class AvatarAndTextWiget extends StatelessWidget {
     required this.color,
     required this.firstText,
     required this.secondText,
+    this.avatarRadius = 45
+
   });
   final String circleText;
   final Color color;
   final String firstText;
   final String secondText;
+  final double avatarRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class AvatarAndTextWiget extends StatelessWidget {
       child: Column(
         children: [
           CircleAvatar(
-            radius: 50.r,
+            radius: avatarRadius,
             backgroundColor: color,
             child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),),
           ),
