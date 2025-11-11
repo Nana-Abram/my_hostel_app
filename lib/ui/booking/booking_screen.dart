@@ -105,11 +105,13 @@ class BookingScreen extends StatelessWidget {
                   ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              AvatarAndTextWiget(circleText: "1", color: AppColors.blueColor, firstText: "Details", secondText:"",avatarRadius: 20,),
-              AvatarAndTextWiget(circleText: "2", color: AppColors.blueColor, firstText: "Payment", secondText:"",avatarRadius: 20,),
-              AvatarAndTextWiget(circleText: "1", color: AppColors.blueColor, firstText: "Confirmation", secondText:"",avatarRadius: 20,),
+              AvatarAndTextWiget(circleText: "1", color: AppColors.blueColor, firstText: "Details", secondText:"",avatarRadius: 25,isBold: false,needsDivider: true,),
+          
+              AvatarAndTextWiget(circleText: "2", color: Colors.blueGrey.shade400, firstText: "Payment", secondText:"",avatarRadius: 25,isBold: false,needsDivider: true,),
+      
+              AvatarAndTextWiget(circleText: "1", color: Colors.blueGrey.shade400, firstText: "Confirmation", secondText:"",avatarRadius: 25,isBold: false),
               ],),
              SafeArea(
               child: Padding(

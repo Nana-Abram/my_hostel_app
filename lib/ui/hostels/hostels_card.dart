@@ -1,33 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
 class HostelCard extends StatefulWidget {
-  final String imageUrl;
-  final String name;
-  final String location;
-  final double rating;
-  final int reviewsCount;
-  final double price;
-  final String description;
-  final List<String> amenities;
-  final VoidCallback? onPressed;
+  final HostelModel hostel;
 
-  const HostelCard({
-    super.key,
-    required this.imageUrl,
-    required this.name,
-    required this.location,
-    required this.rating,
-    required this.reviewsCount,
-    required this.price,
-    required this.description,
-    required this.amenities,
-    this.onPressed,
-  });
+  const HostelCard({super.key, required this.hostel});
 
   @override
   State<HostelCard> createState() => _HostelCardState();
@@ -45,13 +28,14 @@ class _HostelCardState extends State<HostelCard> {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
         transform: Matrix4.identity()..scale(_isHovered ? 1.02 : 1.0),
+        alignment: Alignment.topCenter,
         width: 0.25.sw,
-        height:0.60.sh,
+
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           // border: Border.all(color: Colors.grey.shade300, width: 0.8),
-           border: Border.all(
+          border: Border.all(
             color: _isHovered ? Colors.blueGrey : Colors.transparent,
             width: 1,
           ),
@@ -61,10 +45,9 @@ class _HostelCardState extends State<HostelCard> {
                   ? Colors.blueGrey.shade50
                   : Colors.grey.shade300,
               blurRadius: _isHovered ? 18 : 8,
-              spreadRadius: _isHovered ? 4: 2,
+              spreadRadius: _isHovered ? 4 : 2,
               offset: const Offset(2, 2),
             ),
-            
           ],
         ),
         child: Column(
@@ -72,17 +55,37 @@ class _HostelCardState extends State<HostelCard> {
             //Image + Price Tag
             Stack(
               children: [
-                Container(
-                  height: 0.28.sh,
-                  decoration: BoxDecoration(
+                SizedBox(
+                  height: 300.h,
+                  width: 0.25.sw,
+                  child: ImageNetwork(
+                    image: widget.hostel.images.first,
+
+                    height: 300.h,
+                    width: 0.25.sw,
+
+                    duration: 1500,
+                    curve: Curves.easeIn,
+                    onPointer: true,
+                    debugPrint: false,
+                    backgroundColor: Colors.blue,
+
+                    fitWeb: BoxFitWeb.cover,
+                    fitAndroidIos: BoxFit.cover,
+
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16.r),
                       topRight: Radius.circular(16.r),
                     ),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage(widget.imageUrl),
+
+                    onLoading: const CircularProgressIndicator(
+                      color: Colors.indigoAccent,
                     ),
+                    onError: const Icon(Icons.error, color: Colors.red),
+
+                    onTap: () {
+                      debugPrint("©gabriel_patrick_souza");
+                    },
                   ),
                 ),
                 Positioned(
@@ -91,14 +94,13 @@ class _HostelCardState extends State<HostelCard> {
                   child: SmallContainerAndText(
                     containerColor: Colors.white,
                     text:
-                        "From GHS ${widget.price.toStringAsFixed(0)}/semester",
+                        "From GHS ${widget.hostel.startPrice.toStringAsFixed(0)}/semester",
                     textColor: Colors.black,
                     textSize: 9.sp,
                   ),
                 ),
               ],
             ),
-
             // Details Section
             Container(
               margin: EdgeInsets.all(20.w),
@@ -111,7 +113,7 @@ class _HostelCardState extends State<HostelCard> {
                     children: [
                       Expanded(
                         child: SmallText(
-                          text: widget.name,
+                          text: widget.hostel.name,
                           color: Colors.black,
                           size: 13.sp,
                           overFlow: TextOverflow.ellipsis,
@@ -121,12 +123,12 @@ class _HostelCardState extends State<HostelCard> {
                         children: [
                           IconAndTextWidget(
                             icon: Icons.star,
-                            text: widget.rating.toStringAsFixed(1),
+                            text: widget.hostel.rating.toStringAsFixed(1),
                             iconColor: Colors.orange,
                           ),
                           SizedBox(width: 5.w),
                           SmallText(
-                            text: "(${widget.reviewsCount})",
+                            text: "(${widget.hostel.reviewsCount})",
                             color: Colors.black,
                             size: 11.sp,
                           ),
@@ -140,7 +142,7 @@ class _HostelCardState extends State<HostelCard> {
                   /// Location
                   IconAndTextWidget(
                     icon: Icons.location_on_outlined,
-                    text: widget.location,
+                    text: widget.hostel.campus,
                     iconColor: Colors.blueGrey,
                     textSize: 10.sp,
                   ),
@@ -149,7 +151,7 @@ class _HostelCardState extends State<HostelCard> {
 
                   /// Description
                   SmallText(
-                    text: widget.description,
+                    text: widget.hostel.description,
                     size: 11.sp,
                     overFlow: TextOverflow.ellipsis,
                   ),
@@ -160,17 +162,27 @@ class _HostelCardState extends State<HostelCard> {
                   Wrap(
                     spacing: 6.w,
                     runSpacing: 6.h,
-                    children: widget.amenities
-                        .take(5)
-                        .map(
-                          (amenity) => SmallContainerAndText(
-                            containerColor: Colors.blueGrey.shade50,
-                            text: amenity,
-                            textColor: Colors.black,
-                            textSize: 9.sp,
+                    children: [
+                      // Show first 3 amenities
+                      ...widget.hostel.amenities
+                          .take(3)
+                          .map(
+                            (amenity) => SmallContainerAndText(
+                              containerColor: Colors.blueGrey.shade50,
+                              text: amenity,
+                              textColor: Colors.black,
+                              textSize: 9.sp,
+                            ),
                           ),
-                        )
-                        .toList(),
+                      // Add "+more" if there are more than 3 amenities
+                      if (widget.hostel.amenities.length > 3)
+                        SmallContainerAndText(
+                          containerColor: Colors.blueGrey.shade50,
+                          text: "+${widget.hostel.amenities.length - 3} more",
+                          textColor: Colors.black,
+                          textSize: 9.sp,
+                        ),
+                    ],
                   ),
 
                   SizedBox(height: 20.h),
@@ -178,7 +190,7 @@ class _HostelCardState extends State<HostelCard> {
                   /// View Details Button
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.hostelDetails);
+                      Navigator.pushNamed(context, AppRoutes.hostelDetails,arguments: widget.hostel);
                     },
                     child: Container(
                       height: 0.04.sh,
@@ -232,11 +244,7 @@ class SmallContainerAndText extends StatelessWidget {
         color: containerColor,
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: SmallText(
-        text: text,
-        size: textSize,
-        color: textColor,
-      ),
+      child: SmallText(text: text, size: textSize, color: textColor),
     );
   }
 }

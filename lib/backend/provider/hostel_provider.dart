@@ -1,100 +1,39 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/backend/provider/filter_provider.dart';
+import 'package:my_hostel_app/backend/service/hostel_service.dart';
 
+final hostelServiceProvider = Provider((ref) => HostelService());
 
-class HostelProvider extends ChangeNotifier {
-  // All hostels
-  final List<Hostel> _allHostels = [
-    Hostel(
-      name: "Baidoo Hostel",
-      campus: "UENR Sunyani campus",
-      roomType: "Single",
-      gender: "Male",
-      rating: 4.5,
-      reviewsCount: 220,
-      price: 3000,
-      description:"Affordable accommodation with top-notch facilities and clean environment." ,
-      amenities: ["Wi-Fi", "Kitchen", "Study Room"],
-      image: "assets/images/h1.jpg",
-    ),
-    Hostel(
-      name: "Victory Towers",
-      campus: "KSTU Sunyani campus",
-      roomType: "Two in a room",
-      gender: "Mixed",
-      price: 2500,
-      reviewsCount: 180,
-      rating: 4.0,
-      description: "Well-furnished rooms with all utilities. 3 mins walk to campus.",
-      amenities: ["Wi-Fi", "Gym", "Security"],
-      image: "assets/images/h2.jpg",
-    ),
-    Hostel(
-      name: "Jayson Hostel",
-      campus: "UENR Sunyani campus",
-      roomType: "Four in a room",
-      gender: "Female",
-      rating: 4.6,
-      reviewsCount: 347,
-      price: 2000,
-      description: "Spacious rooms and reliable water supply. Perfect for students.",
-      amenities: ["Wi-Fi", "Laundry", "Kitchen"],
-      image: "assets/images/top2.jpg",
-    ),
-    Hostel(
-      name: "Berlin Hostel",
-      campus: "UENR Sunyani campus",
-      roomType: "Four in a room",
-      gender: "Female",
-      rating: 4.6,
-      reviewsCount: 347,
-      price: 2000,
-      description: "Spacious rooms and reliable water supply. Perfect for students.",
-      amenities: ["Wi-Fi", "Laundry", "Kitchen"],
-      image: "assets/images/vegas1.jpg",
-    ),
-    Hostel(
-      name: "Las Vegas Hostel",
-      campus: "UENR Sunyani campus",
-      roomType: "Four in a room",
-      gender: "Female",
-      rating: 4.6,
-      reviewsCount: 347,
-      price: 2000,
-      description: "Spacious rooms and reliable water supply. Perfect for students.",
-      amenities: ["Wi-Fi", "Laundry", "Kitchen"],
-      image: "assets/images/h1.jpg",
-    ),
-  ];
+// Live updates are better for listings:
+final hostelsStreamProvider = StreamProvider<List<HostelModel>>((ref) {
+  final service = ref.read(hostelServiceProvider);
+  return service.watchAllHostels(); // implement as a Firestore snapshots() stream
+});
 
-  // Filters
-  String? selectedCampus;
-  String? selectedRoomType;
-  String? selectedGender;
+final filteredHostelsProvider =
+    Provider<List<HostelModel>>((ref) {
+  final filter = ref.watch(filterProvider);
+  final hostelsAsync = ref.watch(hostelsStreamProvider);
 
-  // Get filtered hostels
-  List<Hostel> get filteredHostels {
-    return _allHostels.where((h) {
-      final campusMatch = selectedCampus == null || h.campus == selectedCampus;
-      final roomMatch = selectedRoomType == null || h.roomType == selectedRoomType;
-      final genderMatch = selectedGender == null || h.gender == selectedGender;
-      return campusMatch && roomMatch && genderMatch;
-    }).toList();
-  }
+  return hostelsAsync.maybeWhen(
+    data: (hostels) {
+      return hostels.where((h) {
+        final campusOk = (filter.campus == null || filter.campus!.isEmpty)
+            ? true
+            : h.campus == filter.campus;
 
-  // Update filters
-  void updateFilters({String? campus, String? roomType, String? gender}) {
-    selectedCampus = campus ?? selectedCampus;
-    selectedRoomType = roomType ?? selectedRoomType;
-    selectedGender = gender ?? selectedGender;
-    notifyListeners();
-  }
+        final priceOk = (filter.maxPrice == null)
+            ? true
+            : h.startPrice <= filter.maxPrice!;
 
-  // Reset filters
-  void clearFilters() {
-    selectedCampus = null;
-    selectedRoomType = null;
-    selectedGender = null;
-    notifyListeners();
-  }
-}
+        final amenitiesOk = filter.amenities.isEmpty
+            ? true
+            : filter.amenities.every(h.amenities.contains);
+
+        return campusOk && priceOk && amenitiesOk;
+      }).toList();
+    },
+    orElse: () => const <HostelModel>[],
+  );
+});

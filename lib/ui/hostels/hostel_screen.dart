@@ -34,12 +34,13 @@ class HostelsScreen extends StatelessWidget {
               
                   SizedBox(width: 40.w),
               
-                  /// HOSTEL GRID (RIGHT)
-                  /// Use Expanded to take up remaining width
+                 
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: const HostelGrid(),
-                    ),
+                    child: SingleChildScrollView(child: Column(
+                      children: [
+                        const HostelGrid(),
+                      ],
+                    )),
                   ),
                 ],
               ),

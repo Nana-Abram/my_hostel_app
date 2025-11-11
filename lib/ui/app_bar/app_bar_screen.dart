@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/about/about_screen.dart';
+import 'package:my_hostel_app/ui/admin/add_hostels.dart';
 import 'package:my_hostel_app/ui/contact/contact_screen.dart';
 import 'package:my_hostel_app/ui/home/home_screen.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_screen.dart';
@@ -21,6 +22,7 @@ class _AppBarScreenState extends State<AppBarScreen> {
 
   // List of pages for each navigation button
   final List<Widget> _pages = const [
+    AdminAddHostelPage(),
     HomeScreen(),
     HostelsScreen(),
     AboutScreen(),
@@ -94,24 +96,29 @@ class _AppBarScreenState extends State<AppBarScreen> {
               Row(
                 children: [
                   NavButtonWidget(
-                    text: 'Home',
+                    text: 'Admin',
                     isActive: _selectedIndex == 0,
                     onPressed: () => _onNavSelected(0),
                   ),
                   NavButtonWidget(
-                    text: 'Hostels',
+                    text: 'Home',
                     isActive: _selectedIndex == 1,
                     onPressed: () => _onNavSelected(1),
                   ),
                   NavButtonWidget(
-                    text: 'About',
+                    text: 'Hostels',
                     isActive: _selectedIndex == 2,
                     onPressed: () => _onNavSelected(2),
                   ),
                   NavButtonWidget(
-                    text: 'Contact',
+                    text: 'About',
                     isActive: _selectedIndex == 3,
                     onPressed: () => _onNavSelected(3),
+                  ),
+                  NavButtonWidget(
+                    text: 'Contact',
+                    isActive: _selectedIndex == 4,
+                    onPressed: () => _onNavSelected(4),
                   ),
                 ],
               ),

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
+import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-import 'package:provider/provider.dart';
 
-class FilterSection extends StatefulWidget {
+class FilterSection extends ConsumerStatefulWidget {
   const FilterSection({super.key});
 
   @override
-  State<FilterSection> createState() => _FilterSectionState();
+  ConsumerState<FilterSection> createState() => _FilterSectionState();
 }
 
-class _FilterSectionState extends State<FilterSection> {
+class _FilterSectionState extends ConsumerState<FilterSection> {
   double _priceValue = 5000; // Default slider price
 
   @override
@@ -49,7 +49,15 @@ class _FilterSectionState extends State<FilterSection> {
                   text: "Filters",
                   iconColor: Colors.blueGrey,
                 ),
-                ElvButtonWidget(text: "Clear all", isFilter: true),
+                GestureDetector(
+                  onTap: () {
+                    ref.read(filterProvider.notifier).clearFilters();
+                    setState(() {
+                      _priceValue = 0; // reset UI slider
+                    });
+                  },
+                  child: ElvButtonWidget(text: "Clear all", isFilter: true),
+                ),
               ],
             ),
 
@@ -67,7 +75,7 @@ class _FilterSectionState extends State<FilterSection> {
                 'KSTU Sunyani campus',
               ],
               onChanged: (val) {
-                context.read<HostelProvider>().updateFilters(campus: val);
+                ref.read(filterProvider.notifier).setCampus(val);
               },
             ),
             SizedBox(height: 25.h),
@@ -85,7 +93,7 @@ class _FilterSectionState extends State<FilterSection> {
                 "Four in a room",
               ],
               onChanged: (val) {
-                context.read<HostelProvider>().updateFilters(campus: val);
+                ref.read(filterProvider.notifier).setRoomType(val);
               },
             ),
             SizedBox(height: 25.h),
@@ -98,7 +106,7 @@ class _FilterSectionState extends State<FilterSection> {
               items: ["Male", "Female", "Mixed"],
               isFilter: true,
               onChanged: (val) {
-                context.read<HostelProvider>().updateFilters(campus: val);
+                ref.read(filterProvider.notifier).setGender(val);
               },
             ),
             SizedBox(height: 25.h),
@@ -177,7 +185,8 @@ class _FilterSectionState extends State<FilterSection> {
             value: _amenities[title],
             onChanged: (val) {
               setState(() {
-                _amenities[title] = val ?? false;
+                ref.read(filterProvider.notifier).toggleAmenity(title);
+
               });
             },
             activeColor: Colors.blueAccent,

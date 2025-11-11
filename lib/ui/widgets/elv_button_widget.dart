@@ -57,6 +57,7 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
 
         padding: EdgeInsets.symmetric(horizontal: 22.w),
         alignment: Alignment.center,
+        
         child: Text(
           widget.text,
           style: TextStyle(

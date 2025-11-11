@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 items: images.map((img) {
                   return Stack(
                     children: [
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: Image.asset(
                           img,

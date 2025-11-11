@@ -1,61 +1,54 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
-class Hostel {
+class HostelModel {
+  final String id;
   final String name;
-   final String campus;
-  final double rating;
-  final int reviewsCount;
-  final String roomType;
-  final String gender;
-  final double price;
+  final String campus;
+  final List<String> images;   
   final String description;
-  final List<String> amenities;
-  final String image;
-  Hostel({
+  final double rating;
+  final List<dynamic> amenities;
+  final String location;
+  final double startPrice;
+  final double reviewsCount;
+
+  HostelModel({
+    required this.id,
     required this.name,
     required this.campus,
-    required this.rating,
-    required this.reviewsCount,
-    required this.roomType,
-    required this.gender,
-    required this.price,
+    required this.images,
     required this.description,
+    required this.rating,
     required this.amenities,
-    required this.image,
+    required this.location,
+    required this.startPrice,
+    required this.reviewsCount
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'name': name,
-      'campus': campus,
-      'rating': rating,
-      'reviewsCount': reviewsCount,
-      'roomType': roomType,
-      'gender': gender,
-      'price': price,
-      'description':description,
-      'amenities': amenities,
-      'image': image,
-    };
-  }
-
-  factory Hostel.fromMap(Map<String, dynamic> map) {
-    return Hostel(
-      name: map['name'] as String,
-      campus: map['campus'] as String,
-      rating: map['rating'] as double,
-      reviewsCount: map['reviewsCount'] as int,
-      roomType: map['roomType'] as String,
-      gender: map['gender'] as String,
-      price: map['price'] as double,
-      description: map['description'] as String,
-      amenities: List<String>.from((map['amenities'] as List<String>),),
-      image: map['image'] as String,
+  factory HostelModel.fromMap(Map<String, dynamic> data, String id) {
+    return HostelModel(
+      id: id,
+      name: data['name'],
+      campus: data['campus'],
+      images: List<String>.from(data['images'] ?? []), 
+      description: data['description'],
+      rating: (data['rating'] as num).toDouble(),
+      amenities: data['amenities'] ?? [],
+      location: data['location'],
+      startPrice: (data['startPrice'] as num).toDouble(),
+      reviewsCount: (data["reviewsCount"]as num).toDouble()
     );
   }
 
-  String toJson() => json.encode(toMap());
-
-  factory Hostel.fromJson(String source) => Hostel.fromMap(json.decode(source) as Map<String, dynamic>);
+  Map<String, dynamic> toMap() {
+    return {
+      "name": name,
+      "campus": campus,
+      "images": images,          
+      "description": description,
+      "rating": rating,
+      "amenities": amenities,
+      "location": location,
+      "startPrice":startPrice,
+      "reviewsCount":reviewsCount
+    };
+  }
 }
