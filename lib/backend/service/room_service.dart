@@ -20,9 +20,20 @@ class RoomService {
         .toList();
   }
 
+  Stream<List<RoomModel>> getAllRoomsStream() {
+    return _db.collection('rooms').snapshots().map((snapshot) {
+      print("Snap for rooms:${snapshot.docs.length}");
+      return snapshot.docs
+          .map((doc) => RoomModel.fromMap(doc.data(), doc.id))
+          .toList();
+          
+    });
+  }
+
   Future<void> updateRoomAvailability(String roomId, bool value) async {
     await _db.collection('rooms').doc(roomId).update({
       "available": value,
     });
   }
 }
+

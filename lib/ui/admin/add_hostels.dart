@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/service/image_upload_service.dart';
+import 'package:my_hostel_app/ui/admin/add_rooms.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -121,128 +122,137 @@ Future<void> pickAndUploadImage() async {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(40.w),
-        child: Center(
-          child: Container(
-            width: 0.6.sw,
-            padding: EdgeInsets.all(30.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SmallText(
-                    text: "Create New Hostel",
-                    size: 20.sp,
-                    color: Colors.black,
-                  ),
-                  SizedBox(height: 20.h),
-
-                  _input("Hostel Name", nameCtrl),
-                  _input("Campus", campusCtrl),
-                  _input("Location", locationCtrl),
-                  _input("Starting Price (GHS)", startPriceCtrl,
-                      keyboard: TextInputType.number),
-                  _input("Rating (Optional)", ratingCtrl,
-                      keyboard: TextInputType.number),
-                  _input("Reviw Count (Optional)", reviewCountCtrl,
-                      keyboard: TextInputType.number),
-                  _input("Description", descriptionCtrl, maxLines: 3),
-
-                  SizedBox(height: 25.h),
-
-                  Text(
-                    "Amenities",
-                    style: TextStyle(fontSize: 14.sp),
-                  ),
-                  SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 10.w,
-                    runSpacing: 10.h,
-                    children: [
-                      _amenityChip("Wi-Fi"),
-                      _amenityChip("Kitchen"),
-                      _amenityChip("Study Room"),
-                      _amenityChip("Security"),
-                      _amenityChip("Laundry"),
-                      _amenityChip("Air Conditioning"),
+      body: 
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SingleChildScrollView(
+                child: Container(
+                  margin: EdgeInsets.all(20.w),
+                  width: 0.4.sw,
+                  padding: EdgeInsets.all(30.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                      ),
                     ],
                   ),
-
-                  SizedBox(height: 30.h),
-                  Text("Upload Images", style: TextStyle(fontSize: 14.sp)),
-                  SizedBox(height: 10.h),
-
-                  isUploading
-                      ? const CircularProgressIndicator()
-                      : InkWell(
-                        onTap: pickAndUploadImage,
-                        child: ElvButtonWidget(
-                            text: "Choose Image",
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SmallText(
+                          text: "Create New Hostel",
+                          size: 20.sp,
+                          color: Colors.black,
+                        ),
+                        SizedBox(height: 20.h),
+                            
+                        _input("Hostel Name", nameCtrl),
+                        _input("Campus", campusCtrl),
+                        _input("Location", locationCtrl),
+                        _input("Starting Price (GHS)", startPriceCtrl,
+                            keyboard: TextInputType.number),
+                        _input("Rating (Optional)", ratingCtrl,
+                            keyboard: TextInputType.number),
+                        _input("Reviw Count (Optional)", reviewCountCtrl,
+                            keyboard: TextInputType.number),
+                        _input("Description", descriptionCtrl, maxLines: 3),
+                            
+                        SizedBox(height: 25.h),
+                            
+                        Text(
+                          "Amenities",
+                          style: TextStyle(fontSize: 14.sp),
+                        ),
+                        SizedBox(height: 10.h),
+                        Wrap(
+                          spacing: 10.w,
+                          runSpacing: 10.h,
+                          children: [
+                            _amenityChip("Wi-Fi"),
+                            _amenityChip("Kitchen"),
+                            _amenityChip("Study Room"),
+                            _amenityChip("Security"),
+                            _amenityChip("Laundry"),
+                            _amenityChip("Parking"),
+                            _amenityChip("Gym"),
+                            _amenityChip("Air Conditioning"),
+                            _amenityChip("Pool"),
+                            _amenityChip("DSTV"),
+                          ],
+                        ),
+                            
+                        SizedBox(height: 30.h),
+                        Text("Upload Images", style: TextStyle(fontSize: 14.sp)),
+                        SizedBox(height: 10.h),
+                            
+                        isUploading
+                            ? const CircularProgressIndicator()
+                            : InkWell(
+                              onTap: pickAndUploadImage,
+                              child: ElvButtonWidget(
+                                  text: "Choose Image",
+                                ),
+                            ),
+                            
+                        SizedBox(height: 10.h),
+                            
+                        Wrap(
+                          spacing: 12.w,
+                          runSpacing: 12.h,
+                          children: images
+                              .map((img) => Container(
+                                    width: 140.w,
+                                    padding: EdgeInsets.all(8.w),
+                                    decoration: BoxDecoration(
+                                      border:
+                                          Border.all(color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Image.network(
+                                          img,
+                                          height: 90.h,
+                                          width: 120.w,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            images.remove(img);
+                                            setState(() {});
+                                          },
+                                          child: const Text("Remove"),
+                                        )
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                            
+                        SizedBox(height: 40.h),
+                            
+                        InkWell(
+                          onTap:_submit ,
+                          child: ElvButtonWidget(
+                            text: "Submit Hostel",
+                            isPrimary: true,
                           ),
-                      ),
-
-                  SizedBox(height: 10.h),
-
-                  Wrap(
-                    spacing: 12.w,
-                    runSpacing: 12.h,
-                    children: images
-                        .map((img) => Container(
-                              width: 140.w,
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Column(
-                                children: [
-                                  Image.network(
-                                    img,
-                                    height: 90.h,
-                                    width: 120.w,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      images.remove(img);
-                                      setState(() {});
-                                    },
-                                    child: const Text("Remove"),
-                                  )
-                                ],
-                              ),
-                            ))
-                        .toList(),
-                  ),
-
-                  SizedBox(height: 40.h),
-
-                  InkWell(
-                    onTap:_submit ,
-                    child: ElvButtonWidget(
-                      text: "Submit Hostel",
-                      isPrimary: true,
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              AdminAddRoomPage(),
+            ],
           ),
-        ),
-      ),
     );
   }
 

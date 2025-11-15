@@ -142,7 +142,7 @@ class _HostelCardState extends State<HostelCard> {
                   /// Location
                   IconAndTextWidget(
                     icon: Icons.location_on_outlined,
-                    text: widget.hostel.campus,
+                    text: "${widget.hostel.campus} - ${widget.hostel.location}",
                     iconColor: Colors.blueGrey,
                     textSize: 10.sp,
                   ),
@@ -239,7 +239,7 @@ class SmallContainerAndText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: containerColor,
         borderRadius: BorderRadius.circular(12.r),

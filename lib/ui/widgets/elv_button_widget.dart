@@ -32,41 +32,46 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: 45.h,
-        decoration: widget.isFilter?
-         BoxDecoration(
-          color: widget.isPrimary
-              ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-              : (_isHovered ? Colors.grey.shade200 : Colors.white),
-          border:(_isHovered? Border.all(
-            color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
-          ):null),
-          borderRadius: (_isHovered?BorderRadius.circular(10.r):null),
-        ):
-         BoxDecoration(
-          color: widget.isPrimary
-              ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-              : (_isHovered ? Colors.grey.shade200 : Colors.white),
-          border:Border.all(
-            color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
+      
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 45.h,
+          decoration: widget.isFilter?
+           BoxDecoration(
+            color: widget.isPrimary
+                ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
+                : (_isHovered ? Colors.grey.shade200 : Colors.white),
+            border:(_isHovered? Border.all(
+              color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
+            ):null),
+            borderRadius: (_isHovered?BorderRadius.circular(10.r):null),
+          ):
+           BoxDecoration(
+            color: widget.isPrimary
+                ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
+                : (_isHovered ? Colors.grey.shade200 : Colors.white),
+            border:Border.all(
+              color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
+            ),
+            borderRadius: BorderRadius.circular(10.r),
           ),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-
-        padding: EdgeInsets.symmetric(horizontal: 22.w),
-        alignment: Alignment.center,
         
-        child: Text(
-          widget.text,
-          style: TextStyle(
-            color: widget.isPrimary 
-                ? Colors.white
-                : widget.isFilter?AppColors.blueColor:
-                (_isHovered ? primaryColor : Colors.grey.shade800),
-            fontSize:widget.isFilter?10.sp: 16.sp,
-            fontWeight:widget.isFilter?null:FontWeight.w600,
+          padding: EdgeInsets.symmetric(horizontal: 22.w),
+          alignment: Alignment.center,
+          
+          
+          child: Text(
+            widget.text,
+            style: TextStyle(
+              color: widget.isPrimary 
+                  ? Colors.white
+                  : widget.isFilter?AppColors.blueColor:
+                  (_isHovered ? primaryColor : Colors.grey.shade800),
+              fontSize:widget.isFilter?10.sp: 16.sp,
+              fontWeight:widget.isFilter?null:FontWeight.w600,
+            ),
           ),
         ),
       ),

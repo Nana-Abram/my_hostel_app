@@ -6,27 +6,22 @@ import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
 class HostelGrid extends ConsumerWidget {
   const HostelGrid({super.key});
 
- 
   @override
-Widget build(BuildContext context, WidgetRef ref) {
-  final hostels = ref.watch(filteredHostelsProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // This returns a List<HostelModel>
+    final filteredList = ref.watch(filteredHostelsProvider);
 
-  if (hostels.isEmpty) {
-    return const Center(child: Text("No hostels match your filters"));
+    return filteredList.isEmpty
+        ? const Center(child: Text("No hostels found"))
+        : Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            children: filteredList
+                .map((hostel) => HostelCard(hostel: hostel))
+                .toList(),
+          );
   }
-
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Wrap(
-      // direction: Axis.vertical,
-      spacing: 20,
-      runSpacing: 20,
-      children: hostels
-          .map((hostel) => HostelCard(hostel: hostel))
-          .toList(),
-    ),
-  );
-
 }
 
-}
+
+

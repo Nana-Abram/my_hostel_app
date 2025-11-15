@@ -14,10 +14,10 @@ class AppBarScreen extends StatefulWidget {
   const AppBarScreen({super.key});
 
   @override
-  State<AppBarScreen> createState() => _AppBarScreenState();
+  State<AppBarScreen> createState() => AppBarScreenState();
 }
 
-class _AppBarScreenState extends State<AppBarScreen> {
+class AppBarScreenState extends State<AppBarScreen> {
   int _selectedIndex = 0;
 
   // List of pages for each navigation button
@@ -30,7 +30,7 @@ class _AppBarScreenState extends State<AppBarScreen> {
   ];
 
   // Helper function to switch body
-  void _onNavSelected(int index) {
+  void onNavSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -98,27 +98,27 @@ class _AppBarScreenState extends State<AppBarScreen> {
                   NavButtonWidget(
                     text: 'Admin',
                     isActive: _selectedIndex == 0,
-                    onPressed: () => _onNavSelected(0),
+                    onPressed: () => onNavSelected(0),
                   ),
                   NavButtonWidget(
                     text: 'Home',
                     isActive: _selectedIndex == 1,
-                    onPressed: () => _onNavSelected(1),
+                    onPressed: () => onNavSelected(1),
                   ),
                   NavButtonWidget(
                     text: 'Hostels',
                     isActive: _selectedIndex == 2,
-                    onPressed: () => _onNavSelected(2),
+                    onPressed: () => onNavSelected(2),
                   ),
                   NavButtonWidget(
                     text: 'About',
                     isActive: _selectedIndex == 3,
-                    onPressed: () => _onNavSelected(3),
+                    onPressed: () => onNavSelected(3),
                   ),
                   NavButtonWidget(
                     text: 'Contact',
                     isActive: _selectedIndex == 4,
-                    onPressed: () => _onNavSelected(4),
+                    onPressed: () => onNavSelected(4),
                   ),
                 ],
               ),

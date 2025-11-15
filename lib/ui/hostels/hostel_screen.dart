@@ -10,6 +10,11 @@ class HostelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // You might want to be more selective about when to clear
+      // ref.read(filterProvider.notifier).clearFilters();
+    });
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: Padding(

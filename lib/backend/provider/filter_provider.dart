@@ -7,7 +7,7 @@ final filterProvider =
 class FilterNotifier extends Notifier<HostelFilter> {
   @override
   HostelFilter build() {
-    return HostelFilter(); // ✅ initial filter state
+    return HostelFilter(); // 
   }
 
   void setCampus(String? value) {
@@ -18,7 +18,7 @@ class FilterNotifier extends Notifier<HostelFilter> {
     state = state.copyWith(roomType: value);
   }
   void setGender(String? value) {
-    state = state.copyWith(roomType: value);
+    state = state.copyWith(gender: value);
   }
 
   void setMaxPrice(double value) {
@@ -40,4 +40,9 @@ class FilterNotifier extends Notifier<HostelFilter> {
   void clearFilters() {
     state = HostelFilter();
   }
+
+  void applyFilters() {
+  state = state; // Forces recompute
+}
+
 }

@@ -1,14 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_hostel_app/backend/provider/filter_provider.dart';
+import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/hostels/hostel_screen.dart';
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
-class SearchContainer extends StatelessWidget {
+
+ class SearchContainer extends ConsumerStatefulWidget {
   const SearchContainer({super.key});
 
   @override
+  ConsumerState<SearchContainer> createState() => _SearchContainerState();
+}
+
+class _SearchContainerState extends ConsumerState<SearchContainer> {
+  late TextEditingController _campusController;
+
+  @override
+  void initState() {
+    super.initState();
+    _campusController = TextEditingController();
+    
+    // Initialize with current filter value if any
+    final currentFilter = ref.read(filterProvider);
+    if (currentFilter.campus != null) {
+      _campusController.text = currentFilter.campus!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _campusController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filter = ref.watch(filterProvider);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isMobile = constraints.maxWidth < 600;
@@ -31,63 +63,131 @@ class SearchContainer extends StatelessWidget {
             child: isMobile
                 ? Column(
                     children: [
-                      DropdownButtonWidget(
-                        icon: Icons.location_on_outlined,
-                        label: "Campus",
-                        hint: "Select campus",
-                        items: [
-                          'UENR Sunyani campus',
-                          'UENR Dormaa campus',
-                          'KSTU Sunyani campus'
-                        ],
+                      // CAMPUS SEARCH
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: TextField(
+                          controller: _campusController,
+                          decoration: InputDecoration(
+                            hintText: "Search campus...",
+                            border: InputBorder.none,
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 20.w,
+                              color: Colors.grey,
+                            ),
+                            suffixIcon: _campusController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(Icons.clear, size: 18.w, color: Colors.grey),
+                                    onPressed: () {
+                                      _campusController.clear();
+                                      ref.read(filterProvider.notifier).setCampus(null);
+                                    },
+                                  )
+                                : null,
+                          ),
+                          onChanged: (value) {
+                            if (value.isEmpty) {
+                              ref.read(filterProvider.notifier).setCampus(null);
+                            } else {
+                              ref.read(filterProvider.notifier).setCampus(value);
+                            }
+                          },
+                        ),
                       ),
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 15.h),
+                      
+                      // ROOM TYPE DROPDOWN
                       DropdownButtonWidget(
-                        icon: Icons.people_outline,
-                        label: "People per room",
-                        hint: "Select rooms",
+                        icon: Icons.meeting_room_outlined,
+                        label: "Room Type",
+                        hint: "Single, Shared, etc.",
+                        isFilter: true,
+                        value: filter.roomType,
                         items: [
-                          "Single",
-                          "Two in a room",
-                          "Three in a room",
-                          "Four in a room"
+                          "Single Room with washroom",
+                          "Single Room self contain",
+                          "Single Room with shared washroom",
+                          "double Room self contain",
+                          "Double Room with shared washroom",
                         ],
+                        onChanged: (val) {
+                          ref.read(filterProvider.notifier).setRoomType(val);
+                        },
                       ),
-                      SizedBox(height: 10.h),
-                      _buildSearchButton(isMobile),
+                      SizedBox(height: 15.h),
+                      
+                      _buildSearchButton(context, isMobile),
                     ],
                   )
                 : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                        child: DropdownButtonWidget(
-                          icon: Icons.location_on_outlined,
-                          label: "Campus",
-                          hint: "Select campus",
-                          items: [
-                            'UENR Sunyani campus',
-                            'UENR Dormaa campus',
-                            'KSTU Sunyani campus'
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SmallText(text: "Campus", color: Colors.blueGrey),
+                            SizedBox(height: 8.h),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade400),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: TextField(
+                                controller: _campusController,
+                                decoration: InputDecoration(
+                                  hintText: "Search campus...",
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(Icons.search, size: 20.w, color: Colors.grey),
+                                  suffixIcon: _campusController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: Icon(Icons.clear, size: 18.w, color: Colors.grey),
+                                          onPressed: () {
+                                            _campusController.clear();
+                                            ref.read(filterProvider.notifier).setCampus(null);
+                                          },
+                                        )
+                                      : null,
+                                ),
+                                onChanged: (value) {
+                                  if (value.isEmpty) {
+                                    ref.read(filterProvider.notifier).setCampus(null);
+                                  } else {
+                                    ref.read(filterProvider.notifier).setCampus(value);
+                                  }
+                                },
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       SizedBox(width: 10.w),
                       Flexible(
                         child: DropdownButtonWidget(
-                          icon: Icons.people_outline,
-                          label: "People per room",
-                          hint: "Select rooms",
+                          icon: Icons.meeting_room_outlined,
+                          label: "Room Type",
+                          hint: "Single, Shared, etc.",
+                          isFilter: true,
+                          value: filter.roomType,
                           items: [
-                            "Single",
-                            "Two in a room",
-                            "Three in a room",
-                            "Four in a room"
+                            "Single Room with washroom",
+                            "Single Room self contain",
+                            "Single Room with shared washroom",
+                            "double Room self contain",
+                            "Double Room with shared washroom",
                           ],
+                          onChanged: (val) {
+                            ref.read(filterProvider.notifier).setRoomType(val);
+                          },
                         ),
                       ),
                       SizedBox(width: 10.w),
-                      _buildSearchButton(isMobile),
+                      _buildSearchButton(context, isMobile),
                     ],
                   ),
           ),
@@ -96,23 +196,49 @@ class SearchContainer extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchButton(bool isMobile) {
-    return Container(
-      margin: EdgeInsets.only(top: isMobile ? 20.h : 40.h),
-      width: 120.w,
-      height: 55.h,
-      decoration: BoxDecoration(
-        color: AppColors.blueColor,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search, color: Colors.white, size: 24.r),
-          SizedBox(width: 5.w),
-          SmallText(text: "Search", color: Colors.white),
-        ],
+  Widget _buildSearchButton(BuildContext context, bool isMobile) {
+    return GestureDetector(
+      onTap: () {
+        _navigateToFilteredResults(context); 
+      },
+      child: Container(
+        margin: EdgeInsets.only(top: isMobile ? 20.h : 25.h),
+        width: 120.w,
+        height: 55.h,
+        decoration: BoxDecoration(
+          color: AppColors.blueColor,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search, color: Colors.white, size: 24.r),
+            SizedBox(width: 5.w),
+            SmallText(text: "Search", color: Colors.white),
+          ],
+        ),
       ),
     );
+  }
+
+  void _navigateToFilteredResults(BuildContext context) {
+    // Switch to Hostels tab in the main AppBarScreen navigation
+    final appBarScreenState = context.findAncestorStateOfType<AppBarScreenState>();
+    
+    if (appBarScreenState != null) {
+      appBarScreenState.onNavSelected(2);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Showing filtered results in Hostels'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HostelsScreen()),
+      );
+    }
   }
 }

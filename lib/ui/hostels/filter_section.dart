@@ -15,10 +15,53 @@ class FilterSection extends ConsumerStatefulWidget {
 }
 
 class _FilterSectionState extends ConsumerState<FilterSection> {
-  double _priceValue = 5000; // Default slider price
+  late double _priceValue;
+  late Map<String, bool> _amenities;
+  final TextEditingController _campusController = TextEditingController();
+
+  @override
+  void dispose() {
+    _campusController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFromFilter();
+  }
+
+  void _initializeFromFilter() {
+    final filter = ref.read(filterProvider);
+
+    // Initialize price from filter or set to max (no filter)
+    _priceValue = filter.maxPrice ?? 20000;
+
+    _campusController.text = filter.campus ?? '';
+
+
+
+    // Initialize amenities from filter
+    _amenities = {
+      "Wi-Fi": false,
+      "Air Conditioning": false,
+      "Kitchen": false,
+      "Study Room": false,
+      "Security": false,
+      "Laundry": false,
+    };
+
+    // Set checked amenities based on current filter
+    for (var amenity in filter.amenities) {
+      if (_amenities.containsKey(amenity)) {
+        _amenities[amenity] = true;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final filter = ref.watch(filterProvider);
     return Container(
       width: 0.25.sw,
       height: 0.75.sh,
@@ -52,9 +95,8 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
                 GestureDetector(
                   onTap: () {
                     ref.read(filterProvider.notifier).clearFilters();
-                    setState(() {
-                      _priceValue = 0; // reset UI slider
-                    });
+                    _initializeFromFilter();
+                    setState(() {});
                   },
                   child: ElvButtonWidget(text: "Clear all", isFilter: true),
                 ),
@@ -63,48 +105,88 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
 
             SizedBox(height: 25.h),
 
-            /// CAMPUS DROPDOWN
-            DropdownButtonWidget(
-              icon: Icons.location_on_outlined,
-              label: "Campus",
-              hint: "Select campus",
-              isFilter: true,
-              items: [
-                'UENR Sunyani campus',
-                "UNER Dormaa campus",
-                'KSTU Sunyani campus',
+            /// CAMPUS - WITH CONTROLLER
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SmallText(text: "Campus", color: Colors.blueGrey),
+                SizedBox(height: 8.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: TextField(
+                    controller: _campusController,
+                    decoration: InputDecoration(
+                      hintText: "Search campus...",
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        size: 20.w,
+                        color: Colors.grey,
+                      ),
+                      suffixIcon: _campusController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                size: 18.w,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                _campusController.clear();
+                                ref
+                                    .read(filterProvider.notifier)
+                                    .setCampus(null);
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      // Real-time filtering as user types
+                      if (value.isEmpty) {
+                        ref.read(filterProvider.notifier).setCampus(null);
+                      } else {
+                        ref.read(filterProvider.notifier).setCampus(value);
+                      }
+                    },
+                  ),
+                ),
               ],
-              onChanged: (val) {
-                ref.read(filterProvider.notifier).setCampus(val);
-              },
             ),
             SizedBox(height: 25.h),
+            SizedBox(height: 25.h),
 
-            /// ROOM TYPE DROPDOWN
+            /// ROOM TYPE
             DropdownButtonWidget(
               icon: Icons.meeting_room_outlined,
               label: "Room Type",
               hint: "Single, Shared, etc.",
+              value: filter.roomType, // Get current value from filter
               isFilter: true,
               items: [
-                "One in a room",
-                "Two in a room",
-                "Three in a roow",
-                "Four in a room",
+                "Single Room with washroom",
+                "Single Room self contain",
+                "Single Room with shared washroom",
+                "double Room self contain",
+                "Double Room with shared washroom",
               ],
               onChanged: (val) {
                 ref.read(filterProvider.notifier).setRoomType(val);
               },
             ),
+            
             SizedBox(height: 25.h),
 
-            /// GENDER DROPDOWN
+            /// GENDER
             DropdownButtonWidget(
               icon: Icons.people_outline,
               label: "Gender Preference",
               hint: "Select gender type",
-              items: ["Male", "Female", "Mixed"],
               isFilter: true,
+              value: filter.gender, // Get current value from filter
+              items: ["Male", "Female", "Mixed"],
               onChanged: (val) {
                 ref.read(filterProvider.notifier).setGender(val);
               },
@@ -113,7 +195,9 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
 
             /// PRICE RANGE
             SmallText(
-              text: "Price Range (GHS 0 - GHS 20,000 / semester)",
+              text: _priceValue == 20000
+                  ? "Price Range (No max price)"
+                  : "Price Range (Up to GHS ${_priceValue.round()})",
               color: Colors.blueGrey,
             ),
             Slider(
@@ -121,79 +205,59 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
               min: 0,
               max: 20000,
               divisions: 20,
-              label: "GHS ${_priceValue.round()}",
+              label: _priceValue == 20000
+                  ? "No limit"
+                  : "GHS ${_priceValue.round()}",
               activeColor: Colors.blueAccent,
               inactiveColor: Colors.grey.shade300,
               onChanged: (value) {
-                setState(() {
-                  _priceValue = value;
-                });
+                setState(() => _priceValue = value);
+                // Only set filter if not at max (no filter)
+                final maxPrice = value == 20000 ? null : value;
+                ref.read(filterProvider.notifier).setMaxPrice(maxPrice!);
               },
             ),
-            SizedBox(height: 15.h),
 
-            /// AMENITIES CHECKBOXES
+            SizedBox(height: 20.h),
+
+            /// AMENITIES
             SmallText(text: "Amenities", color: Colors.blueGrey),
             SizedBox(height: 10.h),
+
             Wrap(
               runSpacing: 6.h,
-              children: [
-                amenityCheck("Wi-Fi"),
-                amenityCheck("Air Conditioning"),
-                amenityCheck("Kitchen"),
-                amenityCheck("Study Room"),
-                amenityCheck("Security"),
-                amenityCheck("Laundry"),
-              ],
+              children: _amenities.keys.map((title) {
+                return amenityCheck(title);
+              }).toList(),
             ),
 
-            SizedBox(height: 25.h),
+            SizedBox(height: 30.h),
 
-            /// APPLY BUTTON
-            Center(
-              child: ElvButtonWidget(
-                text: "Apply Filters",
-                isPrimary: true,
-                onPressed: () {
-                  // Later: Apply filter logic
-                },
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  final Map<String, bool> _amenities = {
-    "Wi-Fi": false,
-    "Air Conditioning": false,
-    "Kitchen": false,
-    "Study Room": false,
-    "Security": false,
-    "Laundry": false,
-  };
-
-  // Reusable amenity checkbox
+  /// REUSABLE CHECKBOX BUILDER
   Widget amenityCheck(String title) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        children: [
-          Checkbox(
-            checkColor: Colors.amber,
-            value: _amenities[title],
-            onChanged: (val) {
-              setState(() {
-                ref.read(filterProvider.notifier).toggleAmenity(title);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          checkColor: Colors.white,
+          activeColor: Colors.blueAccent,
+          value: _amenities[title],
+          onChanged: (val) {
+            setState(() {
+              _amenities[title] = val ?? false;
+            });
 
-              });
-            },
-            activeColor: Colors.blueAccent,
-          ),
-          SmallText(text: title, color: Colors.black87),
-        ],
-      ),
+            ref.read(filterProvider.notifier).toggleAmenity(title);
+          },
+        ),
+        SmallText(text: title, color: Colors.black87),
+      ],
     );
   }
 }
