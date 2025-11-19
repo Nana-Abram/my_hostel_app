@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_hostel_app/ui/about/about_screen.dart';
+import 'package:my_hostel_app/ui/about%20us/about_screen.dart';
 import 'package:my_hostel_app/ui/admin/add_hostels.dart';
-import 'package:my_hostel_app/ui/contact/contact_screen.dart';
+import 'package:my_hostel_app/ui/contact%20us/contact_screen.dart';
 import 'package:my_hostel_app/ui/home/home_screen.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_screen.dart';
+import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/nav_button_widget.dart';
 
@@ -126,11 +127,15 @@ class AppBarScreenState extends State<AppBarScreen> {
               // ===== RIGHT SIDE (BUTTONS) =====
               Row(
                 children: [
-                  ElvButtonWidget(text: "Login", onPressed: () {}),
+                  ElvButtonWidget(text: "Login", onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.loginScreen);
+                  }),
                   SizedBox(width: 16.w),
                   ElvButtonWidget(
                     text: "Sign Up",
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.signUpScreen);
+                    },
                     isPrimary: true,
                   ),
                 ],

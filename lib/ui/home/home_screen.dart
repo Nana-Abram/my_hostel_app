@@ -24,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "assets/images/top2.jpg",
     "assets/images/h2.jpg",
     "assets/images/vegas1.jpg",
+    "assets/images/new.jpg",
+    // "assets/images/vegas1.jpg",
   ];
 
   int _currentIndex = 0;

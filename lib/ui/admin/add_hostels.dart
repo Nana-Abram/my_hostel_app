@@ -28,6 +28,12 @@ class _AdminAddHostelPageState extends ConsumerState<AdminAddHostelPage> {
   final reviewCountCtrl = TextEditingController();
   final locationCtrl = TextEditingController();
   final ratingCtrl = TextEditingController();
+  final ownerNameCtrl = TextEditingController();
+  final totalRoomsCtrl = TextEditingController();
+  String? selectedSatus;
+
+   final status = ["Verified", "Pending","Suspended"];
+  
 
   // --- DATA HOLDERS ---
   List<String> amenities = [];
@@ -95,12 +101,15 @@ Future<void> pickAndUploadImage() async {
       name: nameCtrl.text.trim(),
       campus: campusCtrl.text.trim(),
       description: descriptionCtrl.text.trim(),
+      ownerName: ownerNameCtrl.text.trim(),
+      totalRooms: double.parse(totalRoomsCtrl.text),
       amenities: amenities,
       images: images,
       startPrice: double.parse(startPriceCtrl.text),
       rating: ratingCtrl.text.isEmpty ? 4.0 : double.parse(ratingCtrl.text),
       reviewsCount: reviewCountCtrl.text.isEmpty ? 4.0 : double.parse(reviewCountCtrl.text),
       location: locationCtrl.text.trim(),
+      status: selectedSatus!
 
     );
 
@@ -114,7 +123,9 @@ Future<void> pickAndUploadImage() async {
     _formKey.currentState!.reset();
     amenities.clear();
     images.clear();
-    setState(() {});
+    setState(() {
+      selectedSatus = null;
+    });
   }
 
   @override
@@ -141,6 +152,7 @@ Future<void> pickAndUploadImage() async {
                       ),
                     ],
                   ),
+                  
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -162,8 +174,23 @@ Future<void> pickAndUploadImage() async {
                             keyboard: TextInputType.number),
                         _input("Reviw Count (Optional)", reviewCountCtrl,
                             keyboard: TextInputType.number),
+                        _input("Owner Name", ownerNameCtrl),
+                        _input("Total Rooms", totalRoomsCtrl,
+                            keyboard: TextInputType.number),
                         _input("Description", descriptionCtrl, maxLines: 3),
                             
+                        SizedBox(height: 25.h),
+                            
+                        DropdownButtonFormField(
+                          hint: const Text("Status"),
+                          value: selectedSatus,
+                          items: status
+                              .map(
+                                (t) => DropdownMenuItem(value: t, child: Text(t)),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(() => selectedSatus = v),
+                        ),
                         SizedBox(height: 25.h),
                             
                         Text(
@@ -311,4 +338,5 @@ Future<void> pickAndUploadImage() async {
       ),
     );
   }
+
 }

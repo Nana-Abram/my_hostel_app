@@ -5,6 +5,7 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/avatar_and_text_wiget.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
@@ -158,11 +159,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               ),
               Row(
                 children: [
-                  ElvButtonWidget(text: "Login", onPressed: () {}),
+                  ElvButtonWidget(text: "Login", onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.loginScreen);
+                  }),
                   SizedBox(width: 16.w),
                   ElvButtonWidget(
                     text: "Sign Up",
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.signUpScreen);
+                    },
                     isPrimary: true,
                   ),
                 ],

@@ -7,6 +7,7 @@ import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/hostels/available_rooms.dart';
 import 'package:my_hostel_app/ui/hostels/booking_card.dart';
 import 'package:my_hostel_app/ui/hostels/image_slider_h_d.dart';
+import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
@@ -80,11 +81,15 @@ class HostelDetailsPage extends ConsumerWidget {
               // ===== RIGHT SIDE (BUTTONS) =====
               Row(
                 children: [
-                  ElvButtonWidget(text: "Login", onPressed: () {}),
+                  ElvButtonWidget(text: "Login", onPressed: () {
+                     Navigator.pushNamed(context, AppRoutes.loginScreen);
+                  }),
                   SizedBox(width: 16.w),
                   ElvButtonWidget(
                     text: "Sign Up",
-                    onPressed: () {},
+                    onPressed: () {
+                       Navigator.pushNamed(context, AppRoutes.signUpScreen);
+                    },
                     isPrimary: true,
                   ),
                 ],

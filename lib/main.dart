@@ -7,7 +7,10 @@ import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/firebase_options.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
+import 'package:my_hostel_app/ui/auth/login.dart';
+import 'package:my_hostel_app/ui/auth/signup.dart';
 import 'package:my_hostel_app/ui/booking/booking_screen.dart';
+import 'package:my_hostel_app/ui/dashboard/dashboard.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_details_page.dart';
 import 'package:my_hostel_app/ui/routes/app_routes.dart';
 
@@ -76,7 +79,14 @@ class MyApp extends ConsumerWidget {
                 );
               }
             },
-          },
+          
+             AppRoutes.dashboardScreen: (context) {
+              return const DashboardScreen();},
+             AppRoutes.loginScreen: (context) {
+              return const LoginScreen();},
+             AppRoutes.signUpScreen: (context) {
+              return const SignUpScreen();},
+          }
         );
       },
       child: const AppBarScreen(),
