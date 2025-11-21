@@ -30,7 +30,7 @@ class ContactScreen extends StatelessWidget {
         Text(
           'Get In Touch',
           style: TextStyle(
-            fontSize: 35.sp,
+            fontSize: 25.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
@@ -39,7 +39,7 @@ class ContactScreen extends StatelessWidget {
         Text(
           'We\'re here to help you find your perfect student accommodation',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 14.sp,
             color: Colors.blueGrey,
             fontWeight: FontWeight.w400,
           ),
@@ -71,7 +71,7 @@ class ContactScreen extends StatelessWidget {
               Text(
                 'Contact Information',
                 style: TextStyle(
-                  fontSize: 26.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -80,7 +80,7 @@ class ContactScreen extends StatelessWidget {
               Text(
                 'Choose your preferred method to reach out to us. Our team is always ready to assist you with any questions about hostels, bookings, or partnerships.',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   color: Colors.blueGrey[700],
                   height: 1.6,
                 ),
@@ -140,7 +140,7 @@ class ContactScreen extends StatelessWidget {
                 Text(
                   'Office Hours',
                   style: TextStyle(
-                    fontSize: 24.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -164,7 +164,7 @@ class ContactScreen extends StatelessWidget {
                         child: Text(
                           'For urgent hostel emergencies outside office hours, call our 24/7 support line.',
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 12.sp,
                             color: Colors.blueGrey[700],
                           ),
                         ),
@@ -220,7 +220,7 @@ class ContactScreen extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
@@ -229,7 +229,7 @@ class ContactScreen extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       color: Colors.blueGrey,
                     ),
                   ),
@@ -237,7 +237,7 @@ class ContactScreen extends StatelessWidget {
                   Text(
                     contact,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.blueColor,
                     ),
@@ -261,7 +261,7 @@ class ContactScreen extends StatelessWidget {
           Text(
             day,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w500,
               color: Colors.blueGrey[700],
             ),
@@ -269,7 +269,7 @@ class ContactScreen extends StatelessWidget {
           Text(
             time,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -299,7 +299,7 @@ Widget _buildContactForm(BuildContext context) {
         Text(
           'Send us a Message',
           style: TextStyle(
-            fontSize: 24.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
@@ -308,7 +308,7 @@ Widget _buildContactForm(BuildContext context) {
         Text(
           'Have a question? We\'ll get back to you quickly.',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 12.sp,
             color: Colors.blueGrey,
           ),
         ),
@@ -347,7 +347,7 @@ Widget _buildContactForm(BuildContext context) {
         Text(
           'Frequently Asked Questions',
           style: TextStyle(
-            fontSize: 26.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
@@ -379,7 +379,7 @@ Widget _buildContactForm(BuildContext context) {
         title: Text(
           question,
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
@@ -390,7 +390,7 @@ Widget _buildContactForm(BuildContext context) {
             child: Text(
               answer,
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 12.sp,
                 color: Colors.blueGrey[700],
                 height: 1.5,
               ),

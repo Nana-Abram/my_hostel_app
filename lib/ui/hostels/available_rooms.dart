@@ -11,16 +11,22 @@ import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
 class AvailableRooms extends StatelessWidget {
-  const AvailableRooms({super.key, required this.room, required this.hostel,});
+  const AvailableRooms({
+    super.key,
+    required this.room,
+    required this.hostel,
+    this.isHostelOwner = false,
+  });
 
   final RoomModel room;
   final HostelModel hostel;
+  final bool isHostelOwner;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 0.5.sw,
-      height: 270.h,
+      width: isHostelOwner ? 0.9.sw : 0.5.sw,
+      height: isHostelOwner ? 300.h : 270.h,
       margin: EdgeInsets.symmetric(vertical: 10.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
@@ -46,7 +52,7 @@ class AvailableRooms extends StatelessWidget {
             child: ImageNetwork(
               image: room.image,
               height: 355.h,
-              width: 250.w,
+              width: isHostelOwner ? 440.w : 250.w,
               fitAndroidIos: BoxFit.cover,
               fitWeb: BoxFitWeb.cover,
             ),
@@ -162,18 +168,16 @@ class AvailableRooms extends StatelessWidget {
                         color: Colors.black54,
                         size: 12.sp,
                       ),
-                      GestureDetector(
+                      isHostelOwner?Container(): GestureDetector(
                         onTap: () {
-                          // User clicks "Book Now" on a specific room
-                          // In your AvailableRooms widget when user clicks "Book Now"
-                         Navigator.pushNamed(
-  context,
-  AppRoutes.bookingPage,
-  arguments: BookingArguments(
-    selectedRoom: room, // Required
-    selectedHostel: hostel, // Required
-  ),
-);
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.bookingPage,
+                            arguments: BookingArguments(
+                              selectedRoom: room, // Required
+                              selectedHostel: hostel, // Required
+                            ),
+                          );
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(
@@ -190,7 +194,7 @@ class AvailableRooms extends StatelessWidget {
                             size: 13.sp,
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ],

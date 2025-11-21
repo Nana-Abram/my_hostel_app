@@ -16,3 +16,4 @@ final roomsByHostelProvider =
   final service = ref.read(roomServiceProvider);
   return service.getRoomsByHostel(hostelId);
 });
+

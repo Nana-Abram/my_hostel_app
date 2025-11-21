@@ -253,6 +253,7 @@ class HostelDetailsPage extends ConsumerWidget {
             );
           },
         ),
+     
       ],
     );
   }

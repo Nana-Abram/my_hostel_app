@@ -48,7 +48,7 @@ class AboutScreen extends StatelessWidget {
         Text(
           'About HostelHub',
           style: TextStyle(
-            fontSize: 36.sp,
+            fontSize: 26.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
             height: 1.1,
@@ -58,7 +58,7 @@ class AboutScreen extends StatelessWidget {
         Text(
           'Your Gateway to Comfortable Student Living',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 14.sp,
             color: Colors.blueGrey,
             fontWeight: FontWeight.w400,
           ),
@@ -91,7 +91,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 'Our Mission',
                 style: TextStyle(
-                  fontSize: 30.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -100,7 +100,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 'At HostelHub, we believe that finding the perfect student accommodation should be simple, transparent, and stress-free. We\'re dedicated to connecting students with safe, affordable, and comfortable living spaces near their educational institutions.',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   color: Colors.blueGrey[700],
                   height: 1.6,
                 ),
@@ -109,7 +109,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 'Our platform brings together hostel owners and students, creating a seamless marketplace that prioritizes safety, convenience, and community.',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   color: Colors.blueGrey[700],
                   height: 1.6,
                 ),
@@ -194,7 +194,7 @@ class AboutScreen extends StatelessWidget {
         Text(
           'Why Choose HostelHub?',
           style: TextStyle(
-            fontSize: 30.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
@@ -202,7 +202,7 @@ class AboutScreen extends StatelessWidget {
         SizedBox(height: 10.h),
         Text(
           'We\'re revolutionizing student accommodation with technology and trust',
-          style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+          style: TextStyle(fontSize: 13.sp, color: Colors.blueGrey),
         ),
         SizedBox(height: 40.h),
         LayoutBuilder(
@@ -249,7 +249,7 @@ class AboutScreen extends StatelessWidget {
                       Text(
                         feature['title'] as String,
                         style: TextStyle(
-                          fontSize: 18.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -258,7 +258,7 @@ class AboutScreen extends StatelessWidget {
                       Text(
                         feature['description'] as String,
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           color: Colors.blueGrey[600],
                           height: 1.4,
                         ),
@@ -282,7 +282,7 @@ Widget _buildTeamSection() {
       'image': 'assets/images/me.jpg'  // Asset path
     },
     {
-      'name': 'Mike Carter', 
+      'name': 'saaka Ahmed', 
       'role': 'Tech Lead', 
       'image': 'assets/images/top2.jpg'
     },
@@ -292,7 +292,7 @@ Widget _buildTeamSection() {
       'image': 'assets/images/h2.jpg'
     },
     {
-      'name': 'David Brown', 
+      'name': 'Osei Frank', 
       'role': 'Partnerships', 
       'image': 'assets/images/vegas1.jpg'
     },
@@ -304,7 +304,7 @@ Widget _buildTeamSection() {
       Text(
         'Meet Our Team',
         style: TextStyle(
-          fontSize: 36.sp,
+          fontSize: 24.sp,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
@@ -312,7 +312,7 @@ Widget _buildTeamSection() {
       SizedBox(height: 10.h),
       Text(
         'Passionate individuals dedicated to improving student living',
-        style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+        style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
       ),
       SizedBox(height: 40.h),
       Wrap(
@@ -366,7 +366,7 @@ Widget _buildTeamSection() {
                 SizedBox(height: 4.h),
                 Text(
                   member['role']!,
-                  style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -404,7 +404,7 @@ Widget _buildTeamSection() {
               Text(
                 stat['value']!,
                 style: TextStyle(
-                  fontSize: 48.sp,
+                  fontSize: 38.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -413,7 +413,7 @@ Widget _buildTeamSection() {
               Text(
                 stat['label']!,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 14.sp,
                   color: Colors.white.withOpacity(0.9),
                   fontWeight: FontWeight.w500,
                 ),
@@ -442,7 +442,7 @@ Widget _buildTeamSection() {
                 Text(
                   'Ready to Find Your Perfect Hostel?',
                   style: TextStyle(
-                    fontSize: 28.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -451,7 +451,7 @@ Widget _buildTeamSection() {
                 Text(
                   'Join thousands of students who have found their ideal accommodation through HostelHub. Start your search today!',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 12.sp,
                     color: Colors.blueGrey[600],
                     height: 1.5,
                   ),
@@ -480,7 +480,7 @@ Widget _buildTeamSection() {
               child: Text(
                 'Browse Hostels',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),

@@ -471,9 +471,6 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                     ),
                     onError: const Icon(Icons.error, color: Colors.red),
 
-                    onTap: () {
-                      debugPrint("©gabriel_patrick_souza");
-                    },
                   ),
           ),
           SizedBox(width: 12.w),

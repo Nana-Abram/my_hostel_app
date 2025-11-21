@@ -30,10 +30,20 @@ class RoomService {
     });
   }
 
-  Future<void> updateRoomAvailability(String roomId, bool value) async {
-    await _db.collection('rooms').doc(roomId).update({
-      "available": value,
-    });
+  // Future<void> updateRoomAvailability(String roomId, bool value) async {
+  //   await _db.collection('rooms').doc(roomId).update({
+  //     "available": value,
+  //   });
+  // }
+
+  // In your RoomService class
+Future<void> updateRoom(String roomId, RoomModel room) async {
+  try {
+    await _db.collection('rooms').doc(roomId).update(room.toMap());
+  } catch (e) {
+    throw Exception('Failed to update room: $e');
   }
+}
+
 }
 

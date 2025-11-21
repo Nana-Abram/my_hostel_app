@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/bookings_page.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/dashboard_page.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/earnings_page.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/my_hostels_page.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/profile_page.dart';
+
+
 
 class HostelOwnerDashboard extends StatefulWidget {
   final int currentIndex;
@@ -12,17 +18,25 @@ class HostelOwnerDashboard extends StatefulWidget {
   });
 
   @override
-  State<HostelOwnerDashboard> createState() => _HostelOwnerDashboardState();
+  State<HostelOwnerDashboard> createState() => HostelOwnerDashboardState();
 }
 
-class _HostelOwnerDashboardState extends State<HostelOwnerDashboard> {
+class HostelOwnerDashboardState extends State<HostelOwnerDashboard> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Hostel Owner Dashboard - Page ${widget.currentIndex + 1}',
-        style: TextStyle(fontSize: 20.sp),
-      ),
-    );
+    switch (widget.currentIndex) {
+      case 0:
+        return DashboardPage(onIndexChanged: widget.onIndexChanged);
+      case 1:
+        return MyHostelsPage();
+      case 2:
+        return BookingsPage();
+      case 3:
+        return EarningsPage();
+      case 4:
+        return ProfilePage();
+      default:
+        return DashboardPage(onIndexChanged: widget.onIndexChanged);
+    }
   }
 }
