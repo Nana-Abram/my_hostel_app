@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
-import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/auth/login.dart';
@@ -69,6 +68,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
+                      // ignore: unused_result
                       ref.refresh(hostelsByOwnerProvider(currentUserId));
                     },
                     child: Text('Retry'),
@@ -130,10 +130,10 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                 // Navigate to your login page
                 Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
               },
-              child: Text('Sign In'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[700],
               ),
+              child: Text('Sign In'),
             ),
           ],
         ),

@@ -6,7 +6,8 @@ import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.isAppBarVisible = false});
+  final bool isAppBarVisible;
 
   @override
   ConsumerState<SettingsPage> createState() => _SettingsPageState();
@@ -22,168 +23,177 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // HEADER
-          _buildHeader(),
-          SizedBox(height: 24.h),
-
-          // ACCOUNT SETTINGS
-          _buildSection(
-            title: 'Account Settings',
-            icon: Icons.person_outline,
-            children: [
-              _buildSettingItem(
-                icon: Icons.edit_outlined,
-                title: 'Edit Profile',
-                subtitle: 'Update your personal information',
-                onTap: _editProfile,
-              ),
-              _buildSettingItem(
-                icon: Icons.security_outlined,
-                title: 'Privacy & Security',
-                subtitle: 'Manage your privacy settings',
-                onTap: _privacySettings,
-              ),
-              _buildSettingItem(
-                icon: Icons.language_outlined,
-                title: 'Language',
-                subtitle: _language,
-                trailing: _buildDropdownButton(_language, _changeLanguage),
-                onTap: () {},
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-
-          // NOTIFICATION SETTINGS
-          _buildSection(
-            title: 'Notifications',
-            icon: Icons.notifications_outlined,
-            children: [
-              _buildToggleSettingItem(
-                icon: Icons.notifications_active_outlined,
-                title: 'Enable Notifications',
-                subtitle: 'Receive app notifications',
-                value: _notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _notificationsEnabled = value;
-                  });
-                },
-              ),
-              if (_notificationsEnabled) ...[
-                SizedBox(height: 12.h),
+    return Scaffold(
+      appBar: widget.isAppBarVisible
+          ? AppBar(
+              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.grey[50],
+              foregroundColor: Colors.black,
+            )
+          : null,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HEADER
+            _buildHeader(),
+            SizedBox(height: 24.h),
+      
+            // ACCOUNT SETTINGS
+            _buildSection(
+              title: 'Account Settings',
+              icon: Icons.person_outline,
+              children: [
+                _buildSettingItem(
+                  icon: Icons.edit_outlined,
+                  title: 'Edit Profile',
+                  subtitle: 'Update your personal information',
+                  onTap: _editProfile,
+                ),
+                _buildSettingItem(
+                  icon: Icons.security_outlined,
+                  title: 'Privacy & Security',
+                  subtitle: 'Manage your privacy settings',
+                  onTap: _privacySettings,
+                ),
+                _buildSettingItem(
+                  icon: Icons.language_outlined,
+                  title: 'Language',
+                  subtitle: _language,
+                  trailing: _buildDropdownButton(_language, _changeLanguage),
+                  onTap: () {},
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+      
+            // NOTIFICATION SETTINGS
+            _buildSection(
+              title: 'Notifications',
+              icon: Icons.notifications_outlined,
+              children: [
                 _buildToggleSettingItem(
-                  icon: Icons.email_outlined,
-                  title: 'Email Notifications',
-                  subtitle: 'Receive notifications via email',
-                  value: _emailNotifications,
+                  icon: Icons.notifications_active_outlined,
+                  title: 'Enable Notifications',
+                  subtitle: 'Receive app notifications',
+                  value: _notificationsEnabled,
                   onChanged: (value) {
                     setState(() {
-                      _emailNotifications = value;
+                      _notificationsEnabled = value;
                     });
                   },
                 ),
-                SizedBox(height: 12.h),
+                if (_notificationsEnabled) ...[
+                  SizedBox(height: 12.h),
+                  _buildToggleSettingItem(
+                    icon: Icons.email_outlined,
+                    title: 'Email Notifications',
+                    subtitle: 'Receive notifications via email',
+                    value: _emailNotifications,
+                    onChanged: (value) {
+                      setState(() {
+                        _emailNotifications = value;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildToggleSettingItem(
+                    icon: Icons.phone_android_outlined,
+                    title: 'Push Notifications',
+                    subtitle: 'Receive push notifications',
+                    value: _pushNotifications,
+                    onChanged: (value) {
+                      setState(() {
+                        _pushNotifications = value;
+                      });
+                    },
+                  ),
+                ],
+              ],
+            ),
+            SizedBox(height: 24.h),
+      
+            // APPEARANCE SETTINGS
+            _buildSection(
+              title: 'Appearance',
+              icon: Icons.palette_outlined,
+              children: [
                 _buildToggleSettingItem(
-                  icon: Icons.phone_android_outlined,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive push notifications',
-                  value: _pushNotifications,
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Dark Mode',
+                  subtitle: 'Switch to dark theme',
+                  value: _darkMode,
                   onChanged: (value) {
                     setState(() {
-                      _pushNotifications = value;
+                      _darkMode = value;
                     });
                   },
                 ),
               ],
-            ],
-          ),
-          SizedBox(height: 24.h),
-
-          // APPEARANCE SETTINGS
-          _buildSection(
-            title: 'Appearance',
-            icon: Icons.palette_outlined,
-            children: [
-              _buildToggleSettingItem(
-                icon: Icons.dark_mode_outlined,
-                title: 'Dark Mode',
-                subtitle: 'Switch to dark theme',
-                value: _darkMode,
-                onChanged: (value) {
-                  setState(() {
-                    _darkMode = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-
-          // PAYMENT & CURRENCY
-          _buildSection(
-            title: 'Payment & Currency',
-            icon: Icons.payments_outlined,
-            children: [
-              _buildSettingItem(
-                icon: Icons.currency_exchange_outlined,
-                title: 'Default Currency',
-                subtitle: _currency,
-                trailing: _buildDropdownButton(_currency, _changeCurrency),
-                onTap: () {},
-              ),
-              _buildSettingItem(
-                icon: Icons.credit_card_outlined,
-                title: 'Payment Methods',
-                subtitle: 'Manage your payment options',
-                onTap: _paymentMethods,
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-
-          // SUPPORT & ABOUT
-          _buildSection(
-            title: 'Support & About',
-            icon: Icons.help_outline,
-            children: [
-              _buildSettingItem(
-                icon: Icons.help_outline,
-                title: 'Help & Support',
-                subtitle: 'Get help and contact support',
-                onTap: _helpSupport,
-              ),
-              _buildSettingItem(
-                icon: Icons.info_outline,
-                title: 'About App',
-                subtitle: 'Version 1.0.0',
-                onTap: _aboutApp,
-              ),
-              _buildSettingItem(
-                icon: Icons.description_outlined,
-                title: 'Terms & Conditions',
-                subtitle: 'App terms and conditions',
-                onTap: _termsConditions,
-              ),
-              _buildSettingItem(
-                icon: Icons.privacy_tip_outlined,
-                title: 'Privacy Policy',
-                subtitle: 'How we handle your data',
-                onTap: _privacyPolicy,
-              ),
-            ],
-          ),
-          SizedBox(height: 32.h),
-
-          // LOGOUT BUTTON
-          _buildLogoutButton(),
-          SizedBox(height: 20.h),
-        ],
+            ),
+            SizedBox(height: 24.h),
+      
+            // PAYMENT & CURRENCY
+            _buildSection(
+              title: 'Payment & Currency',
+              icon: Icons.payments_outlined,
+              children: [
+                _buildSettingItem(
+                  icon: Icons.currency_exchange_outlined,
+                  title: 'Default Currency',
+                  subtitle: _currency,
+                  trailing: _buildDropdownButton(_currency, _changeCurrency),
+                  onTap: () {},
+                ),
+                _buildSettingItem(
+                  icon: Icons.credit_card_outlined,
+                  title: 'Payment Methods',
+                  subtitle: 'Manage your payment options',
+                  onTap: _paymentMethods,
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+      
+            // SUPPORT & ABOUT
+            _buildSection(
+              title: 'Support & About',
+              icon: Icons.help_outline,
+              children: [
+                _buildSettingItem(
+                  icon: Icons.help_outline,
+                  title: 'Help & Support',
+                  subtitle: 'Get help and contact support',
+                  onTap: _helpSupport,
+                ),
+                _buildSettingItem(
+                  icon: Icons.info_outline,
+                  title: 'About App',
+                  subtitle: 'Version 1.0.0',
+                  onTap: _aboutApp,
+                ),
+                _buildSettingItem(
+                  icon: Icons.description_outlined,
+                  title: 'Terms & Conditions',
+                  subtitle: 'App terms and conditions',
+                  onTap: _termsConditions,
+                ),
+                _buildSettingItem(
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy Policy',
+                  subtitle: 'How we handle your data',
+                  onTap: _privacyPolicy,
+                ),
+              ],
+            ),
+            SizedBox(height: 32.h),
+      
+            // LOGOUT BUTTON
+            _buildLogoutButton(),
+            SizedBox(height: 20.h),
+          ],
+        ),
       ),
     );
   }

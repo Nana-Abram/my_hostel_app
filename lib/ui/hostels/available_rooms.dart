@@ -170,6 +170,8 @@ class AvailableRooms extends StatelessWidget {
                       ),
                       isHostelOwner?Container(): GestureDetector(
                         onTap: () {
+                          
+
                           Navigator.pushNamed(
                             context,
                             AppRoutes.bookingPage,

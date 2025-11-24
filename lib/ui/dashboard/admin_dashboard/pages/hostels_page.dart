@@ -18,6 +18,7 @@ class HostelsManagementPage extends ConsumerStatefulWidget {
 class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
+  // ignore: unused_field
   bool _isLoading = false;
 
   @override

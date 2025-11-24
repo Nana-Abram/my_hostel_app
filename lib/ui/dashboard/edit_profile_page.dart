@@ -11,8 +11,13 @@ import 'package:my_hostel_app/ui/core/app_colors.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   final UserModel currentUser;
+  final bool isOwner;
 
-  const EditProfilePage({super.key, required this.currentUser});
+  const EditProfilePage({
+    super.key,
+    required this.currentUser,
+    this.isOwner = true,
+  });
 
   @override
   ConsumerState<EditProfilePage> createState() => _EditProfilePageState();
@@ -29,15 +34,22 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   PlatformFile? _selectedImage;
   bool _isLoading = false;
   bool _isUploadingImage = false;
+  
 
   @override
   void initState() {
     super.initState();
-    _fullNameController = TextEditingController(text: widget.currentUser.fullName);
+    _fullNameController = TextEditingController(
+      text: widget.currentUser.fullName,
+    );
     _emailController = TextEditingController(text: widget.currentUser.email);
-    _phoneController = TextEditingController(text: widget.currentUser.phone ?? '');
+    _phoneController = TextEditingController(
+      text: widget.currentUser.phone ?? '',
+    );
     _bioController = TextEditingController(text: widget.currentUser.bio ?? '');
-    _locationController = TextEditingController(text: widget.currentUser.location ?? '');
+    _locationController = TextEditingController(
+      text: widget.currentUser.location ?? '',
+    );
   }
 
   @override
@@ -52,9 +64,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isOwner = widget.isOwner;
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: _buildAppBar(),
+      appBar:isOwner? _buildAppBar():null,
       body: _isLoading
           ? _buildLoadingState()
           : SingleChildScrollView(
@@ -98,7 +111,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email address';
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value)) {
                               return 'Please enter a valid email address';
                             }
                             return null;
@@ -113,7 +128,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                           keyboardType: TextInputType.phone,
                           validator: (value) {
                             if (value != null && value.isNotEmpty) {
-                              if (!RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$').hasMatch(value)) {
+                              if (!RegExp(
+                                r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',
+                              ).hasMatch(value)) {
                                 return 'Please enter a valid phone number';
                               }
                             }
@@ -135,7 +152,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                           hintText: 'Enter your location',
                           icon: Icons.location_on,
                           validator: (value) {
-                            if (value != null && value.isNotEmpty && value.length < 3) {
+                            if (value != null &&
+                                value.isNotEmpty &&
+                                value.length < 3) {
                               return 'Location must be at least 3 characters';
                             }
                             return null;
@@ -189,12 +208,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       children: [
         Stack(
           children: [
-           CircleAvatar(
+            CircleAvatar(
               radius: 60.w,
               backgroundColor: Colors.grey[200],
-              child: ClipOval(
-                child: _buildProfileImage(),
-              ),
+              child: ClipOval(child: _buildProfileImage()),
             ),
             if (_isUploadingImage)
               Positioned.fill(
@@ -219,10 +236,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 decoration: BoxDecoration(
                   color: AppColors.blueColor,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2.w,
-                  ),
+                  border: Border.all(color: Colors.white, width: 2.w),
                 ),
                 child: IconButton(
                   icon: Icon(Icons.camera_alt, size: 16.w, color: Colors.white),
@@ -236,10 +250,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         SizedBox(height: 12.h),
         Text(
           'Tap to change photo',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.blueGrey,
-          ),
+          style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
         ),
         if (_selectedImage != null) ...[
           SizedBox(height: 8.h),
@@ -261,29 +272,27 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     if (_selectedImage != null) {
       // For web, we can use the bytes directly
       if (_selectedImage!.bytes != null) {
-        return Image.memory(
-          _selectedImage!.bytes!,
-          fit: BoxFit.cover,
-        );
+        return Image.memory(_selectedImage!.bytes!, fit: BoxFit.cover);
       }
     }
-    
+
     // Show current profile image from Firebase
-    if (widget.currentUser.profileImage != null && widget.currentUser.profileImage!.isNotEmpty) {
+    if (widget.currentUser.profileImage != null &&
+        widget.currentUser.profileImage!.isNotEmpty) {
       return SizedBox(
         width: 120.w,
         height: 120.w,
         child: ImageNetwork(
-          image: widget.currentUser.profileImage!, 
-          height: 120.w, 
+          image: widget.currentUser.profileImage!,
+          height: 120.w,
           width: 120.w,
-          onError:_buildPlaceholderAvatar(),
+          onError: _buildPlaceholderAvatar(),
           fitAndroidIos: BoxFit.cover,
           fitWeb: BoxFitWeb.cover,
-          ),
+        ),
       );
     }
-    
+
     // Show placeholder
     return _buildPlaceholderAvatar();
   }
@@ -325,9 +334,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
               children: [
@@ -337,11 +344,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     color: AppColors.blueColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 20.w,
-                    color: AppColors.blueColor,
-                  ),
+                  child: Icon(icon, size: 20.w, color: AppColors.blueColor),
                 ),
                 SizedBox(width: 12.w),
                 Text(
@@ -396,16 +399,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.black87,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: Colors.black87),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey,
-              ),
+              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
               prefixIcon: Icon(icon, size: 20.w, color: Colors.blueGrey),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
@@ -441,16 +438,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           child: TextFormField(
             controller: _bioController,
             maxLines: 4,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.black87,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: Colors.black87),
             decoration: InputDecoration(
               hintText: 'Tell us a little about yourself...',
-              hintStyle: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey,
-              ),
+              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
               alignLabelWithHint: true,
               border: InputBorder.none,
               contentPadding: EdgeInsets.all(12.w),
@@ -468,7 +459,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           '${_bioController.text.length}/500 characters',
           style: TextStyle(
             fontSize: 11.sp,
-            color: _bioController.text.length > 500 ? Colors.red : Colors.blueGrey,
+            color: _bioController.text.length > 500
+                ? Colors.red
+                : Colors.blueGrey,
           ),
         ),
       ],
@@ -541,58 +534,65 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           SizedBox(height: 16.h),
           Text(
             'Updating profile...',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: Colors.blueGrey,
-            ),
+            style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
           ),
         ],
       ),
     );
   }
 
-// File Picker Method for Web - Fixed
-Future<void> _showImagePicker() async {
-  try {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      
-      // Validate file size (optional - limit to 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Image size should be less than 5MB')),
-        );
-        return;
-      }
-      
-      // Validate file type
-      if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(file.extension?.toLowerCase())) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a valid image file (JPG, PNG, GIF, WEBP)')),
-        );
-        return;
-      }
-
-      setState(() {
-        _selectedImage = file;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image selected: ${file.name}')),
+  // File Picker Method for Web - Fixed
+  Future<void> _showImagePicker() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowMultiple: false,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
       );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        // Validate file size (optional - limit to 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image size should be less than 5MB')),
+          );
+          return;
+        }
+
+        // Validate file type
+        if (![
+          'jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'webp',
+        ].contains(file.extension?.toLowerCase())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Please select a valid image file (JPG, PNG, GIF, WEBP)',
+              ),
+            ),
+          );
+          return;
+        }
+
+        setState(() {
+          _selectedImage = file;
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Image selected: ${file.name}')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to pick image: $e')),
-    );
   }
-}
 
   // Upload image to Firebase Storage
   Future<String?> _uploadImage() async {
@@ -604,25 +604,26 @@ Future<void> _showImagePicker() async {
 
     try {
       final storage = FirebaseStorage.instance;
-      final fileName = 'profile_${widget.currentUser.id}_${DateTime.now().millisecondsSinceEpoch}';
+      final fileName =
+          'profile_${widget.currentUser.id}_${DateTime.now().millisecondsSinceEpoch}';
       final reference = storage.ref().child('profile_pictures/$fileName');
-      
+
       // For web, we can upload the bytes directly
       if (_selectedImage!.bytes != null) {
         final task = await reference.putData(
           _selectedImage!.bytes!,
           SettableMetadata(contentType: 'image/jpeg'),
         );
-        
+
         final downloadUrl = await task.ref.getDownloadURL();
         return downloadUrl;
       }
-      
+
       return null;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
       return null;
     } finally {
       setState(() {
@@ -631,78 +632,81 @@ Future<void> _showImagePicker() async {
     }
   }
 
-// Save Profile Method with Auto-Refresh
-Future<void> _saveProfile() async {
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    String? newProfileImageUrl;
-
-    // Upload new image if selected
-    if (_selectedImage != null) {
-      newProfileImageUrl = await _uploadImage();
+  // Save Profile Method with Auto-Refresh
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
 
-    // Update user data in Firebase
-    final usersService = AuthService();
-    await usersService.updateUserProfile(
-      userId: widget.currentUser.id,
-      updates: {
-        'fullName': _fullNameController.text,
-        'email': _emailController.text,
-        if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
-        if (_bioController.text.isNotEmpty) 'bio': _bioController.text,
-        if (_locationController.text.isNotEmpty) 'location': _locationController.text,
-        if (newProfileImageUrl != null) 'profileImage': newProfileImageUrl,
-        'updatedAt': DateTime.now(),
-      },
-    );
-
-    // AUTO-REFRESH: Update the auth provider immediately
-    final updatedUser = widget.currentUser.copyWith(
-      fullName: _fullNameController.text,
-      email: _emailController.text,
-      phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-      bio: _bioController.text.isEmpty ? null : _bioController.text,
-      location: _locationController.text.isEmpty ? null : _locationController.text,
-      profileImage: newProfileImageUrl ?? widget.currentUser.profileImage,
-    );
-
-    // Method 1: Update the entire user object
-    ref.read(authProvider.notifier).updateUser(updatedUser);
-
-    // Method 2: Or update specific fields
-    // ref.read(authProvider.notifier).updateUserFields({
-    //   'fullName': _fullNameController.text,
-    //   'email': _emailController.text,
-    //   'phoneNumber': _phoneController.text.isEmpty ? null : _phoneController.text,
-    //   'bio': _bioController.text.isEmpty ? null : _bioController.text,
-    //   'location': _locationController.text.isEmpty ? null : _locationController.text,
-    //   'profileImage': newProfileImageUrl ?? widget.currentUser.profileImage,
-    // });
-
-    // Method 3: Force refresh from Firebase (if you want latest data)
-    // await ref.read(authProvider.notifier).refreshUser();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile updated successfully!')),
-    );
-
-    Navigator.pop(context, updatedUser);
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to update profile: $e')),
-    );
-  } finally {
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
+
+    try {
+      String? newProfileImageUrl;
+
+      // Upload new image if selected
+      if (_selectedImage != null) {
+        newProfileImageUrl = await _uploadImage();
+      }
+
+      // Update user data in Firebase
+      final usersService = AuthService();
+      await usersService.updateUserProfile(
+        userId: widget.currentUser.id,
+        updates: {
+          'fullName': _fullNameController.text,
+          'email': _emailController.text,
+          if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
+          if (_bioController.text.isNotEmpty) 'bio': _bioController.text,
+          if (_locationController.text.isNotEmpty)
+            'location': _locationController.text,
+          if (newProfileImageUrl != null) 'profileImage': newProfileImageUrl,
+          'updatedAt': DateTime.now(),
+        },
+      );
+
+      // AUTO-REFRESH: Update the auth provider immediately
+      final updatedUser = widget.currentUser.copyWith(
+        fullName: _fullNameController.text,
+        email: _emailController.text,
+        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+        bio: _bioController.text.isEmpty ? null : _bioController.text,
+        location: _locationController.text.isEmpty
+            ? null
+            : _locationController.text,
+        profileImage: newProfileImageUrl ?? widget.currentUser.profileImage,
+      );
+
+      // Method 1: Update the entire user object
+      ref.read(authProvider.notifier).updateUser(updatedUser);
+
+      // Method 2: Or update specific fields
+      // ref.read(authProvider.notifier).updateUserFields({
+      //   'fullName': _fullNameController.text,
+      //   'email': _emailController.text,
+      //   'phoneNumber': _phoneController.text.isEmpty ? null : _phoneController.text,
+      //   'bio': _bioController.text.isEmpty ? null : _bioController.text,
+      //   'location': _locationController.text.isEmpty ? null : _locationController.text,
+      //   'profileImage': newProfileImageUrl ?? widget.currentUser.profileImage,
+      // });
+
+      // Method 3: Force refresh from Firebase (if you want latest data)
+      // await ref.read(authProvider.notifier).refreshUser();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+
+      Navigator.pop(context, updatedUser);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
 }

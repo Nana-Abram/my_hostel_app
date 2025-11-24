@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_hostel_app/backend/provider/auth_provider.dart';
+import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+     final authState = ref.read(authProvider);
+  final currentUser = authState.value;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Text('Profile Page Content Here'),
-      ),
+    
+      body:EditProfilePage(currentUser: currentUser!, isOwner: false,),
     );
   }
 }

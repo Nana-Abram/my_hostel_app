@@ -8,10 +8,10 @@ import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/admin_dashboard.dart';
+import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/settings_page.dart';
 import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/hostel_owner.dart';
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/student_dashboard.dart';
-
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -21,13 +21,12 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _currentIndex = 0;  
-  
-  
+  int _currentIndex = 0;
+
   void _editProfile() {
     final authState = ref.read(authProvider);
     final currentUser = authState.value;
-    
+
     if (currentUser != null) {
       Navigator.push(
         context,
@@ -42,28 +41,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         }
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to load user data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Unable to load user data')));
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    
+
     return authState.when(
       data: (user) {
         if (user == null) {
           // Redirect to login if user is null
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/login',
+              (route) => false,
+            );
           });
           return _buildLoadingScreen();
         }
-        
+
         return Scaffold(
           backgroundColor: Colors.grey[50],
           appBar: _buildAppBar(user),
@@ -115,10 +116,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               Text(
                 _getGreeting(),
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.blueGrey,
-                ),
+                style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
               ),
             ],
           ),
@@ -135,40 +133,45 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             // Navigate to notifications
           },
         ),
-        
-   // User Profile
-Padding(
-  padding: EdgeInsets.only(right: 16.w),
-  child: CircleAvatar(
-    radius: 18.w,
-    backgroundColor: AppColors.blueColor.withOpacity(0.1),
-    child: user.profileImage != null
-        ? ClipOval(
-            child: ImageNetwork(
-              image: user.profileImage!,
-              height: 36.w,   // Diameter = radius * 2
-              width: 36.w,
-              fitAndroidIos: BoxFit.cover,
-              fitWeb: BoxFitWeb.cover,
-              backgroundColor: Colors.transparent,
-              onLoading: const CircularProgressIndicator(
-                color: Colors.indigoAccent,
-              ),
-              onError: const Icon(Icons.error, color: Colors.red),
-              onTap: _showProfileMenu,
-            ),
-          )
-        : Text(
-            user.fullName[0].toUpperCase(),
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.blueColor,
+
+        // User Profile
+        Padding(
+          padding: EdgeInsets.only(right: 16.w),
+          child: Tooltip(
+            message: 'Profile Menu',
+            child: CircleAvatar(
+              radius: 18.w,
+              backgroundColor: AppColors.blueColor.withOpacity(0.1),
+              child: user.profileImage != null
+                  ? ClipOval(
+                      child: ImageNetwork(
+                        image: user.profileImage!,
+                        height: 36.w, // Diameter = radius * 2
+                        width: 36.w,
+                        fitAndroidIos: BoxFit.cover,
+                        fitWeb: BoxFitWeb.cover,
+                        backgroundColor: Colors.transparent,
+                        onLoading: const CircularProgressIndicator(
+                          color: Colors.indigoAccent,
+                        ),
+                        onError: const Icon(Icons.error, color: Colors.red),
+                        onTap: _showProfileMenu,
+                      ),
+                    )
+                  : InkWell(
+                      onTap: _showProfileMenu,
+                    child: Text(
+                        user.fullName[0].toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.blueColor,
+                        ),
+                      ),
+                  ),
             ),
           ),
-  ),
-),
-
+        ),
       ],
     );
   }
@@ -187,7 +190,7 @@ Padding(
           onIndexChanged: (index) => setState(() => _currentIndex = index),
         );
       case UserRole.student:
-          return StudentDashboard(
+        return StudentDashboard(
           currentIndex: _currentIndex,
           onIndexChanged: (index) => setState(() => _currentIndex = index),
         );
@@ -201,7 +204,7 @@ Padding(
 
   Widget _buildBottomNavigationBar(UserModel user) {
     final navItems = _getNavigationItems(user.role);
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -220,7 +223,10 @@ Padding(
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.blueColor,
         unselectedItemColor: Colors.blueGrey,
-        selectedLabelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
+        selectedLabelStyle: TextStyle(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+        ),
         unselectedLabelStyle: TextStyle(fontSize: 11.sp),
         items: navItems,
       ),
@@ -257,7 +263,7 @@ Padding(
             label: 'Settings',
           ),
         ];
-        
+
       case UserRole.hostelOwner:
         return [
           BottomNavigationBarItem(
@@ -286,9 +292,9 @@ Padding(
             label: 'Profile',
           ),
         ];
-        
+
       case UserRole.student:
-      return [
+        return [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore),
@@ -345,18 +351,27 @@ Padding(
                 },
               ),
               SizedBox(height: 20.h),
-              
+
               // Menu Items
               _buildMenuButton(
                 icon: Icons.person_outline,
                 title: 'Edit Profile',
-                onTap:_editProfile,
+                onTap:(){
+                 Navigator.pop(context);
+                 _editProfile();
+                }
               ),
               _buildMenuButton(
                 icon: Icons.settings_outlined,
                 title: 'Settings',
                 onTap: () {
-                  Navigator.pop(context);
+                 Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SettingsPage(isAppBarVisible: true,),
+                      ),
+                    );
                   // Navigate to settings
                 },
               ),
@@ -365,11 +380,12 @@ Padding(
                 title: 'Help & Support',
                 onTap: () {
                   Navigator.pop(context);
+
                   // Navigate to help
                 },
               ),
               SizedBox(height: 16.h),
-              
+
               // Logout Button
               SizedBox(
                 width: double.infinity,
@@ -396,37 +412,37 @@ Padding(
   Widget _buildProfileHeader(UserModel user) {
     return Row(
       children: [
-   // User Profile
-Padding(
-  padding: EdgeInsets.only(right: 16.w),
-  child: CircleAvatar(
-    radius: 18.w,
-    backgroundColor: AppColors.blueColor.withOpacity(0.1),
-    child: user.profileImage != null
-        ? ClipOval(
-            child: ImageNetwork(
-              image: user.profileImage!,
-              height: 36.w,   // Diameter = radius * 2
-              width: 36.w,
-              fitAndroidIos: BoxFit.cover,
-              fitWeb: BoxFitWeb.cover,
-              backgroundColor: Colors.transparent,
-              onLoading: const CircularProgressIndicator(
-                color: Colors.indigoAccent,
-              ),
-              onError: const Icon(Icons.error, color: Colors.red),
-            ),
-          )
-        : Text(
-            user.fullName[0].toUpperCase(),
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.blueColor,
-            ),
+        // User Profile
+        Padding(
+          padding: EdgeInsets.only(right: 16.w),
+          child: CircleAvatar(
+            radius: 18.w,
+            backgroundColor: AppColors.blueColor.withOpacity(0.1),
+            child: user.profileImage != null
+                ? ClipOval(
+                    child: ImageNetwork(
+                      image: user.profileImage!,
+                      height: 36.w, // Diameter = radius * 2
+                      width: 36.w,
+                      fitAndroidIos: BoxFit.cover,
+                      fitWeb: BoxFitWeb.cover,
+                      backgroundColor: Colors.transparent,
+                      onLoading: const CircularProgressIndicator(
+                        color: Colors.indigoAccent,
+                      ),
+                      onError: const Icon(Icons.error, color: Colors.red),
+                    ),
+                  )
+                : Text(
+                    user.fullName[0].toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.blueColor,
+                    ),
+                  ),
           ),
-  ),
-),
+        ),
 
         SizedBox(width: 16.w),
         Expanded(
@@ -444,10 +460,7 @@ Padding(
               SizedBox(height: 4.h),
               Text(
                 user.email,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.blueGrey,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
               ),
               SizedBox(height: 4.h),
               Container(
@@ -535,9 +548,9 @@ Padding(
       await authService.signOut();
       // Auth state provider will handle the navigation
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logout failed: ${e.toString()}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Logout failed: ${e.toString()}')));
     }
   }
 
@@ -552,10 +565,7 @@ Padding(
             SizedBox(height: 20.h),
             Text(
               'Loading your dashboard...',
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: Colors.blueGrey,
-              ),
+              style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
             ),
           ],
         ),
@@ -572,11 +582,7 @@ Padding(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 64.w,
-                color: Colors.red,
-              ),
+              Icon(Icons.error_outline, size: 64.w, color: Colors.red),
               SizedBox(height: 20.h),
               Text(
                 'Something went wrong',
@@ -590,10 +596,7 @@ Padding(
               Text(
                 error.toString(),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.blueGrey,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
               ),
               SizedBox(height: 30.h),
               ElevatedButton(
@@ -606,5 +609,4 @@ Padding(
       ),
     );
   }
-
 }

@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
-import 'package:my_hostel_app/backend/provider/users_provider.dart';
 import 'package:my_hostel_app/backend/service/image_upload_service.dart';
 import 'package:my_hostel_app/ui/admin/add_rooms.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';

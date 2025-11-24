@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 final analyticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final analyticsService = AnalyticsService();
@@ -7,7 +6,7 @@ final analyticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 });
 
 class AnalyticsService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<Map<String, dynamic>> getAnalyticsData() async {
     // Implement your analytics data fetching logic
