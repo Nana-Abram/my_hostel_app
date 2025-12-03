@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class RoomModel {
   final String id;
   final String hostelId;
@@ -34,7 +36,7 @@ class RoomModel {
       price: (map['price'] as num).toDouble(),
       available: map['available'],
       availableRooms: map['availableRooms'],
-      features: List<String>.from(map['features']),
+      features: List<String>.from(map['features'] ?? []),
     );
   }
 
@@ -50,5 +52,14 @@ class RoomModel {
       "availableRooms": availableRooms,
       "features": features,
     };
+  }
+
+  /// Converts this model to a JSON string
+  String toJson() => json.encode(toMap());
+
+  /// Creates a RoomModel from a JSON string
+  factory RoomModel.fromJson(String source, {String? id}) {
+    final map = json.decode(source) as Map<String, dynamic>;
+    return RoomModel.fromMap(map, id ?? map['id'] ?? '');
   }
 }

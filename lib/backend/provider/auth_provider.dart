@@ -49,17 +49,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 
-  // ADD THIS METHOD: Force refresh from Firebase
-  Future<void> refreshUser() async {
-    try {
-      state = const AsyncValue.loading();
-      final authService = ref.read(authServiceProvider);
-      final currentUser = await authService.getCurrentUser();
-      state = AsyncData(currentUser);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+  // In your auth_provider.dart, update the refreshUser method
+Future<void> refreshUser() async {
+  try {
+    print("🔄 [Auth] Starting refreshUser...");
+    state = const AsyncValue.loading();
+    final authService = ref.read(authServiceProvider);
+    final currentUser = await authService.getCurrentUser();
+    print("✅ [Auth] refreshUser completed. User: ${currentUser?.id}");
+    state = AsyncData(currentUser);
+  } catch (e, stack) {
+    print("❌ [Auth] refreshUser failed: $e");
+    state = AsyncValue.error(e, stack);
   }
+}
 
   Future<void> signOut() async {
     final authService = ref.read(authServiceProvider);

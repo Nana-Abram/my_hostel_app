@@ -6,6 +6,7 @@ import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboar
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/recent_activity.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/stats_grid.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/welcome_header.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 // import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_stat.dart';
 
 
@@ -23,6 +24,14 @@ class MainDashboard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const IconAndTextWidget(
+              icon: Icons.arrow_back_ios,
+              text: 'Back to home',
+              iconColor: Colors.blueGrey,
+              isBackArrow: true,
+            ),
+
+          SizedBox(height: 30.h),
           const WelcomeHeader(),
           SizedBox(height: 30.h),
           

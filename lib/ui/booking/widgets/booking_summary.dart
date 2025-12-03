@@ -1,0 +1,126 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/backend/model/room_model.dart';
+import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+
+class BookingSummaryCard extends StatelessWidget {
+  final HostelModel hostel;
+  final RoomModel room;
+
+  const BookingSummaryCard({
+    super.key,
+    required this.hostel,
+    required this.room,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final roomImage = room.image.isNotEmpty
+        ? room.image
+        : (hostel.images.isNotEmpty ? hostel.images.first : '');
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 8,
+            offset: const Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Room image
+          Container(
+            height: 200.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.r),
+                topRight: Radius.circular(20.r),
+              ),
+              color: Colors.grey.shade200,
+            ),
+            child: roomImage.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
+                    ),
+                    child: ImageNetwork(
+                      image: roomImage,
+                      height: 200.h,
+                      width: 450.w,
+                      fitAndroidIos: BoxFit.cover,
+                      fitWeb: BoxFitWeb.cover,
+                    ),
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.hotel,
+                      size: 60.sp,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+          ),
+
+          // Booking details
+          Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BigText(
+                  text: "Booking Summary",
+                  color: Colors.black,
+                  size: 16.sp,
+                ),
+                SizedBox(height: 20.h),
+
+                _buildSummaryRow("Hostel", hostel.name),
+                _buildSummaryRow("Room Type", room.type),
+                _buildSummaryRow("Campus", hostel.campus),
+                _buildSummaryRow("Duration", "One semester"),
+                _buildSummaryRow(
+                  "Price",
+                  "GHS ${room.price.toStringAsFixed(2)}",
+                ),
+                const Divider(),
+                _buildSummaryRow(
+                  "Total",
+                  "GHS ${room.price.toStringAsFixed(2)}",
+                  isBold: true,
+                ),
+                SizedBox(height: 30.h),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String title, String value, {bool isBold = false}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SmallText(text: title, color: Colors.blueGrey),
+          SmallText(
+            text: value,
+            color: isBold ? Colors.blue : Colors.black,
+            size: isBold ? 12.sp : 10.sp,
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
@@ -96,7 +97,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         );
 
         // Success - show verification message
-        Navigator.pop(context);
+        GoRouter.of(context).goNamed('login');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -106,10 +107,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               children: [
                 Text('Account created successfully!'),
                 SizedBox(height: 4.h),
-                Text(
-                  'Please check your email for verification link.',
-                  style: TextStyle(fontSize: 12.sp),
-                ),
               ],
             ),
             backgroundColor: Colors.green,
@@ -129,28 +126,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
   }
 
-  Future<void> _signUpWithGoogle() async {
-    try {
-      ref.read(authLoadingProvider.notifier).state = true;
+  // Future<void> _signUpWithGoogle() async {
+  //   try {
+  //     ref.read(authLoadingProvider.notifier).state = true;
 
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithGoogle();
+  //     // final authService = ref.read(authServiceProvider);
+  //     // await authService.signInWithGoogle();
 
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google sign up failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      ref.read(authLoadingProvider.notifier).state = false;
-    }
-  }
+  //     Navigator.pop(context);
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Google sign up failed: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   } finally {
+  //     ref.read(authLoadingProvider.notifier).state = false;
+  //   }
+  // }
 
   void _navigateToLogin() {
-    Navigator.pushNamed(context, AppRoutes.loginScreen);
+    GoRouter.of(context).goNamed('login');
   }
 
   @override
@@ -164,7 +161,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed:() {
+            GoRouter.of(context).goNamed('home');
+          },
         ),
       ),
       body: Stack(
@@ -471,44 +470,44 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           SizedBox(height: 20.h),
 
                           // GOOGLE SIGN UP
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56.h,
-                            child: OutlinedButton(
-                              onPressed: isLoading ? null : _signUpWithGoogle,
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                side: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/contact1',
-                                    width: 24.w,
-                                    height: 24.w,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.account_circle,
-                                        size: 24.w,
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Text(
-                                    'Continue with Google',
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 30.h),
+                          // SizedBox(
+                          //   width: double.infinity,
+                          //   height: 56.h,
+                          //   child: OutlinedButton(
+                          //     onPressed: isLoading ? null : _signUpWithGoogle,
+                          //     style: OutlinedButton.styleFrom(
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(12.r),
+                          //       ),
+                          //       side: BorderSide(color: Colors.grey.shade300),
+                          //     ),
+                          //     child: Row(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       children: [
+                          //         Image.asset(
+                          //           'assets/images/contact1',
+                          //           width: 24.w,
+                          //           height: 24.w,
+                          //           errorBuilder: (context, error, stackTrace) {
+                          //             return Icon(
+                          //               Icons.account_circle,
+                          //               size: 24.w,
+                          //             );
+                          //           },
+                          //         ),
+                          //         SizedBox(width: 12.w),
+                          //         Text(
+                          //           'Continue with Google',
+                          //           style: TextStyle(
+                          //             fontSize: 16.sp,
+                          //             color: Colors.black87,
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(height: 30.h),
 
                           // LOGIN LINK
                           Row(

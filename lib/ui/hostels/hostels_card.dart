@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
-import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -190,8 +190,12 @@ class _HostelCardState extends State<HostelCard> {
                   /// View Details Button
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.hostelDetails,arguments: widget.hostel);
+                      // Using GoRouter navigation
+                      GoRouter.of(
+                        context,
+                      ).go('/hostel-details/${widget.hostel.id}');
                     },
+
                     child: Container(
                       height: 0.04.sh,
                       width: double.infinity,

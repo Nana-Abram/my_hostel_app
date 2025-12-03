@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 
-
 class RoomService {
   final _db = FirebaseFirestore.instance;
 
@@ -20,30 +19,56 @@ class RoomService {
         .toList();
   }
 
+  // ✅ FIXED: Get single room by document ID
+  Future<RoomModel?> getRoomById(String roomId) async {
+    try {
+      final doc = await _db.collection('rooms').doc(roomId).get();
+      
+      if (doc.exists) {
+        return RoomModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching room by ID: $e');
+      return null;
+    }
+  }
+
+  //  Stream version for real-time updates
+  Stream<RoomModel?> getRoomByIdStream(String roomId) {
+    return _db.collection('rooms').doc(roomId).snapshots().map((doc) {
+      if (doc.exists) {
+        return RoomModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    });
+  }
+
   Stream<List<RoomModel>> getAllRoomsStream() {
     return _db.collection('rooms').snapshots().map((snapshot) {
       print("Snap for rooms:${snapshot.docs.length}");
       return snapshot.docs
           .map((doc) => RoomModel.fromMap(doc.data(), doc.id))
           .toList();
-          
     });
   }
 
-  // Future<void> updateRoomAvailability(String roomId, bool value) async {
-  //   await _db.collection('rooms').doc(roomId).update({
-  //     "available": value,
-  //   });
-  // }
+  // Add this to RoomService for real-time room updates by hostel
+Stream<List<RoomModel>> getRoomsByHostelStream(String hostelId) {
+  return _db
+      .collection('rooms')
+      .where('hostelId', isEqualTo: hostelId)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => RoomModel.fromMap(doc.data(), doc.id))
+          .toList());
+}
 
-  // In your RoomService class
-Future<void> updateRoom(String roomId, RoomModel room) async {
-  try {
-    await _db.collection('rooms').doc(roomId).update(room.toMap());
-  } catch (e) {
-    throw Exception('Failed to update room: $e');
+  Future<void> updateRoom(String roomId, RoomModel room) async {
+    try {
+      await _db.collection('rooms').doc(roomId).update(room.toMap());
+    } catch (e) {
+      throw Exception('Failed to update room: $e');
+    }
   }
 }
-
-}
-

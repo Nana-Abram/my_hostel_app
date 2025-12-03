@@ -82,6 +82,8 @@ class UserModel {
   bool get isHostelOwner => role == UserRole.hostelOwner;
   
   String get roleDisplayName => role.displayName;
+  String get uid => id;
+  String get displayName => fullName;
   
  UserModel copyWith({
   String? fullName,

@@ -24,7 +24,6 @@ class HostelService {
             .toList());
   }
 
-  // Add this to your HostelService
 Stream<HostelModel?> getHostelByIdStream(String id) {
   return _firestore
       .collection('hostels')

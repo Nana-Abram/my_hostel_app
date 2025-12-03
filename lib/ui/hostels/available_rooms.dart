@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
-import 'package:my_hostel_app/main.dart';
+import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
-import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
-class AvailableRooms extends StatelessWidget {
+class AvailableRooms extends ConsumerWidget {
   const AvailableRooms({
     super.key,
     required this.room,
@@ -23,7 +24,7 @@ class AvailableRooms extends StatelessWidget {
   final bool isHostelOwner;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: isHostelOwner ? 0.9.sw : 0.5.sw,
       height: isHostelOwner ? 300.h : 270.h,
@@ -65,7 +66,6 @@ class AvailableRooms extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   /// TITLE + PRICE
                   Row(
@@ -76,7 +76,6 @@ class AvailableRooms extends StatelessWidget {
                         color: Colors.black,
                         size: 13.sp,
                       ),
-
                       SmallText(
                         text: room.capacity == 1
                             ? "GHS${room.price.toStringAsFixed(2)}"
@@ -111,8 +110,8 @@ class AvailableRooms extends StatelessWidget {
 
                   /// ROOM FEATURES
                   Wrap(
-                    spacing: 10.w, // Reduced horizontal spacing
-                    runSpacing: 10.h, // Reduced vertical spacing
+                    spacing: 10.w,
+                    runSpacing: 10.h,
                     alignment: WrapAlignment.start,
                     children: room.features.map((feature) {
                       return Container(
@@ -126,8 +125,7 @@ class AvailableRooms extends StatelessWidget {
                           border: Border.all(color: Colors.blue.shade200),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize
-                              .min, // Important: don't take full width
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               _getFeatureIcon(feature),
@@ -168,35 +166,28 @@ class AvailableRooms extends StatelessWidget {
                         color: Colors.black54,
                         size: 12.sp,
                       ),
-                      isHostelOwner?Container(): GestureDetector(
-                        onTap: () {
-                          
-
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.bookingPage,
-                            arguments: BookingArguments(
-                              selectedRoom: room, // Required
-                              selectedHostel: hostel, // Required
+                      isHostelOwner
+                          ? Container()
+                          : GestureDetector(
+                              onTap: () {
+                                _handleBookNow(context, ref);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 8.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.blueColor,
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: SmallText(
+                                  text: "Book Now",
+                                  color: Colors.white,
+                                  size: 13.sp,
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 8.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.blueColor,
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: SmallText(
-                            text: "Book Now",
-                            color: Colors.white,
-                            size: 13.sp,
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ],
@@ -207,6 +198,25 @@ class AvailableRooms extends StatelessWidget {
       ),
     );
   }
+
+void _handleBookNow(BuildContext context, WidgetRef ref) {
+  final authState = ref.read(authProvider);
+  final user = authState.value;
+  // final user = null; // Temporary - replace with your auth check
+
+  if (user == null) {
+    // Not logged in → redirect to login with return URL
+    final bookingUrl = '/booking/${hostel.id}/${room.id}';
+    final encodedUrl = Uri.encodeComponent(bookingUrl);
+    
+    context.push('/login?redirect=$encodedUrl');
+    return;
+  }
+
+  // Logged in → go directly to booking page
+
+  context.go('/booking/${hostel.id}/${room.id}');
+}
 }
 
 IconData _getFeatureIcon(String feature) {

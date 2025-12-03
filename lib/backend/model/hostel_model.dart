@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 class HostelModel {
   final String id;
   final String name;
   final String campus;
   final String ownerName;
   final double totalRooms;
-  final List<String> images;   
+  final List<String> images;
   final String description;
   final double rating;
   final List<dynamic> amenities;
@@ -36,7 +38,7 @@ class HostelModel {
       id: id,
       name: data['name'],
       campus: data['campus'],
-      images: List<String>.from(data['images'] ?? []), 
+      images: List<String>.from(data['images'] ?? []),
       description: data['description'],
       ownerName: data['ownerName'],
       totalRooms: (data['totalRooms'] as num).toDouble(),
@@ -44,9 +46,9 @@ class HostelModel {
       amenities: data['amenities'] ?? [],
       location: data['location'],
       startPrice: (data['startPrice'] as num).toDouble(),
-      reviewsCount: (data["reviewsCount"]as num).toDouble(),
+      reviewsCount: (data["reviewsCount"] as num).toDouble(),
       status: data['status'],
-      ownerId: data['ownerId'],
+      ownerId: data['ownerId'] ?? '',
     );
   }
 
@@ -54,17 +56,26 @@ class HostelModel {
     return {
       "name": name,
       "campus": campus,
-      "images": images,          
+      "images": images,
       "description": description,
       "ownerName": ownerName,
       "totalRooms": totalRooms,
       "rating": rating,
       "amenities": amenities,
       "location": location,
-      "startPrice":startPrice,
-      "reviewsCount":reviewsCount,
-      "status":status,
+      "startPrice": startPrice,
+      "reviewsCount": reviewsCount,
+      "status": status,
       "ownerId": ownerId,
     };
+  }
+
+  /// Converts this model to a JSON string
+  String toJson() => json.encode(toMap());
+
+  /// Creates a HostelModel from a JSON string
+  factory HostelModel.fromJson(String source, {String? id}) {
+    final map = json.decode(source) as Map<String, dynamic>;
+    return HostelModel.fromMap(map, id ?? map['id'] ?? '');
   }
 }

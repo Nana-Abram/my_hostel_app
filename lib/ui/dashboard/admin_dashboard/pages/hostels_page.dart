@@ -6,6 +6,7 @@ import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/admin_hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class HostelsManagementPage extends ConsumerStatefulWidget {
   const HostelsManagementPage({super.key});
@@ -34,6 +35,13 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+           const IconAndTextWidget(
+              icon: Icons.arrow_back_ios,
+              text: 'Back to home',
+              iconColor: Colors.blueGrey,
+              isBackArrow: true,
+            ),
+          SizedBox(height: 30.h),
           // HEADER
           _buildHeader(),
           SizedBox(height: 20.h),

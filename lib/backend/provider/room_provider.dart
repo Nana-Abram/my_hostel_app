@@ -11,9 +11,22 @@ final roomsStreamProvider = StreamProvider<List<RoomModel>>((ref) {
 });
 
 /// GET ROOMS FOR A SELECTED HOSTEL
+
 final roomsByHostelProvider =
     FutureProvider.family<List<RoomModel>, String>((ref, hostelId) {
   final service = ref.read(roomServiceProvider);
   return service.getRoomsByHostel(hostelId);
 });
 
+// Add this to your room_provider.dart
+final roomByIdProvider = FutureProvider.autoDispose.family<RoomModel?, String>((ref, roomId) async {
+  final service = ref.read(roomServiceProvider); // You'll need to create this
+  return await service.getRoomById(roomId);
+});
+
+
+//  Stream version for real-time updates
+final roomByIdStreamProvider = StreamProvider.autoDispose.family<RoomModel?, String>((ref, roomId) {
+  final service = ref.read(roomServiceProvider);
+  return service.getRoomByIdStream(roomId);
+});

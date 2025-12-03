@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
@@ -190,20 +191,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onIndexChanged: (index) => setState(() => _currentIndex = index),
         );
       case UserRole.student:
-        return StudentDashboard(
-          currentIndex: _currentIndex,
-          onIndexChanged: (index) => setState(() => _currentIndex = index),
-        );
+        return StudentDashboard();
       default:
-        return StudentDashboard(
-          currentIndex: _currentIndex,
-          onIndexChanged: (index) => setState(() => _currentIndex = index),
-        );
+        return StudentDashboard();
     }
   }
 
   Widget _buildBottomNavigationBar(UserModel user) {
     final navItems = _getNavigationItems(user.role);
+      if (user.role == UserRole.student) {
+    return const SizedBox.shrink();
+  }
 
     return Container(
       decoration: BoxDecoration(
@@ -234,6 +232,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   List<BottomNavigationBarItem> _getNavigationItems(UserRole role) {
+    
     switch (role) {
       case UserRole.admin:
         return [
@@ -294,7 +293,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ];
 
       case UserRole.student:
-        return [
+        return
+         [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore),
@@ -321,6 +321,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             label: 'Profile',
           ),
         ];
+    
     }
   }
 
@@ -527,8 +528,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Close bottom sheet
+              GoRouter.of(context).goNamed('login'); // Close bottom sheet
               _logout();
             },
             style: ElevatedButton.styleFrom(

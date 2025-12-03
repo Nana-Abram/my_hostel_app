@@ -1,155 +1,139 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
+import 'package:my_hostel_app/ui/booking/widgets/booking_appbar.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/hostels/available_rooms.dart';
 import 'package:my_hostel_app/ui/hostels/booking_card.dart';
 import 'package:my_hostel_app/ui/hostels/image_slider_h_d.dart';
-import 'package:my_hostel_app/ui/routes/app_routes.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
+
+
 class HostelDetailsPage extends ConsumerWidget {
-  const HostelDetailsPage({super.key, required this.hostel,});
+  const HostelDetailsPage({super.key, required this.hostelId});
 
-  final HostelModel hostel;
-  
-
+  final String hostelId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roomsAsync = ref.watch(roomsByHostelProvider(hostel.id));
+    // Fetch hostel data using the ID
+    
+    final hostelAsync = ref.watch(hostelByIdProvider(hostelId));
+    final roomsAsync = ref.watch(roomsByHostelProvider(hostelId));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(120.h),
-        child: Container(
-          height: 120.h,
-          padding: EdgeInsets.symmetric(horizontal: 40.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      appBar: BookingAppBar(),
+      body: hostelAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ===== LEFT SIDE (LOGO + NAME) =====
-              Row(
-                children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'H',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.sp,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  const Text(
-                    "HostelHub",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
-
-              // ===== RIGHT SIDE (BUTTONS) =====
-              Row(
-                children: [
-                  ElvButtonWidget(text: "Login", onPressed: () {
-                     Navigator.pushNamed(context, AppRoutes.loginScreen);
-                  }),
-                  SizedBox(width: 16.w),
-                  ElvButtonWidget(
-                    text: "Sign Up",
-                    onPressed: () {
-                       Navigator.pushNamed(context, AppRoutes.signUpScreen);
-                    },
-                    isPrimary: true,
-                  ),
-                ],
+              Icon(Icons.error_outline, color: Colors.red, size: 50.sp),
+              SizedBox(height: 16.h),
+              BigText(text: "Failed to load hostel", color: Colors.red),
+              SizedBox(height: 8.h),
+              SmallText(text: "Please try again later"),
+              SizedBox(height: 16.h),
+              ElvButtonWidget(
+                text: "Go Back",
+                onPressed:() {
+                  GoRouter.of(context).go('/');
+                },
               ),
             ],
           ),
         ),
+        data: (hostel) {
+          if (hostel == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.hotel, color: Colors.grey, size: 50.sp),
+                  SizedBox(height: 16.h),
+                  BigText(text: "Hostel not found", color: Colors.grey),
+                  SizedBox(height: 8.h),
+                  SmallText(text: "The requested hostel could not be found"),
+                  SizedBox(height: 16.h),
+                  ElvButtonWidget(
+                    text: "Go Back",
+                    onPressed:() {
+                      GoRouter.of(context).go('/');
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return _buildHostelContent(hostel, roomsAsync);
+        },
       ),
+    );
+  }
 
-      body: Container(
-        margin: EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back button
-              IconAndTextWidget(
-                icon: Icons.arrow_back_ios,
-                text: 'Back to search',
-                iconColor: Colors.blueGrey,
-                isBackArrow: true,
-              ),
-              SizedBox(height: 20.h),
+  Widget _buildHostelContent(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Back button
+            IconAndTextWidget(
+              icon: Icons.arrow_back_ios,
+              text: 'Back to search',
+              iconColor: Colors.blueGrey,
+              isBackArrow: true,
+              
+            ),
+            SizedBox(height: 20.h),
 
-              // Image carousel
-              HostelImageCarousel(images: hostel.images),
-              SizedBox(height: 30.h),
+            // Image carousel
+            HostelImageCarousel(images: hostel.images),
+            SizedBox(height: 30.h),
 
-              // Responsive layout for content
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isMobile = constraints.maxWidth < 600;
-                  
-                  if (isMobile) {
-                    return _buildMobileLayout(roomsAsync);
-                  } else {
-                    return _buildDesktopLayout(roomsAsync);
-                  }
-                },
-              ),
+            // Responsive layout for content
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+                
+                if (isMobile) {
+                  return _buildMobileLayout(hostel, roomsAsync);
+                } else {
+                  return _buildDesktopLayout(hostel, roomsAsync);
+                }
+              },
+            ),
 
-              // Location map
-              SizedBox(height: 30.h),
-              _buildLocationMap(),
-              SizedBox(height: 50.h),
-            ],
-          ),
+            // Location map
+            SizedBox(height: 30.h),
+            _buildLocationMap(hostel),
+            SizedBox(height: 50.h),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildDesktopLayout(AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildDesktopLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left column - Hostel details and rooms
         Expanded(
           flex: 2,
-          child: _buildHostelDetailsAndRooms(roomsAsync),
+          child: _buildHostelDetailsAndRooms(hostel, roomsAsync),
         ),
         
         SizedBox(width: 30.w),
@@ -157,28 +141,24 @@ class HostelDetailsPage extends ConsumerWidget {
         // Right column - Booking cards
         Expanded(
           flex: 1,
-          child: BookingCardWidget(
-            hostel: hostel,
-          ),
+          child: BookingCardWidget(hostel: hostel),
         ),
       ],
     );
   }
 
-  Widget _buildMobileLayout(AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildMobileLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHostelDetailsAndRooms(roomsAsync),
+        _buildHostelDetailsAndRooms(hostel, roomsAsync),
         SizedBox(height: 30.h),
-        BookingCardWidget(
-          hostel: hostel,
-        ),
+        BookingCardWidget(hostel: hostel),
       ],
     );
   }
 
-  Widget _buildHostelDetailsAndRooms(AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildHostelDetailsAndRooms(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,11 +187,11 @@ class HostelDetailsPage extends ConsumerWidget {
         SizedBox(height: 30.h),
 
         // About section
-        _buildAboutSection(),
+        _buildAboutSection(hostel),
         SizedBox(height: 20.h),
 
         // Amenities
-        _buildAmenitiesSection(),
+        _buildAmenitiesSection(hostel),
         SizedBox(height: 30.h),
 
         // Available rooms
@@ -253,13 +233,11 @@ class HostelDetailsPage extends ConsumerWidget {
             );
           },
         ),
-     
       ],
     );
   }
 
-
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection(HostelModel hostel) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.sp),
@@ -297,7 +275,7 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAmenitiesSection() {
+  Widget _buildAmenitiesSection(HostelModel hostel) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.sp),
@@ -395,7 +373,7 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildLocationMap() {
+  Widget _buildLocationMap(HostelModel hostel) {
     return Container(
       width: double.infinity,
       height: 300.h,
@@ -434,8 +412,7 @@ class HostelDetailsPage extends ConsumerWidget {
   }
 }
 
-
-
+// Helper functions remain the same
 class RowIconAndText extends StatelessWidget {
   const RowIconAndText({super.key, required this.icon, required this.text});
   final IconData icon;
@@ -461,7 +438,6 @@ class RowIconAndText extends StatelessWidget {
   }
 }
 
-//============================================
 IconData _getAmenityIcon(String amenity) {
   final amenityLower = amenity.toLowerCase();
 

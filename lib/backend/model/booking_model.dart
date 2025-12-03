@@ -15,7 +15,7 @@ class BookingModel {
   final DateTime checkInDate;
   final String confirmationImage;
   final double totalPrice;
-  final String status; // pending, confirmed, checked-in, checked-out, cancelled
+  final String status; // pending, confirmed, checked-in, cancelled
   final DateTime createdAt;
   final String? specialRequests;
 

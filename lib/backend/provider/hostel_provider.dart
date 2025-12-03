@@ -23,9 +23,15 @@ final hostelsFutureProvider = FutureProvider<List<HostelModel>>((ref) {
   return service.getAllHostels();
 });
 
-final hostelByIdProvider = StreamProvider.family<HostelModel?, String>((ref, hostelId) {
+// final hostelByIdProvider = StreamProvider.family<HostelModel?, String>((ref, hostelId) {
+//   final service = ref.read(hostelServiceProvider);
+//   return service.getHostelByIdStream(hostelId);
+// });
+
+// Update this provider to use your actual service method
+final hostelByIdProvider = FutureProvider.autoDispose.family<HostelModel?, String>((ref, hostelId) async {
   final service = ref.read(hostelServiceProvider);
-  return service.getHostelByIdStream(hostelId);
+  return await service.getHostelById(hostelId);
 });
 
 // ADD: Notifier for CRUD operations

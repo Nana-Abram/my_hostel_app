@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
-import 'package:my_hostel_app/ui/hostels/hostel_screen.dart';
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -226,7 +226,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
     final appBarScreenState = context.findAncestorStateOfType<AppBarScreenState>();
     
     if (appBarScreenState != null) {
-      appBarScreenState.onNavSelected(2);
+      appBarScreenState.onNavSelected(1);
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -235,10 +235,8 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
         ),
       );
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HostelsScreen()),
-      );
+      GoRouter.of(context).push('/0');
+
     }
   }
 }

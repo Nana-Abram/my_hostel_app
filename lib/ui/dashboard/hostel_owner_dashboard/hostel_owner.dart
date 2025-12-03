@@ -30,7 +30,7 @@ class HostelOwnerDashboardState extends State<HostelOwnerDashboard> {
       case 1:
         return MyHostelsPage();
       case 2:
-        return BookingsPage();
+        return OwnerBookingsPage();
       case 3:
         return EarningsPage();
       case 4:

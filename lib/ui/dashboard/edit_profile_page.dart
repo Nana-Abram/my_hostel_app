@@ -8,6 +8,7 @@ import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/auth_service.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -34,7 +35,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   PlatformFile? _selectedImage;
   bool _isLoading = false;
   bool _isUploadingImage = false;
-  
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final isOwner = widget.isOwner;
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar:isOwner? _buildAppBar():null,
+      appBar: isOwner ? _buildAppBar() : null,
       body: _isLoading
           ? _buildLoadingState()
           : SingleChildScrollView(
@@ -76,6 +76,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    const IconAndTextWidget(
+                      icon: Icons.arrow_back_ios,
+                      text: 'Back to home',
+                      iconColor: Colors.blueGrey,
+                      isBackArrow: true,
+                    ),
+                    SizedBox(height: 30.h),
                     // PROFILE PICTURE SECTION
                     _buildProfilePictureSection(),
                     SizedBox(height: 32.h),

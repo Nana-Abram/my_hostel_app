@@ -171,10 +171,10 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => _onAddHostelPressed(),
-            child: Text('Add Hostel'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue[700],
             ),
+            child: Text('Add Hostel'),
           ),
         ],
       ),
@@ -442,7 +442,7 @@ ElevatedButton(
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'active':
+      case 'verified':
         return Colors.green;
       case 'inactive':
         return Colors.orange;

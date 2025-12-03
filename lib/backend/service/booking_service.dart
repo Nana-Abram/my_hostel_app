@@ -1,47 +1,92 @@
-// services/booking_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 
 class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Get all bookings for hostels owned by a specific user
-  Stream<List<BookingModel>> getBookingsByOwner(String ownerId) {
-    return _firestore
-        .collection('bookings')
-        .where('ownerId', isEqualTo: ownerId) // We'll need to add ownerId to bookings
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
-            .toList());
+  // Create a new booking with status "pending"
+  Future<String> createBooking(BookingModel booking) async {
+    try {
+      final docRef = await _firestore.collection('bookings').add(booking.toMap());
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Failed to create booking: $e');
+    }
   }
 
-  // Get bookings by hostel ID
-  Stream<List<BookingModel>> getBookingsByHostel(String hostelId) {
-    return _firestore
-        .collection('bookings')
-        .where('hostelId', isEqualTo: hostelId)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
+  // // Get bookings by user ID
+  // Stream<List<BookingModel>> getBookingsByUser(String userId) {
+  //   return _firestore
+  //       .collection('bookings')
+  //       .where('userId', isEqualTo: userId)
+  //       .orderBy('createdAt', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) => snapshot.docs
+  //           .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+  //           .toList());
+  // }
+Stream<List<BookingModel>> getBookingsByOwner(String ownerId) {
+  return _firestore
+      .collection('bookings')
+      .where('ownerId', isEqualTo: ownerId)
+      // .orderBy('createdAt', descending: true) // Remove this temporarily
+      .snapshots()
+      .map((snapshot) {
+        final bookings = snapshot.docs
             .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
-            .toList());
+            .toList();
+        // Sort client-side
+        bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return bookings;
+      });
+}
+
+  // Get booking by ID
+  Future<BookingModel?> getBookingById(String bookingId) async {
+    try {
+      final doc = await _firestore.collection('bookings').doc(bookingId).get();
+      if (doc.exists) {
+        return BookingModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get booking: $e');
+    }
   }
 
-  // Update booking status
-  Future<void> updateBookingStatus(String bookingId, String status) async {
+  // Update booking status (for owners to confirm/reject)
+  Future<void> updateBookingStatus(String bookingId, String newStatus) async {
     try {
       await _firestore.collection('bookings').doc(bookingId).update({
-        'status': status,
-        'updatedAt': FieldValue.serverTimestamp(),
+        'status': newStatus,
       });
     } catch (e) {
       throw Exception('Failed to update booking status: $e');
     }
   }
 
-  // Get booking statistics for dashboard
+  // Cancel booking (for users)
+  Future<void> cancelBooking(String bookingId) async {
+    try {
+      await _firestore.collection('bookings').doc(bookingId).update({
+        'status': 'cancelled',
+      });
+    } catch (e) {
+      throw Exception('Failed to cancel booking: $e');
+    }
+  }
+
+  // Get pending bookings count for owner
+  Stream<int> getPendingBookingsCount(String ownerId) {
+    return _firestore
+        .collection('bookings')
+        .where('ownerId', isEqualTo: ownerId)
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
+    // Get booking statistics for dashboard
   Future<Map<String, int>> getBookingStats(String ownerId) async {
     final bookings = await _firestore
         .collection('bookings')
@@ -64,4 +109,56 @@ class BookingService {
       }).length,
     };
   }
+
+
+// In getBookingsByUser method
+Stream<List<BookingModel>> getBookingsByUser(String userId) {
+  return _firestore
+      .collection('bookings')
+      .where('userId', isEqualTo: userId)
+      .snapshots()  // Removed .orderBy('createdAt', descending: true)
+      .map((snapshot) {
+        final bookings = snapshot.docs
+            .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+            .toList();
+        // Sort client-side instead
+        bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return bookings;
+      });
+}
+
+Future<List<BookingModel>> getBookingsByUserOnce(String userId) async {
+  try {
+    final querySnapshot = await _firestore
+        .collection('bookings')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    return querySnapshot.docs
+        .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } on FirebaseException catch (e) {
+    if (e.code == 'failed-precondition') {
+      print('Index not created yet. Please create the composite index.');
+      print('Or use the client-side sorting approach.');
+      // Fallback to client-side sorting
+      final querySnapshot = await _firestore
+          .collection('bookings')
+          .where('userId', isEqualTo: userId)
+          .get();
+      
+      final bookings = querySnapshot.docs
+          .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+          .toList();
+      
+      bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return bookings;
+    }
+    throw Exception('Failed to get user bookings: $e');
+  } catch (e) {
+    throw Exception('Failed to get user bookings: $e');
+  }
+}
+
 }

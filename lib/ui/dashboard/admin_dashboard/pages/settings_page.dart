@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key, this.isAppBarVisible = false});
@@ -36,6 +37,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+             const IconAndTextWidget(
+              icon: Icons.arrow_back_ios,
+              text: 'Back to home',
+              iconColor: Colors.blueGrey,
+              isBackArrow: true,
+            ),
+            SizedBox(height: 24.h),
             // HEADER
             _buildHeader(),
             SizedBox(height: 24.h),

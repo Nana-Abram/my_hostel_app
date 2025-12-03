@@ -12,7 +12,8 @@ class ProfilePage extends ConsumerWidget {
   final currentUser = authState.value;
     return Scaffold(
     
-      body:EditProfilePage(currentUser: currentUser!, isOwner: false,),
+      body:
+        EditProfilePage(currentUser: currentUser!, isOwner: false,),
     );
   }
 }

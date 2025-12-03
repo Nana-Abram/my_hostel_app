@@ -9,6 +9,7 @@ import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/Utility/user_
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_header.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_list.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_stat.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 
 class UsersManagementPage extends ConsumerStatefulWidget {
@@ -47,6 +48,13 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+               const IconAndTextWidget(
+              icon: Icons.arrow_back_ios,
+              text: 'Back to home',
+              iconColor: Colors.blueGrey,
+              isBackArrow: true,
+            ),
+          SizedBox(height: 20.h),
               Text(
                 'Users Management',
                 style: TextStyle(

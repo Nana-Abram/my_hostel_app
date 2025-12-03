@@ -1,87 +1,73 @@
-// pages/hostel_owner/bookings_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
-import 'package:my_hostel_app/backend/provider/booking_provider.dart';
+import 'package:my_hostel_app/backend/service/booking_service.dart';
+import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/booking_card.dart';
 
-class BookingsPage extends ConsumerStatefulWidget {
-  const BookingsPage({Key? key}) : super(key: key);
+
+class OwnerBookingsPage extends ConsumerStatefulWidget {
+  const OwnerBookingsPage({super.key});
 
   @override
-  ConsumerState<BookingsPage> createState() => _BookingsPageState();
+  ConsumerState<OwnerBookingsPage> createState() => _OwnerBookingsPageState();
 }
 
-class _BookingsPageState extends ConsumerState<BookingsPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final List<String> _statusTabs = ['All', 'Pending', 'Confirmed', ];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: _statusTabs.length, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
+  String _selectedFilter = 'all'; // all, pending, confirmed, cancelled
+  String _selectedSort = 'newest'; // newest, oldest, checkin
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final user = ref.watch(authProvider).value;
     
-    return authState.when(
-      loading: () => Scaffold(
-        appBar: AppBar(title: Text('Bookings')),
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        appBar: AppBar(title: Text('Bookings')),
-        body: Center(child: Text('Error: $error')),
-      ),
-      data: (user) {
-        if (user == null) {
-          return _buildNotSignedInState();
-        }
-        
-        return _buildBookingsPage(user.id);
-      },
-    );
-  }
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  Widget _buildBookingsPage(String ownerId) {
-    final statsAsync = ref.watch(bookingStatsProvider(ownerId));
-    
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Bookings'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: _statusTabs.map((tab) => Tab(text: tab)).toList(),
-        ),
-      ),
+      backgroundColor: Colors.grey[50],
       body: Column(
         children: [
-          // Statistics Cards
-          statsAsync.when(
-            loading: () => Container(),
-            error: (error, stack) => Container(),
-            data: (stats) => _buildStatsCards(stats),
-          ),
+          // Header
+          _buildHeader(user),
+          
+          // Filter and Sort Row
+          _buildFilterSortRow(),
           
           // Bookings List
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: _statusTabs.map((status) {
-                return _buildBookingsList(ownerId, status);
-              }).toList(),
+            child: _buildBookingsList(user),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(UserModel user) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Bookings',
+            style: TextStyle(
+              fontSize: 28.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Manage bookings for your hostels',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.blueGrey,
             ),
           ),
         ],
@@ -89,414 +75,196 @@ class _BookingsPageState extends ConsumerState<BookingsPage> with SingleTickerPr
     );
   }
 
-  Widget _buildStatsCards(Map<String, int> stats) {
+  Widget _buildFilterSortRow() {
     return Container(
-      padding: EdgeInsets.all(16.w),
-      color: Colors.grey[50],
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      color: Colors.white,
       child: Row(
         children: [
-          _buildStatCard('Total', stats['total'] ?? 0, Colors.blue),
-          SizedBox(width: 8.w),
-          _buildStatCard('Pending', stats['pending'] ?? 0, Colors.orange),
-          SizedBox(width: 8.w),
-          _buildStatCard('Confirmed', stats['confirmed'] ?? 0, Colors.green),
-          SizedBox(width: 8.w),
-          _buildStatCard('Today', stats['todayCheckIn'] ?? 0, Colors.purple),
+          // Filter Dropdown
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedFilter,
+                  isExpanded: true,
+                  icon: Icon(Icons.filter_list, size: 20.w),
+                  items: [
+                    _buildDropdownItem('all', 'All Bookings'),
+                    _buildDropdownItem('pending', 'Pending'),
+                    _buildDropdownItem('confirmed', 'Confirmed'),
+                    _buildDropdownItem('cancelled', 'Cancelled'),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedFilter = value!);
+                  },
+                ),
+              ),
+            ),
+          ),
+          
+          SizedBox(width: 12.w),
+          
+          // Sort Dropdown
+          Container(
+            width: 140.w,
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedSort,
+                isExpanded: true,
+                icon: Icon(Icons.sort, size: 20.w),
+                items: [
+                  _buildDropdownItem('newest', 'Newest First'),
+                  _buildDropdownItem('oldest', 'Oldest First'),
+                  _buildDropdownItem('checkin', 'Check-in Date'),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedSort = value!);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, int count, Color color) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              count.toString(),
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+  DropdownMenuItem<String> _buildDropdownItem(String value, String text) {
+    return DropdownMenuItem(
+      value: value,
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 14.sp),
       ),
     );
   }
 
-  Widget _buildBookingsList(String ownerId, String statusFilter) {
-    final bookingsAsync = ref.watch(bookingsByOwnerProvider(ownerId));
+  Widget _buildBookingsList(UserModel user) {
+    final bookingService = BookingService();
     
-    return bookingsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Error: $error')),
-      data: (bookings) {
-        // Filter bookings based on tab selection
-        final filteredBookings = statusFilter == 'All' 
-            ? bookings 
-            : bookings.where((booking) {
-                switch (statusFilter) {
-                  case 'Pending': return booking.isPending;
-                  case 'Confirmed': return booking.isConfirmed;
-                  default: return true;
-                }
-              }).toList();
-
-        if (filteredBookings.isEmpty) {
-          return _buildEmptyState(statusFilter);
+    return StreamBuilder<List<BookingModel>>(
+      stream: bookingService.getBookingsByOwner(user.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: AppColors.blueColor));
         }
-
-        return ListView.builder(
-          padding: EdgeInsets.all(16.w),
-          itemCount: filteredBookings.length,
-          itemBuilder: (context, index) {
-            return _buildBookingCard(filteredBookings[index]);
+        
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64.w, color: Colors.red),
+                SizedBox(height: 16.h),
+                Text(
+                  'Error loading bookings',
+                  style: TextStyle(fontSize: 16.sp, color: Colors.red),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        final allBookings = snapshot.data ?? [];
+        
+        // Apply filters
+        List<BookingModel> filteredBookings = allBookings;
+        
+        if (_selectedFilter != 'all') {
+          filteredBookings = allBookings
+              .where((booking) => booking.status == _selectedFilter)
+              .toList();
+        }
+        
+        // Apply sorting
+        filteredBookings = _sortBookings(filteredBookings, _selectedSort);
+        
+        if (filteredBookings.isEmpty) {
+          return _buildEmptyState();
+        }
+        
+        return RefreshIndicator(
+          onRefresh: () async {
+            // Refresh logic if needed
           },
+          child: ListView.separated(
+            padding: EdgeInsets.all(20.w),
+            itemCount: filteredBookings.length,
+            separatorBuilder: (context, index) => SizedBox(height: 16.h),
+            itemBuilder: (context, index) {
+              return BookingCard(
+                booking: filteredBookings[index],
+                onStatusUpdated: () {
+                  // Refresh the list if needed
+                  setState(() {});
+                },
+              );
+            },
+          ),
         );
       },
     );
   }
 
-  Widget _buildBookingCard(BookingModel booking) {
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.only(bottom: 12.h),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with booking ID and status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Booking #${booking.id.substring(0, 8)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(booking.status).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _getStatusColor(booking.status)),
-                  ),
-                  child: Text(
-                    booking.status.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.bold,
-                      color: _getStatusColor(booking.status),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 8.h),
-            
-            // Hostel and Room info
-            Text(
-              booking.hostelName,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            
-            SizedBox(height: 12.h),
-            
-            // Guest information
-            _buildInfoRow('Guest', booking.userName),
-            _buildInfoRow('Contact', '${booking.userPhone} • ${booking.userEmail}'),
-            
-            SizedBox(height: 8.h),
-            
-            // Dates and Price
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Check-in',
-                        style: TextStyle(fontSize: 10.sp, color: Colors.grey),
-                      ),
-                      // Text(
-                      //   // DateFormat('MMM dd, yyyy').format(booking.checkInDate),
-                      //   style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
-                      // ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Check-out',
-                        style: TextStyle(fontSize: 10.sp, color: Colors.grey),
-                      ),
-                  
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Total',
-                        style: TextStyle(fontSize: 10.sp, color: Colors.grey),
-                      ),
-                      Text(
-                        '₹${booking.totalPrice.toInt()}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 12.h),
-            
-            // Action buttons based on status
-            if (booking.isPending) _buildPendingActions(booking),
-            if (booking.isConfirmed) _buildConfirmedActions(booking),
-            
-          ],
-        ),
-      ),
-    );
+  List<BookingModel> _sortBookings(List<BookingModel> bookings, String sortBy) {
+    List<BookingModel> sorted = List.from(bookings);
+    
+    switch (sortBy) {
+      case 'newest':
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case 'oldest':
+        sorted.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case 'checkin':
+        sorted.sort((a, b) => a.checkInDate.compareTo(b.checkInDate));
+        break;
+    }
+    
+    return sorted;
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.h),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 12.sp, color: Colors.grey[700]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPendingActions(BookingModel booking) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _updateBookingStatus(booking.id, 'confirmed'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.green),
-            child: Text('Confirm'),
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _updateBookingStatus(booking.id, 'cancelled'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Reject'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildConfirmedActions(BookingModel booking) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _updateBookingStatus(booking.id, 'checked-in'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.blue),
-            child: Text('Check-in'),
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _showBookingDetails(booking),
-            child: Text('View Details'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckedInActions(BookingModel booking) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _updateBookingStatus(booking.id, 'checked-out'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.purple),
-            child: Text('Check-out'),
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _showBookingDetails(booking),
-            child: Text('View Details'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(String status) {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_today, size: 80, color: Colors.grey[400]),
-          SizedBox(height: 16.h),
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 80.w,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 20.h),
           Text(
-            'No $status Bookings',
+            'No bookings found',
             style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
               color: Colors.grey[600],
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 12.h),
           Text(
-            'When you get $status.toLowerCase() bookings, they will appear here',
-            style: TextStyle(color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotSignedInState() {
-    return Scaffold(
-      appBar: AppBar(title: Text('Bookings')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.person_off, size: 80, color: Colors.grey[400]),
-            SizedBox(height: 16.h),
-            Text(
-              'Please Sign In',
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            _selectedFilter == 'all'
+                ? 'You don\'t have any bookings yet'
+                : 'No $_selectedFilter bookings',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey[500],
             ),
-            SizedBox(height: 8.h),
-            Text('You need to be signed in to view bookings'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending': return Colors.orange;
-      case 'confirmed': return Colors.green;
-      case 'checked-in': return Colors.blue;
-      case 'checked-out': return Colors.purple;
-      case 'cancelled': return Colors.red;
-      default: return Colors.grey;
-    }
-  }
-
-  Future<void> _updateBookingStatus(String bookingId, String status) async {
-    try {
-      final service = ref.read(bookingServiceProvider);
-      await service.updateBookingStatus(bookingId, status);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking status updated to $status')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update booking: $e')),
-      );
-    }
-  }
-
-  void _showBookingDetails(BookingModel booking) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Booking Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDetailRow('Booking ID', booking.id),
-              _buildDetailRow('Hostel', booking.hostelName),
-              _buildDetailRow('Room Type', booking.roomType),
-              _buildDetailRow('Guest', booking.userName),
-              _buildDetailRow('Email', booking.userEmail),
-              _buildDetailRow('Phone', booking.userPhone),
-              // _buildDetailRow('Check-in', DateFormat('MMM dd, yyyy').format(booking.checkInDate)),
-              _buildDetailRow('Total', '₹${booking.totalPrice}'),
-              if (booking.specialRequests != null)
-                _buildDetailRow('Special Requests', booking.specialRequests!),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(value, style: TextStyle(fontSize: 12.sp)),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
