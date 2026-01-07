@@ -1,9 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/firebase_options.dart';
+import 'package:my_hostel_app/ui/core/app_theme.dart';
 import 'package:my_hostel_app/ui/routes/app_routes.dart';
 
 void main() async {
@@ -11,17 +12,17 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Enable local cache persistence
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-  );
+  // // Enable local cache persistence
+  // FirebaseFirestore.instance.settings = const Settings(
+  //   persistenceEnabled: true,
+  //   cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  // );
   
-  if(FirebaseFirestore.instance.settings.persistenceEnabled == true) {
-    print("✅ Firestore local cache persistence is ENABLED");
-  } else {
-    print("❌ Firestore local cache persistence is DISABLED");
-  }
+  // if(FirebaseFirestore.instance.settings.persistenceEnabled == true) {
+  //   print("✅ Firestore local cache persistence is ENABLED");
+  // } else {
+  //   print("❌ Firestore local cache persistence is DISABLED");
+  // }
   
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -31,17 +32,23 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ScreenUtilInit(
-      designSize: const Size(1440, 1024),
-      minTextAdapt: true,
-      builder: (context, child) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'My Hostel App',
-          theme: ThemeData(fontFamily: 'Poppins'),
-          routerConfig: AppRouter.router,
-        );
-      },
+    return AdaptiveTheme(
+      light: AppTheme.lightTheme(),
+      dark: AppTheme.darkTheme(),
+      initial: AdaptiveThemeMode.light,
+      builder:(theme, darkTheme) => ScreenUtilInit(
+        designSize: const Size(1440, 1024),
+        minTextAdapt: true,
+        builder: (context, child) {
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'My Hostel App',
+            theme: theme,
+            darkTheme: darkTheme,
+            routerConfig: AppRouter.router,
+          );
+        },
+      ),
     );
   }
 }

@@ -22,15 +22,16 @@ class ConfirmationStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Container(
         padding: EdgeInsets.all(40.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.shade300,
+              color: theme.shadowColor.withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(2, 4),
             ),
@@ -41,7 +42,7 @@ class ConfirmationStep extends StatelessWidget {
           children: [
             Icon(Icons.check_circle, size: 80.sp, color: Colors.green),
             SizedBox(height: 20.h),
-            BigText(text: "Booking Submitted!", color: Colors.black),
+            BigText(text: "Booking Submitted!", color: Colors.green, size: 20.sp),
             SizedBox(height: 10.h),
             SmallText(
               text: "Your booking request has been submitted for review",

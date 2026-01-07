@@ -30,6 +30,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -43,7 +44,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
             ),
           SizedBox(height: 30.h),
           // HEADER
-          _buildHeader(),
+          _buildHeader(theme),
           SizedBox(height: 20.h),
 
           // QUICK STATS
@@ -53,7 +54,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
             builder: (context, ref, child) {
               final statsAsync = ref.watch(hostelsStatsProvider);
               return statsAsync.when(
-                data: (stats) => _buildHostelsStats(stats),
+                data: (stats) => _buildHostelsStats(stats, theme),
                 loading: () => _buildStatsLoading(),
                 error: (error, stack) => _buildStatsError(error),
               );
@@ -62,11 +63,11 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
           SizedBox(height: 24.h),
 
           // SEARCH AND FILTERS
-          _buildSearchAndFilters(),
+          _buildSearchAndFilters(theme),
           SizedBox(height: 16.h),
 
           // HOSTELS LIST
-          _buildHostelsList(),
+          _buildHostelsList(theme),
         ],
       ),
     );
@@ -115,7 +116,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -127,13 +128,13 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 4.h),
             Text(
               'Manage all hostel listings and verifications',
-              style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
+              style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
             ),
           ],
         ),
@@ -141,11 +142,12 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     );
   }
 
-  Widget _buildHostelsStats(stats) {
+  Widget _buildHostelsStats(stats,ThemeData theme) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
+            theme: theme,
             title: 'Total Hostels',
             value: '${stats['totalHostels'] ?? 0}',
             change: '+12%',
@@ -157,6 +159,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
         SizedBox(width: 12.w),
         Expanded(
           child: _buildStatCard(
+            theme: theme,
             title: 'Verified',
             value: '${stats['verifiedHostels'] ?? 0}',
             change: '+8%',
@@ -168,6 +171,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
         SizedBox(width: 12.w),
         Expanded(
           child: _buildStatCard(
+            theme: theme,
             title: 'Pending',
             value: '${stats['pendingHostels'] ?? 0}',
             change: '-2%',
@@ -181,6 +185,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
   }
 
   Widget _buildStatCard({
+    required ThemeData theme,
     required String title,
     required String value,
     required String change,
@@ -191,11 +196,11 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -240,7 +245,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           SizedBox(height: 4.h),
@@ -253,15 +258,15 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     );
   }
 
-  Widget _buildSearchAndFilters() {
+  Widget _buildSearchAndFilters(ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -275,7 +280,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
               height: 40.h,
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: theme.colorScheme.background,
                 borderRadius: BorderRadius.circular(8.r),
                 border: Border.all(color: Colors.grey.shade300),
               ),
@@ -306,7 +311,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
             height: 40.h,
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: theme.colorScheme.background,
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -326,7 +331,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                     _selectedFilter = value!;
                   });
                 },
-                style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+                style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
               ),
             ),
           ),
@@ -335,7 +340,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     );
   }
 
-  Widget _buildHostelsList() {
+  Widget _buildHostelsList(ThemeData theme) {
     return Consumer(
       builder: (context, ref, child) {
         final hostelsAsync = ref.watch(hostelsStreamProvider);
@@ -355,7 +360,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                     vertical: 12.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(12.r),
                     ),
@@ -415,13 +420,13 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                 // HOSTELS LIST
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: const BorderRadius.vertical(
                       bottom: Radius.circular(12),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: theme.shadowColor.withOpacity(0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -429,7 +434,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                   ),
                   child: Column(
                     children: hostels
-                        .map((hostel) => _buildHostelListItem(hostel))
+                        .map((hostel) => _buildHostelListItem(hostel, theme))
                         .toList(),
                   ),
                 ),
@@ -443,7 +448,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     );
   }
 
-  Widget _buildHostelListItem(HostelModel hostel) {
+  Widget _buildHostelListItem(HostelModel hostel, ThemeData theme) {
     // Calculate occupancy percentage from occupancyRate
     // final occupancyPercent = (hostel.occupancyRate * 100).toInt();
     // final occupancyText = '$occupancyPercent%';
@@ -451,7 +456,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: Row(
         children: [
@@ -495,7 +500,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -534,7 +539,7 @@ class _HostelsManagementPageState extends ConsumerState<HostelsManagementPage> {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

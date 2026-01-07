@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
+
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -39,6 +39,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filter = ref.watch(filterProvider);
 
     return LayoutBuilder(
@@ -50,11 +51,11 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
             width: isMobile ? 0.9.sw : 0.45.sw,
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black26,
+                  color: theme.shadowColor.withOpacity(0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -67,7 +68,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
+                          border: Border.all(color: theme.dividerColor),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: TextField(
@@ -78,11 +79,11 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                             prefixIcon: Icon(
                               Icons.search,
                               size: 20.w,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             suffixIcon: _campusController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: Icon(Icons.clear, size: 18.w, color: Colors.grey),
+                                    icon: Icon(Icons.clear, size: 18.w, color: theme.colorScheme.onSurfaceVariant),
                                     onPressed: () {
                                       _campusController.clear();
                                       ref.read(filterProvider.notifier).setCampus(null);
@@ -130,12 +131,12 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SmallText(text: "Campus", color: Colors.blueGrey),
+                            SmallText(text: "Campus", color: theme.colorScheme.onSurfaceVariant),
                             SizedBox(height: 8.h),
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 12.w),
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade400),
+                                border: Border.all(color: theme.dividerColor),
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
                               child: TextField(
@@ -143,10 +144,10 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                                 decoration: InputDecoration(
                                   hintText: "Search campus...",
                                   border: InputBorder.none,
-                                  prefixIcon: Icon(Icons.search, size: 20.w, color: Colors.grey),
+                                  prefixIcon: Icon(Icons.search, size: 20.w, color: theme.colorScheme.onSurfaceVariant),
                                   suffixIcon: _campusController.text.isNotEmpty
                                       ? IconButton(
-                                          icon: Icon(Icons.clear, size: 18.w, color: Colors.grey),
+                                          icon: Icon(Icons.clear, size: 18.w, color: theme.colorScheme.onSurfaceVariant),
                                           onPressed: () {
                                             _campusController.clear();
                                             ref.read(filterProvider.notifier).setCampus(null);
@@ -197,6 +198,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
   }
 
   Widget _buildSearchButton(BuildContext context, bool isMobile) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         _navigateToFilteredResults(context); 
@@ -206,15 +208,15 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
         width: 120.w,
         height: 55.h,
         decoration: BoxDecoration(
-          color: AppColors.blueColor,
+          color: theme.colorScheme.primary,
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search, color: Colors.white, size: 24.r),
+            Icon(Icons.search, color: theme.colorScheme.onPrimary, size: 24.r),
             SizedBox(width: 5.w),
-            SmallText(text: "Search", color: Colors.white),
+            SmallText(text: "Search", color: theme.colorScheme.onPrimary),
           ],
         ),
       ),

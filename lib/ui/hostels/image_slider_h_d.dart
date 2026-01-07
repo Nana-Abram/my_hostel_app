@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 
 class HostelImageCarousel extends StatefulWidget {
   final List<String> images;
@@ -48,6 +47,7 @@ class _HostelImageCarouselState extends State<HostelImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Stack(
       children: [
         //IMAGE SLIDER
@@ -83,6 +83,7 @@ class _HostelImageCarouselState extends State<HostelImageCarousel> {
             Icons.arrow_back_ios,
             onTap: _prevImage,
             isDisabled: _currentIndex == 0,
+            theme: theme,
           ),
         ),
 
@@ -94,6 +95,7 @@ class _HostelImageCarouselState extends State<HostelImageCarousel> {
             Icons.arrow_forward_ios,
             onTap: _nextImage,
             isDisabled: _currentIndex == widget.images.length - 1,
+            theme: theme,
           ),
         ),
 
@@ -112,7 +114,7 @@ class _HostelImageCarouselState extends State<HostelImageCarousel> {
                 width: isActive ? 20.w : 10.w,
                 height: 6.h,
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.blueColor: Colors.white,
+                  color: isActive ? theme.colorScheme.primary : theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
               );
@@ -125,17 +127,17 @@ class _HostelImageCarouselState extends State<HostelImageCarousel> {
 
   /// Reusable arrow widget
   Widget _arrowButton(IconData icon,
-      {required void Function()? onTap, bool isDisabled = false}) {
+      {required void Function()? onTap, bool isDisabled = false, required ThemeData theme}) {
     return GestureDetector(
       onTap: isDisabled ? null : onTap,
       child: CircleAvatar(
         radius: 20.r,
         backgroundColor:
-            isDisabled ? Colors.grey.shade200 : Colors.white.withOpacity(.85),
+            isDisabled ? theme.disabledColor.withOpacity(0.3) : theme.colorScheme.surface.withOpacity(.85),
         child: Icon(
           icon,
           size: 18.sp,
-          color: isDisabled ? Colors.grey : Colors.black,
+          color: isDisabled ? theme.disabledColor : theme.colorScheme.onSurface,
         ),
       ),
     );

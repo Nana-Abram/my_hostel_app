@@ -6,7 +6,6 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
@@ -25,17 +24,18 @@ class AvailableRooms extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     return Container(
       width: isHostelOwner ? 0.9.sw : 0.5.sw,
       height: isHostelOwner ? 300.h : 270.h,
       margin: EdgeInsets.symmetric(vertical: 10.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade300, width: 0.5.w),
-        color: Colors.white,
+        border: Border.all(color: theme.dividerColor, width: 0.5.w),
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
+            color: theme.shadowColor.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(2, 4),
           ),
@@ -73,14 +73,14 @@ class AvailableRooms extends ConsumerWidget {
                     children: [
                       SmallText(
                         text: room.type,
-                        color: Colors.black,
+                        color: theme.colorScheme.onSurface,
                         size: 13.sp,
                       ),
                       SmallText(
                         text: room.capacity == 1
                             ? "GHS${room.price.toStringAsFixed(2)}"
                             : "Per head: GHS${(room.price).toStringAsFixed(2)}",
-                        color: AppColors.blueColor,
+                        color: theme.colorScheme.primary,
                         size: 13.sp,
                       ),
                     ],
@@ -96,12 +96,12 @@ class AvailableRooms extends ConsumerWidget {
                         text: room.capacity == 1
                             ? "Capacity: ${room.capacity} student"
                             : "Capacity: ${room.capacity} students",
-                        iconColor: Colors.blueGrey,
+                        iconColor: theme.colorScheme.onSurfaceVariant,
                         textSize: 12.sp,
                       ),
                       SmallText(
                         text: "Per Year",
-                        color: Colors.black54,
+                        color: theme.colorScheme.onSurfaceVariant,
                         size: 12.sp,
                       ),
                     ],
@@ -120,9 +120,9 @@ class AvailableRooms extends ConsumerWidget {
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: theme.colorScheme.primary.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.blue.shade200),
+                          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -130,14 +130,14 @@ class AvailableRooms extends ConsumerWidget {
                             Icon(
                               _getFeatureIcon(feature),
                               size: 16.sp,
-                              color: Colors.blue.shade700,
+                              color: theme.colorScheme.primary,
                             ),
                             SizedBox(width: 6.w),
                             Text(
                               feature,
                               style: TextStyle(
                                 fontSize: 11.sp,
-                                color: Colors.blue.shade800,
+                                color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -151,10 +151,10 @@ class AvailableRooms extends ConsumerWidget {
                   /// STATUS + BOOK BUTTON
                   SmallContainerAndText(
                     containerColor: room.available
-                        ? AppColors.instantColor
-                        : Colors.blueGrey.shade50,
+                        ? theme.colorScheme.secondary.withOpacity(0.2)
+                        : theme.colorScheme.surfaceContainerHighest,
                     text: room.available ? "Available" : "Unavailable",
-                    textColor: room.available ? Colors.green : Colors.black,
+                    textColor: room.available ? theme.colorScheme.secondary : theme.colorScheme.onSurface,
                     textSize: 12.sp,
                   ),
                   SizedBox(height: 15.h),
@@ -163,7 +163,7 @@ class AvailableRooms extends ConsumerWidget {
                     children: [
                       SmallText(
                         text: "Gender: ${room.gender}",
-                        color: Colors.black54,
+                        color: theme.colorScheme.onSurfaceVariant,
                         size: 12.sp,
                       ),
                       isHostelOwner
@@ -178,12 +178,12 @@ class AvailableRooms extends ConsumerWidget {
                                   vertical: 8.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.blueColor,
+                                  color: theme.colorScheme.primary,
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                                 child: SmallText(
                                   text: "Book Now",
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   size: 13.sp,
                                 ),
                               ),

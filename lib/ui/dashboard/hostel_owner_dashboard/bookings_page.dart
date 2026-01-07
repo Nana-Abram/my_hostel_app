@@ -33,7 +33,7 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
       body: Column(
         children: [
           // Header
-          _buildHeader(user),
+          // _buildHeader(user),
           
           // Filter and Sort Row
           _buildFilterSortRow(),
@@ -47,33 +47,33 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
     );
   }
 
-  Widget _buildHeader(UserModel user) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bookings',
-            style: TextStyle(
-              fontSize: 28.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Manage bookings for your hostels',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.blueGrey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildHeader(UserModel user) {
+  //   return Container(
+  //     padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+  //     color: Colors.white,
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Bookings',
+  //           style: TextStyle(
+  //             fontSize: 28.sp,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //         SizedBox(height: 4.h),
+  //         Text(
+  //           'Manage bookings for your hostels',
+  //           style: TextStyle(
+  //             fontSize: 14.sp,
+  //             color: Colors.blueGrey,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildFilterSortRow() {
     return Container(

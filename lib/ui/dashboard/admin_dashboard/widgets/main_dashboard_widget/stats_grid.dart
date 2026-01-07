@@ -8,6 +8,7 @@ class StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Wrap(
   spacing: 20.w,
   runSpacing: 20.h,
@@ -15,6 +16,7 @@ class StatsGrid extends StatelessWidget {
     SizedBox(
       width: (MediaQuery.of(context).size.width / 2) - 30.w,
       child: _buildUserStatCard(
+        theme: theme,
         title: 'Total Users',
         value: '${stats['totalUsers'] ?? 0}',
         icon: Icons.people_outline,
@@ -25,6 +27,7 @@ class StatsGrid extends StatelessWidget {
     SizedBox(
       width: (MediaQuery.of(context).size.width / 2) - 30.w,
       child: _buildUserStatCard(
+        theme: theme,
         title: 'Total Hostels',
         value: '${stats['totalHostels'] ?? 0}',
         icon: Icons.school_outlined,
@@ -36,6 +39,7 @@ class StatsGrid extends StatelessWidget {
       width: (MediaQuery.of(context).size.width / 2) - 30.w,
       // height: 200.h,
       child: _buildUserStatCard(
+        theme: theme,
         title: 'Bookings',
         value: '${stats['totalBookings'] ?? 0}',
         icon: Icons.business_outlined,
@@ -46,11 +50,12 @@ class StatsGrid extends StatelessWidget {
     SizedBox(
       width: (MediaQuery.of(context).size.width / 2) - 30.w,
       child: _buildUserStatCard(
+        theme: theme,
         title: 'Revenue',
-        value: '${stats['revenue'] ?? 0}',
+        value: 'GHS ${stats['totalEarnings'] ?? 0}',
         icon: Icons.attach_money,
         color: Colors.purple,
-        change: '+0%',
+        change: '+10%',
       ),
     ),
   ],
@@ -59,6 +64,7 @@ class StatsGrid extends StatelessWidget {
   }
 
   Widget _buildUserStatCard({
+    required ThemeData theme,
     required String title,
     required String value,
     required IconData icon,
@@ -69,7 +75,7 @@ class StatsGrid extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -99,7 +105,7 @@ class StatsGrid extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -107,7 +113,7 @@ class StatsGrid extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.blueGrey,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],

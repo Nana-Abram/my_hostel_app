@@ -8,6 +8,7 @@ class RecentActivity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -16,13 +17,13 @@ class RecentActivity extends StatelessWidget {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 16.h),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
               BoxShadow(
@@ -34,7 +35,7 @@ class RecentActivity extends StatelessWidget {
           ),
           child: Column(
             children: activities.map((activity) {
-              return _buildActivityItem(activity);
+              return _buildActivityItem(activity, theme);
             }).toList(),
           ),
         ),
@@ -42,13 +43,13 @@ class RecentActivity extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityItem(ActivityItem activity) {
+  Widget _buildActivityItem(ActivityItem activity,ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey.shade200,
+            color: Colors.grey.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -77,7 +78,7 @@ class RecentActivity extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 2.h),

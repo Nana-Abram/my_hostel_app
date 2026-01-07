@@ -14,22 +14,11 @@ class BookingService {
     }
   }
 
-  // // Get bookings by user ID
-  // Stream<List<BookingModel>> getBookingsByUser(String userId) {
-  //   return _firestore
-  //       .collection('bookings')
-  //       .where('userId', isEqualTo: userId)
-  //       .orderBy('createdAt', descending: true)
-  //       .snapshots()
-  //       .map((snapshot) => snapshot.docs
-  //           .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
-  //           .toList());
-  // }
 Stream<List<BookingModel>> getBookingsByOwner(String ownerId) {
   return _firestore
       .collection('bookings')
       .where('ownerId', isEqualTo: ownerId)
-      // .orderBy('createdAt', descending: true) // Remove this temporarily
+      //  .orderBy('createdAt', descending: true) // Remove this temporarily
       .snapshots()
       .map((snapshot) {
         final bookings = snapshot.docs
@@ -158,6 +147,108 @@ Future<List<BookingModel>> getBookingsByUserOnce(String userId) async {
     throw Exception('Failed to get user bookings: $e');
   } catch (e) {
     throw Exception('Failed to get user bookings: $e');
+  }
+}
+
+
+// Get confirmed bookings by owner ID (for earnings calculation)
+Stream<List<BookingModel>> getConfirmedBookingsByOwner(String ownerId) {
+  return _firestore
+      .collection('bookings')
+      .where('ownerId', isEqualTo: ownerId)
+      .where('status', whereIn: ['confirmed', 'checked-in'])
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+          .toList());
+}
+
+// Get confirmed bookings by owner ID once (for initial load)
+Future<List<BookingModel>> getConfirmedBookingsByOwnerOnce(String ownerId) async {
+  try {
+    final querySnapshot = await _firestore
+        .collection('bookings')
+        .where('ownerId', isEqualTo: ownerId)
+        .where('status', whereIn: ['confirmed', 'checked-in'])
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    return querySnapshot.docs
+        .map((doc) => BookingModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } catch (e) {
+    throw Exception('Failed to get confirmed bookings: $e');
+  }
+}
+
+// Get bookings by owner ID once (for dashboard and initial loads)
+Future<List<BookingModel>> getBookingsByOwnerOnce(String ownerId) async {
+  try {
+    
+    final querySnapshot = await _firestore
+        .collection('bookings')
+        .where('ownerId', isEqualTo: ownerId)
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    
+    final bookings = querySnapshot.docs
+        .map((doc) {
+          try {
+            return BookingModel.fromMap(doc.data(), doc.id);
+          } catch (e) {
+
+            return null;
+          }
+        })
+        .where((booking) => booking != null)
+        .cast<BookingModel>()
+        .toList();
+    
+    
+    if (bookings.isNotEmpty) {
+    }
+    
+    return bookings;
+    
+  } on FirebaseException catch (e) {
+    
+    // Fallback if index is not created yet
+    if (e.code == 'failed-precondition') {
+      
+      try {
+        final querySnapshot = await _firestore
+            .collection('bookings')
+            .where('ownerId', isEqualTo: ownerId)
+            .get();
+        
+        final bookings = querySnapshot.docs
+            .map((doc) {
+              try {
+                return BookingModel.fromMap(doc.data(), doc.id);
+              } catch (e) {
+                return null;
+              }
+            })
+            .where((booking) => booking != null)
+            .cast<BookingModel>()
+            .toList();
+        
+        // Sort client-side
+        bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+        return bookings;
+        
+      } catch (fallbackError) {
+        throw Exception('Failed to get owner bookings even with fallback: $fallbackError');
+      }
+    }
+    
+    throw Exception('Failed to get owner bookings: $e');
+    
+  } catch (e) {
+    throw Exception('Failed to get owner bookings: $e');
   }
 }
 

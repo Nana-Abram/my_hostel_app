@@ -22,9 +22,10 @@ class _NavButtonWidgetState extends State<NavButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final color = widget.isActive
-        ? Colors.blueAccent
-        : (_isHovered ? Colors.blueAccent : Colors.grey.shade700);
+        ? theme.colorScheme.primary
+        : (_isHovered ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.7));
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -39,7 +40,7 @@ class _NavButtonWidgetState extends State<NavButtonWidget> {
           decoration: BoxDecoration(
             border: widget.isActive
                 ? Border(
-                    bottom: BorderSide(width: 2, color: Colors.blueAccent),
+                    bottom: BorderSide(width: 2, color: theme.colorScheme.primary),
                   )
                 : null,
           ),

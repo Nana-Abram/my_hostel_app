@@ -30,41 +30,82 @@ class UsersService {
     });
   }
 
-  // Get users statistics
-  Future<Map<String, dynamic>> getUsersStats() async {
-    try {
-      final usersSnapshot = await _firestore.collection('users').get();
-      final hostelsSnapshot = await _firestore.collection('hostels').get();
-      final bookingsSnapshot = await _firestore.collection('bookings').get();
+// Get users statistics
+Future<Map<String, dynamic>> getUsersStats() async {
+  try {
+    final usersSnapshot = await _firestore.collection('users').get();
+    final hostelsSnapshot = await _firestore.collection('hostels').get();
+    final bookingsSnapshot = await _firestore.collection('bookings').get();
 
-      final users = usersSnapshot.docs.map((doc) => UserModel.fromMap(doc.data(), doc.id)).toList();
-      final hostels = hostelsSnapshot.docs.map((doc) => HostelModel.fromMap(doc.data(), doc.id)).toList();
-      final bookings = bookingsSnapshot.docs.map((doc) => BookingModel.fromMap(doc.data(), doc.id)).toList();
+    final users = usersSnapshot.docs.map((doc) => UserModel.fromMap(doc.data(), doc.id)).toList();
+    final hostels = hostelsSnapshot.docs.map((doc) => HostelModel.fromMap(doc.data(), doc.id)).toList();
+    final bookings = bookingsSnapshot.docs.map((doc) => BookingModel.fromMap(doc.data(), doc.id)).toList();
 
-      int totalUsers = users.length;
-      int students = users.where((user) => user.role == UserRole.student).length;
-      int hostelOwners = users.where((user) => user.role == UserRole.hostelOwner).length;
-      int admins = users.where((user) => user.role == UserRole.admin).length;
-      int verifiedUsers = users.where((user) => user.isEmailVerified).length;
+    int totalUsers = users.length;
+    int students = users.where((user) => user.role == UserRole.student).length;
+    int hostelOwners = users.where((user) => user.role == UserRole.hostelOwner).length;
+    int admins = users.where((user) => user.role == UserRole.admin).length;
+    int verifiedUsers = users.where((user) => user.isEmailVerified).length;
 
-      int totalHostels = hostels.length;
-      print("Total hostels $totalHostels");
-      int totalBookings = bookings.length;
-
-      return {
-        'totalUsers': totalUsers,
-        'students': students,
-        'hostelOwners': hostelOwners,
-        'admins': admins,
-        'verifiedUsers': verifiedUsers,
-
-        'totalHostels':totalHostels,
-        'totalBookings':totalBookings
-      };
-    } catch (e) {
-      throw 'Failed to fetch users stats: $e';
+    int totalHostels = hostels.length;
+    int totalBookings = bookings.length;
+    
+    // Calculate total earnings from confirmed bookings
+    double totalEarnings = 0;
+    int confirmedBookings = 0;
+    int pendingBookings = 0;
+    int cancelledBookings = 0;
+    int checkedInBookings = 0;
+    
+    for (var booking in bookings) {
+      if (booking.status == 'confirmed') {
+        totalEarnings += booking.totalPrice;
+        confirmedBookings++;
+      } else if (booking.status == 'pending') {
+        pendingBookings++;
+      } else if (booking.status == 'cancelled') {
+        cancelledBookings++;
+      } else if (booking.status == 'checked-in') {
+        totalEarnings += booking.totalPrice; // Also count checked-in bookings
+        checkedInBookings++;
+        confirmedBookings++; // Add to confirmed count as well
+      }
     }
+    
+    // Calculate average booking value
+    double averageBookingValue = (confirmedBookings + checkedInBookings) > 0 
+        ? totalEarnings / (confirmedBookings + checkedInBookings) 
+        : 0;
+
+    return {
+      'totalUsers': totalUsers,
+      'students': students,
+      'hostelOwners': hostelOwners,
+      'admins': admins,
+      'verifiedUsers': verifiedUsers,
+      
+      'totalHostels': totalHostels,
+      'totalBookings': totalBookings,
+      'totalEarnings': totalEarnings,
+      'confirmedBookings': confirmedBookings,
+      'pendingBookings': pendingBookings,
+      'cancelledBookings': cancelledBookings,
+      'checkedInBookings': checkedInBookings,
+      'averageBookingValue': averageBookingValue,
+      
+      // Additional useful stats
+      'bookingCompletionRate': totalBookings > 0 
+          ? ((confirmedBookings + checkedInBookings) / totalBookings * 100).toStringAsFixed(1)
+          : '0.0',
+      'cancellationRate': totalBookings > 0 
+          ? (cancelledBookings / totalBookings * 100).toStringAsFixed(1)
+          : '0.0',
+    };
+  } catch (e) {
+    print('Error fetching users stats: $e');
+    throw Exception('Failed to fetch users stats: $e');
   }
+}
 
   // Search users
   Stream<List<UserModel>> searchUsers(String query) {

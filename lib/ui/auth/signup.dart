@@ -6,8 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
-import 'package:my_hostel_app/ui/routes/app_routes.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -109,7 +107,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 SizedBox(height: 4.h),
               ],
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: const Color(0xFF4CAF50), // green
             duration: Duration(seconds: 5),
           ),
         );
@@ -117,7 +115,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Sign up failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: const Color(0xFFF44336), // red
           ),
         );
       } finally {
@@ -153,14 +151,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authLoadingProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed:() {
             GoRouter.of(context).goNamed('home');
           },
@@ -183,7 +182,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          color: Colors.black.withOpacity(0.2), // light dim
+          color: const Color(0xFF000000).withOpacity(0.2), // light dim
         ),
       ),
     ),
@@ -198,9 +197,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 width: 500.w,
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(14.r),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                  boxShadow: [BoxShadow(color: theme.shadowColor.withOpacity(0.1), blurRadius: 6)],
                 ),
 
                 child: Column(
@@ -213,13 +212,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       style: TextStyle(
                         fontSize: 30.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'Join thousands of students finding their perfect hostel',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+                      style: TextStyle(fontSize: 16.sp, color: theme.colorScheme.onSurfaceVariant),
                     ),
                     SizedBox(height: 40.h),
 
@@ -240,7 +239,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.black87,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                                 SizedBox(height: 12.h),
@@ -254,8 +253,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                         role.displayName,
                                         style: TextStyle(
                                           color: isSelected
-                                              ? Colors.white
-                                              : Colors.black87,
+                                              ? theme.colorScheme.onPrimary
+                                              : theme.colorScheme.onSurface,
                                           fontSize: 14.sp,
                                         ),
                                       ),
@@ -265,8 +264,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                           _selectedRole = role;
                                         });
                                       },
-                                      backgroundColor: Colors.grey[200],
-                                      selectedColor: AppColors.blueColor,
+                                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                                      selectedColor: theme.colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
                                           20.r,
@@ -380,7 +379,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               Icon(
                                 Icons.info_outline,
                                 size: 16.w,
-                                color: Colors.blueGrey,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                               SizedBox(width: 8.w),
                               Expanded(
@@ -388,7 +387,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   text: TextSpan(
                                     style: TextStyle(
                                       fontSize: 12.sp,
-                                      color: Colors.blueGrey,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                       height: 1.4,
                                     ),
                                     children: [
@@ -399,7 +398,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       TextSpan(
                                         text: 'Terms of Service',
                                         style: TextStyle(
-                                          color: AppColors.blueColor,
+                                          color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -407,7 +406,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       TextSpan(
                                         text: 'Privacy Policy',
                                         style: TextStyle(
-                                          color: AppColors.blueColor,
+                                          color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -426,8 +425,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             child: ElevatedButton(
                               onPressed: isLoading ? null : _signUpWithEmail,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.blueColor,
-                                foregroundColor: Colors.white,
+                                backgroundColor: theme.colorScheme.primary,
+                                foregroundColor: theme.colorScheme.onPrimary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
@@ -439,7 +438,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       height: 20.w,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.white,
+                                        color: theme.colorScheme.onPrimary,
                                       ),
                                     )
                                   : Text(
@@ -461,7 +460,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                                 child: Text(
                                   'Or sign up with',
-                                  style: TextStyle(color: Colors.blueGrey),
+                                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                                 ),
                               ),
                               Expanded(child: Divider()),
@@ -515,14 +514,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             children: [
                               Text(
                                 "Already have an account? ",
-                                style: TextStyle(color: Colors.blueGrey),
+                                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                               ),
                               TextButton(
                                 onPressed: _navigateToLogin,
                                 child: Text(
                                   'Sign In',
                                   style: TextStyle(
-                                    color: AppColors.blueColor,
+                                    color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

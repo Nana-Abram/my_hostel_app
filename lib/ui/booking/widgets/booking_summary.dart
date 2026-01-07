@@ -18,17 +18,18 @@ class BookingSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final roomImage = room.image.isNotEmpty
         ? room.image
         : (hostel.images.isNotEmpty ? hostel.images.first : '');
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
+            color: theme.shadowColor.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(2, 4),
           ),
@@ -46,7 +47,7 @@ class BookingSummaryCard extends StatelessWidget {
                 topLeft: Radius.circular(20.r),
                 topRight: Radius.circular(20.r),
               ),
-              color: Colors.grey.shade200,
+              color: theme.colorScheme.onSurface.withOpacity(0.05),
             ),
             child: roomImage.isNotEmpty
                 ? ClipRRect(
@@ -66,7 +67,7 @@ class BookingSummaryCard extends StatelessWidget {
                     child: Icon(
                       Icons.hotel,
                       size: 60.sp,
-                      color: Colors.grey.shade400,
+                      color: theme.colorScheme.onSurface.withOpacity(0.3),
                     ),
                   ),
           ),
@@ -79,21 +80,25 @@ class BookingSummaryCard extends StatelessWidget {
               children: [
                 BigText(
                   text: "Booking Summary",
-                  color: Colors.black,
+                  color: theme.colorScheme.onSurface,
                   size: 16.sp,
                 ),
                 SizedBox(height: 20.h),
 
-                _buildSummaryRow("Hostel", hostel.name),
-                _buildSummaryRow("Room Type", room.type),
-                _buildSummaryRow("Campus", hostel.campus),
-                _buildSummaryRow("Duration", "One semester"),
                 _buildSummaryRow(
+                  theme,
+                  "Hostel", hostel.name),
+                _buildSummaryRow(theme, "Room Type", room.type),
+                _buildSummaryRow(theme, "Campus", hostel.campus),
+                _buildSummaryRow(theme, "Duration", "One semester"),
+                _buildSummaryRow(
+                  theme,
                   "Price",
                   "GHS ${room.price.toStringAsFixed(2)}",
                 ),
                 const Divider(),
                 _buildSummaryRow(
+                  theme,
                   "Total",
                   "GHS ${room.price.toStringAsFixed(2)}",
                   isBold: true,
@@ -107,7 +112,7 @@ class BookingSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(String title, String value, {bool isBold = false}) {
+  Widget _buildSummaryRow(ThemeData theme, String title, String value, {bool isBold = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -116,7 +121,7 @@ class BookingSummaryCard extends StatelessWidget {
           SmallText(text: title, color: Colors.blueGrey),
           SmallText(
             text: value,
-            color: isBold ? Colors.blue : Colors.black,
+            color: isBold ? Colors.blue :theme.colorScheme.onSurface,
             size: isBold ? 12.sp : 10.sp,
           ),
         ],

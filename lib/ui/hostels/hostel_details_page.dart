@@ -6,7 +6,6 @@ import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/ui/booking/widgets/booking_appbar.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/hostels/available_rooms.dart';
 import 'package:my_hostel_app/ui/hostels/booking_card.dart';
 import 'package:my_hostel_app/ui/hostels/image_slider_h_d.dart';
@@ -25,12 +24,12 @@ class HostelDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Fetch hostel data using the ID
-    
+    final theme = Theme.of(context);
     final hostelAsync = ref.watch(hostelByIdProvider(hostelId));
     final roomsAsync = ref.watch(roomsByHostelProvider(hostelId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: BookingAppBar(),
       body: hostelAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -38,9 +37,9 @@ class HostelDetailsPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.red, size: 50.sp),
+              Icon(Icons.error_outline, color: theme.colorScheme.error, size: 50.sp),
               SizedBox(height: 16.h),
-              BigText(text: "Failed to load hostel", color: Colors.red),
+              BigText(text: "Failed to load hostel", color: theme.colorScheme.error),
               SizedBox(height: 8.h),
               SmallText(text: "Please try again later"),
               SizedBox(height: 16.h),
@@ -59,9 +58,9 @@ class HostelDetailsPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.hotel, color: Colors.grey, size: 50.sp),
+                  Icon(Icons.hotel, color: theme.colorScheme.onSurfaceVariant, size: 50.sp),
                   SizedBox(height: 16.h),
-                  BigText(text: "Hostel not found", color: Colors.grey),
+                  BigText(text: "Hostel not found", color: theme.colorScheme.onSurfaceVariant),
                   SizedBox(height: 8.h),
                   SmallText(text: "The requested hostel could not be found"),
                   SizedBox(height: 16.h),
@@ -76,13 +75,14 @@ class HostelDetailsPage extends ConsumerWidget {
             );
           }
 
-          return _buildHostelContent(hostel, roomsAsync);
+          return _buildHostelContent(context, hostel, roomsAsync);
         },
       ),
     );
   }
 
-  Widget _buildHostelContent(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildHostelContent(BuildContext context, HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+    final theme = Theme.of(context);
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
       child: SingleChildScrollView(
@@ -93,7 +93,7 @@ class HostelDetailsPage extends ConsumerWidget {
             IconAndTextWidget(
               icon: Icons.arrow_back_ios,
               text: 'Back to search',
-              iconColor: Colors.blueGrey,
+              iconColor: theme.colorScheme.onSurfaceVariant,
               isBackArrow: true,
               
             ),
@@ -109,16 +109,16 @@ class HostelDetailsPage extends ConsumerWidget {
                 final isMobile = constraints.maxWidth < 600;
                 
                 if (isMobile) {
-                  return _buildMobileLayout(hostel, roomsAsync);
+                  return _buildMobileLayout(hostel, roomsAsync, theme);
                 } else {
-                  return _buildDesktopLayout(hostel, roomsAsync);
+                  return _buildDesktopLayout(hostel, roomsAsync, theme);
                 }
               },
             ),
 
             // Location map
             SizedBox(height: 30.h),
-            _buildLocationMap(hostel),
+            _buildLocationMap(hostel, theme),
             SizedBox(height: 50.h),
           ],
         ),
@@ -126,14 +126,14 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDesktopLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildDesktopLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync, ThemeData theme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left column - Hostel details and rooms
         Expanded(
           flex: 2,
-          child: _buildHostelDetailsAndRooms(hostel, roomsAsync),
+          child: _buildHostelDetailsAndRooms(hostel, roomsAsync, theme),
         ),
         
         SizedBox(width: 30.w),
@@ -147,23 +147,23 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMobileLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildMobileLayout(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHostelDetailsAndRooms(hostel, roomsAsync),
+        _buildHostelDetailsAndRooms(hostel, roomsAsync, theme),
         SizedBox(height: 30.h),
         BookingCardWidget(hostel: hostel),
       ],
     );
   }
 
-  Widget _buildHostelDetailsAndRooms(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
+  Widget _buildHostelDetailsAndRooms(HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Hostel name and rating
-        SmallText(text: hostel.name, color: Colors.black, size: 16.sp),
+        SmallText(text: hostel.name, color: theme.colorScheme.onSurface, size: 16.sp),
         SizedBox(height: 15.h),
         
         Row(
@@ -171,8 +171,8 @@ class HostelDetailsPage extends ConsumerWidget {
             IconAndTextWidget(
               icon: Icons.star,
               text: hostel.rating.toStringAsFixed(1),
-              iconColor: Colors.orange,
-              textColor: Colors.black,
+              iconColor: theme.colorScheme.tertiary,
+              textColor: theme.colorScheme.onSurface,
             ),
             SizedBox(width: 5.w),
             SmallText(text: "(${hostel.reviewsCount} reviews)"),
@@ -180,22 +180,22 @@ class HostelDetailsPage extends ConsumerWidget {
             IconAndTextWidget(
               icon: Icons.location_on_outlined,
               text: hostel.campus,
-              iconColor: Colors.blueGrey,
+              iconColor: theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
         SizedBox(height: 30.h),
 
         // About section
-        _buildAboutSection(hostel),
+        _buildAboutSection(hostel, theme),
         SizedBox(height: 20.h),
 
         // Amenities
-        _buildAmenitiesSection(hostel),
+        _buildAmenitiesSection(hostel, theme),
         SizedBox(height: 30.h),
 
         // Available rooms
-        SmallText(text: "Available Rooms", color: Colors.black, size: 16.sp),
+        SmallText(text: "Available Rooms", color: theme.colorScheme.onSurface, size: 16.sp),
         SizedBox(height: 20.h),
         
         // Rooms list with proper loading/error states
@@ -204,16 +204,16 @@ class HostelDetailsPage extends ConsumerWidget {
           error: (error, stackTrace) => Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: theme.colorScheme.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Column(
               children: [
-                Icon(Icons.error_outline, color: Colors.red, size: 40.sp),
+                Icon(Icons.error_outline, color: theme.colorScheme.error, size: 40.sp),
                 SizedBox(height: 10.h),
                 SmallText(
                   text: "Failed to load rooms",
-                  color: Colors.red,
+                  color: theme.colorScheme.error,
                   size: 12.sp,
                 ),
               ],
@@ -221,7 +221,7 @@ class HostelDetailsPage extends ConsumerWidget {
           ),
           data: (rooms) {
             if (rooms.isEmpty) {
-              return _buildNoRoomsAvailable();
+              return _buildNoRoomsAvailable(theme);
             }
             return Column(
               children: rooms
@@ -237,20 +237,20 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAboutSection(HostelModel hostel) {
+  Widget _buildAboutSection(HostelModel hostel, ThemeData theme) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.sp),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: Colors.grey.shade400,
+          color: theme.dividerColor,
           width: 0.5.w,
         ),
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 5.r,
             offset: const Offset(0, 2),
           ),
@@ -261,34 +261,34 @@ class HostelDetailsPage extends ConsumerWidget {
         children: [
           BigText(
             text: "About this hostel",
-            color: Colors.black,
+            color: theme.colorScheme.onSurface,
             size: 16.sp,
           ),
           SizedBox(height: 12.h),
           SmallText(
             text: hostel.description,
             size: 12.sp,
-            color: Colors.grey.shade700,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAmenitiesSection(HostelModel hostel) {
+  Widget _buildAmenitiesSection(HostelModel hostel, ThemeData theme) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.sp),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: Colors.grey.shade400,
+          color: theme.dividerColor,
           width: 0.5.w,
         ),
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 8.r,
             offset: const Offset(2, 2),
           ),
@@ -299,7 +299,7 @@ class HostelDetailsPage extends ConsumerWidget {
         children: [
           BigText(
             text: "Amenities",
-            color: Colors.black,
+            color: theme.colorScheme.onSurface,
             size: 16.sp,
           ),
           SizedBox(height: 15.h),
@@ -314,10 +314,10 @@ class HostelDetailsPage extends ConsumerWidget {
                   vertical: 8.h,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: theme.colorScheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: Colors.blue.shade200,
+                    color: theme.colorScheme.primary.withOpacity(0.2),
                   ),
                 ),
                 child: Row(
@@ -326,14 +326,14 @@ class HostelDetailsPage extends ConsumerWidget {
                     Icon(
                       _getAmenityIcon(amenity),
                       size: 16.sp,
-                      color: Colors.blue.shade700,
+                      color: theme.colorScheme.primary,
                     ),
                     SizedBox(width: 6.w),
                     Text(
                       amenity,
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: Colors.blue.shade800,
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -347,42 +347,42 @@ class HostelDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildNoRoomsAvailable() {
+  Widget _buildNoRoomsAvailable(ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(30.w),
       decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         children: [
-          Icon(Icons.hotel, size: 50.sp, color: Colors.grey),
+          Icon(Icons.hotel, size: 50.sp, color: theme.colorScheme.onSurfaceVariant),
           SizedBox(height: 15.h),
           BigText(
             text: "No rooms available",
-            color: Colors.grey,
+            color: theme.colorScheme.onSurfaceVariant,
             size: 16.sp,
           ),
           SizedBox(height: 10.h),
           SmallText(
             text: "Check back later for new room listings",
-            color: Colors.grey.shade600,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLocationMap(HostelModel hostel) {
+  Widget _buildLocationMap(HostelModel hostel, ThemeData theme) {
     return Container(
       width: double.infinity,
       height: 300.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
-        color: Colors.blueGrey.shade300,
+        color: theme.colorScheme.primary.withOpacity(0.7),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade400,
+            color: theme.shadowColor.withOpacity(0.15),
             blurRadius: 8.r,
             offset: const Offset(2, 2),
           ),
@@ -394,17 +394,17 @@ class HostelDetailsPage extends ConsumerWidget {
           Icon(
             Icons.location_on_outlined,
             size: 50.sp,
-            color: Colors.white,
+            color: theme.colorScheme.onPrimary,
           ),
           SizedBox(height: 15.h),
           BigText(
             text: "Location on map",
-            color: Colors.white,
+            color: theme.colorScheme.onPrimary,
           ),
           SizedBox(height: 10.h),
           SmallText(
             text: hostel.campus,
-            color: Colors.white,
+            color: theme.colorScheme.onPrimary,
           ),
         ],
       ),
@@ -420,6 +420,7 @@ class RowIconAndText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
@@ -427,12 +428,12 @@ class RowIconAndText extends StatelessWidget {
           height: 40.h,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
-            color: AppColors.checkColor,
+            color: theme.colorScheme.primary.withOpacity(0.15),
           ),
-          child: Icon(icon, size: 22.sp, color: AppColors.blueColor),
+          child: Icon(icon, size: 22.sp, color: theme.colorScheme.primary),
         ),
         SizedBox(width: 10.w),
-        SmallText(text: text, color: Colors.black),
+        SmallText(text: text, color: theme.colorScheme.onSurface),
       ],
     );
   }

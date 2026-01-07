@@ -12,8 +12,9 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (user == null) {
-      return _buildPlaceholderAvatar();
+      return _buildPlaceholderAvatar(theme);
     }
 
     return GestureDetector(
@@ -23,8 +24,8 @@ class UserAvatar extends StatelessWidget {
         height: size.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.blue.shade100,
-          border: Border.all(color: Colors.blue.shade300, width: 2.w),
+          color: theme.colorScheme.primary.withOpacity(0.1),
+          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3), width: 2.w),
         ),
         child: Stack(
           children: [
@@ -36,12 +37,12 @@ class UserAvatar extends StatelessWidget {
                   image: user!.profileImage!,
                   height: size.w,
                   width: size.w,
-                  onError: _buildInitialsAvatar(user!),
+                  onError: _buildInitialsAvatar(user!, theme),
                   onTap: onTap,
                 ),
               )
             else
-              _buildInitialsAvatar(user!),
+              _buildInitialsAvatar(user!, theme),
 
             // Online indicator for admin/active users
             if (user!.role == UserRole.admin)
@@ -52,9 +53,9 @@ class UserAvatar extends StatelessWidget {
                   width: 12.w,
                   height: 12.w,
                   decoration: BoxDecoration(
-                    color: Colors.green,
+                    color: const Color(0xFF4CAF50), // green
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.w),
+                    border: Border.all(color: theme.colorScheme.surface, width: 2.w),
                   ),
                 ),
               ),
@@ -64,20 +65,20 @@ class UserAvatar extends StatelessWidget {
     );
   }
 
-  Widget _buildInitialsAvatar(UserModel user) {
+  Widget _buildInitialsAvatar(UserModel user, ThemeData theme) {
     return Center(
       child: Text(
         _getUserInitials(user),
         style: TextStyle(
           fontSize: (size * 0.35).sp,
           fontWeight: FontWeight.bold,
-          color: Colors.blue.shade800,
+          color: theme.colorScheme.primary,
         ),
       ),
     );
   }
 
-  Widget _buildPlaceholderAvatar() {
+  Widget _buildPlaceholderAvatar(ThemeData theme) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -85,13 +86,13 @@ class UserAvatar extends StatelessWidget {
         height: size.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.grey.shade200,
-          border: Border.all(color: Colors.grey.shade400, width: 2.w),
+          color: theme.colorScheme.surfaceContainerHighest,
+          border: Border.all(color: theme.dividerColor, width: 2.w),
         ),
         child: Icon(
           Icons.person_outline,
           size: (size * 0.5).sp,
-          color: Colors.grey.shade600,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );

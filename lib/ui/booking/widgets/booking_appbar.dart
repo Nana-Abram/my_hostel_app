@@ -12,6 +12,7 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
     final currentUser = authState.value;
 
@@ -21,10 +22,10 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
         height: 120.h,
         padding: EdgeInsets.symmetric(horizontal: 40.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -57,12 +58,12 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  const Text(
+                  Text(
                     "HostelHub",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: theme.colorScheme.onSurface,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -79,6 +80,7 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   Widget _buildAuthSection(BuildContext context, UserModel? currentUser) {
+    final theme = Theme.of(context);
     if (currentUser == null) {
       // Show auth buttons when not logged in
       return Row(
@@ -109,7 +111,7 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.blueGrey.shade800,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(width: 12.w),

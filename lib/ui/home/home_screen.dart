@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/core/dimensions.dart';
 import 'package:my_hostel_app/ui/home/foster_section.dart';
 import 'package:my_hostel_app/ui/widgets/avatar_and_text_wiget.dart';
@@ -56,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.black.withOpacity(0.6),
+                              const Color(0xFF000000).withOpacity(0.6),
                               Colors.transparent,
                             ],
                             begin: Alignment.bottomCenter,
@@ -94,8 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12.r),
                         color: _currentIndex == entry.key
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.4),
+                            ? const Color(0xFFFFFFFF)
+                            : const Color(0xFFFFFFFF).withOpacity(0.4),
                       ),
                     );
                   }).toList(),
@@ -117,12 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       SmallText(
                         text: "Find your perfect hostel on campus",
                         size: Dimensions.fontSmall12,
-                        color: Colors.white,
+                        color: const Color(0xFFFFFFFF),
                       ),
                       SizedBox(height: 20.h),
                       BigText(
                         text: "Book Verified rooms easily and securely",
-                        color: Colors.white,
+                        color: const Color(0xFFFFFFFF),
                         size: 18.sp,
                       ),
                       SizedBox(height: 20.h),
@@ -143,24 +142,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 secondText:
                     "All hostels are verified and approved by the university administration",
                 icon: Icons.check_circle_outlined,
-                containerColor: AppColors.checkColor,
-                iconColor: AppColors.blueColor,
+                containerColor: const Color(0xFFE3F2FD),
+                iconColor: const Color(0xFF2196F3),
               ),
               CardWidget(
                 firstText: "Instant Booking",
                 secondText:
                     "Book your room instantly with our streamlined booking process",
                 icon: Icons.electric_bolt_outlined,
-                containerColor: AppColors.instantColor,
-                iconColor: AppColors.greenColor,
+                containerColor: const Color(0xFFE8F5E9),
+                iconColor: const Color(0xFF4CAF50),
               ),
               CardWidget(
                 firstText: "Secure Payment",
                 secondText:
                     "Your payments are processed securely through trusted payment gateways",
                 icon: Icons.shield_outlined,
-                containerColor: AppColors.secureColor,
-                iconColor: AppColors.orangeColor,
+                containerColor: const Color(0xFFFFF3E0),
+                iconColor: const Color(0xFFFF9800),
               ),
             ],
           ),
@@ -168,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             width: double.infinity,
             height: 400.h,
-            color: Color(0xFFF9FAFB),
+            color: Theme.of(context).colorScheme.surface,
             child: Column(
               children: [
                 SizedBox(height: 30.h),
@@ -182,21 +181,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     AvatarAndTextWiget(
                       circleText: "1",
-                      color: AppColors.blueColor,
+                      color: const Color(0xFF2196F3),
                       firstText: "Search & Filter",
                       secondText:
                           "Browse hostels by campus, price and amenities to\n find your ideal match",
                     ),
                     AvatarAndTextWiget(
                       circleText: "2",
-                      color: AppColors.greenColor,
+                      color: const Color(0xFF4CAF50),
                       firstText: "Search & Filter",
                       secondText:
                           "Choose from available rooms and view detailed\n information and photos",
                     ),
                     AvatarAndTextWiget(
                       circleText: "3",
-                      color: AppColors.orangeColor,
+                      color: const Color(0xFFFF9800),
                       firstText: "Search & Filter",
                       secondText:
                           "Complete your booking with secure payment and\n receive instant confirmation",

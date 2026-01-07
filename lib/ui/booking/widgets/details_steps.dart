@@ -126,6 +126,7 @@ class _DetailsStepState extends State<DetailsStep> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -135,11 +136,11 @@ class _DetailsStepState extends State<DetailsStep> {
           child: Container(
             padding: EdgeInsets.all(40.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(20.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
+                  color: theme.shadowColor.withOpacity(0.08),
                   blurRadius: 10,
                   offset: const Offset(2, 4),
                 ),
@@ -148,16 +149,17 @@ class _DetailsStepState extends State<DetailsStep> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BigText(text: "Book Your Room", color: Colors.black),
+                BigText(text: "Book Your Room", color: theme.colorScheme.onSurface),
                 SizedBox(height: 10.h),
                 SmallText(
                   text: "Please fill in the details below to complete your booking.",
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
                 SizedBox(height: 30.h),
 
                 // Form fields
                 _buildTextField(
+                  theme,
                   label: "Full Name *",
                   controller: _fullNameController,
                   isValid: _fullNameValid,
@@ -167,6 +169,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 SizedBox(height: 20.h),
 
                 _buildTextField(
+                  theme,
                   label: "Email Address *",
                   controller: _emailController,
                   isValid: _emailValid,
@@ -177,6 +180,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 SizedBox(height: 20.h),
 
                 _buildTextField(
+                  theme,
                   label: "Phone Number *",
                   controller: _phoneController,
                   isValid: _phoneValid,
@@ -187,6 +191,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 SizedBox(height: 20.h),
 
                 _buildTextField(
+                  theme,
                   label: "Check-in Date *",
                   controller: _checkInDateController,
                   isValid: _checkInDateValid,
@@ -198,6 +203,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 SizedBox(height: 20.h),
 
                 _buildTextField(
+                  theme,
                   label: "Special Requests (Optional)",
                   controller: _specialRequestsController,
                   isValid: true,
@@ -257,7 +263,8 @@ class _DetailsStepState extends State<DetailsStep> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(ThemeData? theme,{
+    
     required String label,
     required TextEditingController controller,
     required bool isValid,
@@ -273,7 +280,7 @@ class _DetailsStepState extends State<DetailsStep> {
       children: [
         Row(
           children: [
-            SmallText(text: label, color: Colors.black),
+            SmallText(text: label, color: theme?.colorScheme.onSurface, size: 12.sp),
             if (label.contains('*'))
               Text(
                 " ",
@@ -284,10 +291,10 @@ class _DetailsStepState extends State<DetailsStep> {
         SizedBox(height: 6.h),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: theme?.colorScheme.surface,
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
-              color: isValid ? Colors.grey.shade300 : Colors.red.shade400,
+              color: isValid ? theme?.shadowColor.withOpacity(0.08) ?? Colors.grey.shade300 : Colors.red.shade400,
               width: isValid ? 1 : 1.5,
             ),
           ),
@@ -304,7 +311,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 border: InputBorder.none,
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: Colors.grey.shade500,
+                  color: theme?.colorScheme.onSurface.withOpacity(0.5) ?? Colors.grey.shade500,
                   fontSize: 12.sp,
                 ),
                 errorText: isValid ? null : "This field is required",
@@ -313,7 +320,7 @@ class _DetailsStepState extends State<DetailsStep> {
                   color: Colors.red.shade600,
                 ),
               ),
-              style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+              style: TextStyle(fontSize: 12.sp, color: theme?.colorScheme.onSurface),
             ),
           ),
         ),

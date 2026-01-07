@@ -25,6 +25,7 @@ class AvatarAndTextWiget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Column(
@@ -35,13 +36,13 @@ class AvatarAndTextWiget extends StatelessWidget {
                CircleAvatar(
             radius: avatarRadius,
             backgroundColor: color,
-            child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight:FontWeight.bold, color: Colors.white),),
+            child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight:FontWeight.bold, color: theme.colorScheme.onPrimary),),
           ),
           SizedBox(width: 10,),
            SizedBox(
                 width: 0.08.sw,
                 child: Divider(
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurfaceVariant,
                   height: 1,
                   thickness: 3,
                 
@@ -53,7 +54,7 @@ class AvatarAndTextWiget extends StatelessWidget {
           CircleAvatar(
             radius: avatarRadius,
             backgroundColor: color,
-            child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight:FontWeight.bold, color: Colors.white),),
+            child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight:FontWeight.bold, color: theme.colorScheme.onPrimary),),
           ),
           SizedBox(height: 10.h),
       
@@ -62,11 +63,11 @@ class AvatarAndTextWiget extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight:isBold?FontWeight.bold:null,
-              color:isBold? Colors.black87:Colors.blueGrey,
+              color:isBold? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
-          SmallText(text: secondText, size: 11.sp, color: Colors.blueGrey),
+          SmallText(text: secondText, size: 11.sp, color: theme.colorScheme.onSurfaceVariant),
         ],
       ),
     );

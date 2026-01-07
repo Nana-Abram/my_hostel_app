@@ -50,6 +50,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
 
     return authState.when(
@@ -67,10 +68,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: _buildAppBar(user),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          appBar: _buildAppBar(user, context),
           body: _buildBody(user),
-          bottomNavigationBar: _buildBottomNavigationBar(user),
+          bottomNavigationBar: _buildBottomNavigationBar(user, theme),
         );
       },
       loading: () => _buildLoadingScreen(),
@@ -78,9 +79,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  AppBar _buildAppBar(UserModel user) {
+  AppBar _buildAppBar(UserModel user, BuildContext context) {
+    final theme = Theme.of(context);
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       elevation: 1,
       title: Row(
         children: [
@@ -89,7 +91,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             width: 32.w,
             height: 32.w,
             decoration: BoxDecoration(
-              color: AppColors.blueColor,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Center(
@@ -112,12 +114,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               Text(
                 _getGreeting(),
-                style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
+                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
               ),
             ],
           ),
@@ -197,7 +199,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  Widget _buildBottomNavigationBar(UserModel user) {
+  Widget _buildBottomNavigationBar(UserModel user, ThemeData theme) {
     final navItems = _getNavigationItems(user.role);
       if (user.role == UserRole.student) {
     return const SizedBox.shrink();
@@ -205,10 +207,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 8,
             offset: Offset(0, -2),
           ),
@@ -218,7 +220,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         selectedItemColor: AppColors.blueColor,
         unselectedItemColor: Colors.blueGrey,
         selectedLabelStyle: TextStyle(
@@ -250,11 +252,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             icon: Icon(Icons.business_outlined),
             activeIcon: Icon(Icons.business),
             label: 'Hostels',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics),
-            label: 'Analytics',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

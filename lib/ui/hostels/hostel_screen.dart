@@ -10,12 +10,13 @@ class HostelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    final theme = Theme.of(context);
+    
      WidgetsBinding.instance.addPostFrameCallback((_) {
     
     });
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: EdgeInsets.only(top: 40.h, left: 80.w, right: 40.w),
         child: Column(
@@ -23,9 +24,9 @@ class HostelsScreen extends StatelessWidget {
           children: [
             /// --- HEADER TEXTS ---
             SizedBox(height: 10.h),
-            BigText(text: "Available Hostels", size: 18.sp),
+            BigText(text: "Available Hostels", size: 18.sp, color: theme.colorScheme.onSurface),
             SizedBox(height: 10.h),
-            SmallText(text: "Found 6 hostels matching your criteria"),
+            SmallText(text: "Found 6 hostels matching your criteria", color: theme.colorScheme.onSurface.withOpacity(0.7)),
             SizedBox(height: 20.h),
         
             /// --- MAIN SECTION ---

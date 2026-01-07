@@ -9,25 +9,26 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // HEADER SECTION
-          _buildHeaderSection(context),
+              _buildHeaderSection(context, theme),
           SizedBox(height: 60.h),
 
           // MISSION SECTION
-          _buildMissionSection(),
+          _buildMissionSection(theme),
           SizedBox(height: 60.h),
 
           // FEATURES GRID
-          _buildFeaturesSection(),
+              _buildFeaturesSection(theme),
           SizedBox(height: 60.h),
 
           // TEAM SECTION
-          _buildTeamSection(),
+          _buildTeamSection(theme),
           SizedBox(height: 60.h),
 
           // STATS SECTION
@@ -35,13 +36,13 @@ class AboutScreen extends StatelessWidget {
           SizedBox(height: 40.h),
 
           // CTA SECTION
-          _buildCTASection(context),
+          _buildCTASection(context, theme),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderSection(BuildContext context) {
+  Widget _buildHeaderSection(BuildContext context, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -50,7 +51,7 @@ class AboutScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 26.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
             height: 1.1,
           ),
         ),
@@ -59,7 +60,7 @@ class AboutScreen extends StatelessWidget {
           'Your Gateway to Comfortable Student Living',
           style: TextStyle(
             fontSize: 14.sp,
-            color: Colors.blueGrey,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -79,7 +80,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMissionSection() {
+  Widget _buildMissionSection(ThemeData theme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,7 +94,7 @@ class AboutScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 20.h),
@@ -101,7 +102,7 @@ class AboutScreen extends StatelessWidget {
                 'At HostelHub, we believe that finding the perfect student accommodation should be simple, transparent, and stress-free. We\'re dedicated to connecting students with safe, affordable, and comfortable living spaces near their educational institutions.',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.blueGrey[700],
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   height: 1.6,
                 ),
               ),
@@ -110,7 +111,7 @@ class AboutScreen extends StatelessWidget {
                 'Our platform brings together hostel owners and students, creating a seamless marketplace that prioritizes safety, convenience, and community.',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.blueGrey[700],
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   height: 1.6,
                 ),
               ),
@@ -122,27 +123,27 @@ class AboutScreen extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(30.w),
             decoration: BoxDecoration(
-              color: AppColors.blueColor.withOpacity(0.1),
+              color: theme.colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: AppColors.blueColor.withOpacity(0.3)),
+              border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
             ),
             child: Column(
               children: [
-                Icon(Icons.school, size: 50.w, color: AppColors.blueColor),
+                Icon(Icons.school, size: 50.w, color: theme.colorScheme.primary),
                 SizedBox(height: 16.h),
                 Text(
                   'For Students',
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.blueColor,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 SizedBox(height: 10.h),
                 SmallText(
                   text:
                       'Find your perfect home away from home with verified listings and transparent pricing.',
-                  color: Colors.blueGrey[700],
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
               ],
             ),
@@ -152,7 +153,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturesSection() {
+  Widget _buildFeaturesSection(ThemeData theme) {
     final features = [
       {
         'icon': Icons.verified_user,
@@ -196,13 +197,13 @@ class AboutScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+                color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 10.h),
         Text(
           'We\'re revolutionizing student accommodation with technology and trust',
-          style: TextStyle(fontSize: 13.sp, color: Colors.blueGrey),
+              style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
         SizedBox(height: 40.h),
         LayoutBuilder(
@@ -220,7 +221,7 @@ class AboutScreen extends StatelessWidget {
                   width: cardWidth,
                   padding: EdgeInsets.all(24.w),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                        color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
@@ -242,7 +243,7 @@ class AboutScreen extends StatelessWidget {
                         child: Icon(
                           feature['icon'] as IconData,
                           size: 32.w,
-                          color: AppColors.blueColor,
+                              color: theme.colorScheme.primary,
                         ),
                       ),
                       SizedBox(height: 20.h),
@@ -251,7 +252,7 @@ class AboutScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                              color: theme.colorScheme.onSurface,
                         ),
                       ),
                       SizedBox(height: 8.h),
@@ -259,7 +260,7 @@ class AboutScreen extends StatelessWidget {
                         feature['description'] as String,
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: Colors.blueGrey[600],
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
                           height: 1.4,
                         ),
                       ),
@@ -274,7 +275,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-Widget _buildTeamSection() {
+Widget _buildTeamSection(ThemeData theme) {
   final team = [
     {
       'name': 'Kwabena Yeboah', 
@@ -306,7 +307,7 @@ Widget _buildTeamSection() {
         style: TextStyle(
           fontSize: 24.sp,
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color:theme.colorScheme.onSurface,
         ),
       ),
       SizedBox(height: 10.h),
@@ -320,7 +321,7 @@ Widget _buildTeamSection() {
         runSpacing: 40.h,
         alignment: WrapAlignment.start,
         children: team.map((member) {
-          return Container(
+          return SizedBox(
             width: 160.w,
             child: Column(
               children: [
@@ -359,7 +360,7 @@ Widget _buildTeamSection() {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color:theme.colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -425,11 +426,11 @@ Widget _buildTeamSection() {
     );
   }
 
-  Widget _buildCTASection(BuildContext context) {
+  Widget _buildCTASection(BuildContext context, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(40.w),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.onSurface.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.grey[200]!),
       ),
@@ -444,7 +445,7 @@ Widget _buildTeamSection() {
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 16.h),

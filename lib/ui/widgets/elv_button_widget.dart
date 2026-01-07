@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 
 class ElvButtonWidget extends StatefulWidget {
   const ElvButtonWidget({
@@ -26,7 +25,8 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF2563EB);
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -42,18 +42,18 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
            BoxDecoration(
             color: widget.isPrimary
                 ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-                : (_isHovered ? Colors.grey.shade200 : Colors.white),
+                : (_isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface),
             border:(_isHovered? Border.all(
-              color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
+              color: widget.isPrimary ? primaryColor : theme.colorScheme.outline,
             ):null),
             borderRadius: (_isHovered?BorderRadius.circular(10.r):null),
           ):
            BoxDecoration(
             color: widget.isPrimary
                 ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-                : (_isHovered ? Colors.grey.shade200 : Colors.white),
+                : (_isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface),
             border:Border.all(
-              color: widget.isPrimary ? primaryColor : Colors.grey.shade400,
+              color: widget.isPrimary ? primaryColor : theme.colorScheme.outline,
             ),
             borderRadius: BorderRadius.circular(10.r),
           ),
@@ -66,9 +66,9 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
             widget.text,
             style: TextStyle(
               color: widget.isPrimary 
-                  ? Colors.white
-                  : widget.isFilter?AppColors.blueColor:
-                  (_isHovered ? primaryColor : Colors.grey.shade800),
+                  ? theme.colorScheme.onPrimary
+                  : widget.isFilter ? theme.colorScheme.primary :
+                  (_isHovered ? primaryColor : theme.colorScheme.onSurface),
               fontSize:widget.isFilter?10.sp: 16.sp,
               fontWeight:widget.isFilter?null:FontWeight.w600,
             ),

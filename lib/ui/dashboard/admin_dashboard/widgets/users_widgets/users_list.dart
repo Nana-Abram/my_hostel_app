@@ -16,17 +16,18 @@ class UsersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (users.isEmpty) {
-      return _buildEmptyUsersState();
+      return _buildEmptyUsersState(theme);
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -38,9 +39,9 @@ class UsersList extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(bottom: BorderSide(color: theme.dividerColor)),
             ),
             child: Row(
               children: [
@@ -52,7 +53,7 @@ class UsersList extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -62,7 +63,7 @@ class UsersList extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -72,7 +73,7 @@ class UsersList extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -82,7 +83,7 @@ class UsersList extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -101,16 +102,16 @@ class UsersList extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyUsersState() {
+  Widget _buildEmptyUsersState(ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(40.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         children: [
-          Icon(Icons.people_outline, size: 64.w, color: Colors.grey),
+          Icon(Icons.people_outline, size: 64.w, color: theme.colorScheme.onSurfaceVariant),
           SizedBox(height: 16.h),
           Text(
             'No Users Found',

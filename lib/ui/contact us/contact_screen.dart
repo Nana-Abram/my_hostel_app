@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
       child: Column(
         children: [
-          _buildHeaderSection(),
+          _buildHeaderSection(theme),
           SizedBox(height: 60.h),
           _buildContactMethods(context),
           SizedBox(height: 60.h),
           _buildContactForm(context),
           SizedBox(height: 40.h),
-          _buildFAQSection(),
+          _buildFAQSection(theme),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderSection() {
+  Widget _buildHeaderSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,7 +32,7 @@ class ContactScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 25.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 16.h),
@@ -40,7 +40,7 @@ class ContactScreen extends StatelessWidget {
           'We\'re here to help you find your perfect student accommodation',
           style: TextStyle(
             fontSize: 14.sp,
-            color: Colors.blueGrey,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
             fontWeight: FontWeight.w400,
           ),
           textAlign: TextAlign.center,
@@ -52,7 +52,7 @@ class ContactScreen extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20.r),
             image: const DecorationImage(
-              image: AssetImage('assets/images/contact4.jpg'),
+              image: AssetImage('assets/images/contact2.jpg'),
               fit: BoxFit.cover,
             ),
           ),
@@ -62,6 +62,8 @@ class ContactScreen extends StatelessWidget {
   }
 
   Widget _buildContactMethods(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
@@ -73,7 +75,7 @@ class ContactScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 20.h),
@@ -81,7 +83,7 @@ class ContactScreen extends StatelessWidget {
                 'Choose your preferred method to reach out to us. Our team is always ready to assist you with any questions about hostels, bookings, or partnerships.',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.blueGrey[700],
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   height: 1.6,
                 ),
               ),
@@ -93,6 +95,7 @@ class ContactScreen extends StatelessWidget {
                 subtitle: 'Available 24/7 for urgent inquiries',
                 contact: '+233 12 345 6789', // Ghana number format
                 onTap: () => _showPhoneDialog(context),
+                context: context,
               ),
               SizedBox(height: 20.h),
               
@@ -102,6 +105,7 @@ class ContactScreen extends StatelessWidget {
                 subtitle: 'We respond within 2 hours',
                 contact: 'support@hostelhub.com',
                 onTap: () => _showEmailDialog(context),
+                context: context,
               ),
               SizedBox(height: 20.h),
               
@@ -111,6 +115,7 @@ class ContactScreen extends StatelessWidget {
                 subtitle: 'Instant help from our team',
                 contact: 'Start Chat',
                 onTap: () => _showChatDialog(context),
+                context: context,
               ),
               SizedBox(height: 20.h),
               
@@ -120,6 +125,7 @@ class ContactScreen extends StatelessWidget {
                 subtitle: 'Come say hello at our office',
                 contact: 'University of Energy and Natural Resource, Sunyani',
                 onTap: () => _showLocationDialog(context),
+                context: context,
               ),
             ],
           ),
@@ -130,9 +136,9 @@ class ContactScreen extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(30.w),
             decoration: BoxDecoration(
-              color: AppColors.blueColor.withOpacity(0.05),
+              color: theme.colorScheme.primary.withOpacity(isDark ? 0.08 : 0.05),
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: AppColors.blueColor.withOpacity(0.2)),
+              border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +148,7 @@ class ContactScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -153,19 +159,19 @@ class ContactScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
-                    color: AppColors.blueColor.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withOpacity(isDark ? 0.14 : 0.1),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.warning_amber, color: Colors.orange, size: 20.w),
+                      Icon(Icons.warning_amber, color: theme.colorScheme.tertiary, size: 20.w),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
                           'For urgent hostel emergencies outside office hours, call our 24/7 support line.',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Colors.blueGrey[700],
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -186,17 +192,19 @@ class ContactScreen extends StatelessWidget {
     required String subtitle,
     required String contact,
     required VoidCallback onTap,
+    required BuildContext context,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -207,10 +215,10 @@ class ContactScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.blueColor.withOpacity(0.1),
+                color: theme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, size: 24.w, color: AppColors.blueColor),
+              child: Icon(icon, size: 24.w, color: theme.colorScheme.primary),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -222,7 +230,7 @@ class ContactScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -230,7 +238,7 @@ class ContactScreen extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: Colors.blueGrey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -239,13 +247,13 @@ class ContactScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.blueColor,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16.w, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios, size: 16.w, color: theme.colorScheme.onSurfaceVariant),
           ],
         ),
       ),
@@ -255,39 +263,45 @@ class ContactScreen extends StatelessWidget {
   Widget _buildOfficeHour(String day, String time) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            day,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
-              color: Colors.blueGrey[700],
-            ),
-          ),
-          Text(
-            time,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ],
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                day,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
 Widget _buildContactForm(BuildContext context) {
+  final theme = Theme.of(context);
   return Container(
     padding: EdgeInsets.all(30.w),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(16.r),
       boxShadow: [
         BoxShadow(
-          color: Colors.black12,
+          color: theme.shadowColor.withOpacity(0.1),
           blurRadius: 10,
           offset: const Offset(0, 3),
         ),
@@ -301,7 +315,7 @@ Widget _buildContactForm(BuildContext context) {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 8.h),
@@ -309,7 +323,7 @@ Widget _buildContactForm(BuildContext context) {
           'Have a question? We\'ll get back to you quickly.',
           style: TextStyle(
             fontSize: 12.sp,
-            color: Colors.blueGrey,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         SizedBox(height: 25.h),
@@ -321,7 +335,7 @@ Widget _buildContactForm(BuildContext context) {
   );
 }
 
-  Widget _buildFAQSection() {
+  Widget _buildFAQSection(ThemeData theme) {
     final faqs = [
       {
         'question': 'How do I book a hostel through HostelHub?',
@@ -349,27 +363,28 @@ Widget _buildContactForm(BuildContext context) {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 20.h),
         ...faqs.map((faq) => _buildFAQItem(
           question: faq['question']!,
           answer: faq['answer']!,
+          theme: theme,
         )).toList(),
       ],
     );
   }
 
-  Widget _buildFAQItem({required String question, required String answer}) {
+  Widget _buildFAQItem({required String question, required String answer, required ThemeData theme}) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -381,7 +396,7 @@ Widget _buildContactForm(BuildContext context) {
           style: TextStyle(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         children: [
@@ -391,7 +406,7 @@ Widget _buildContactForm(BuildContext context) {
               answer,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: Colors.blueGrey[700],
+                color: theme.colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -618,12 +633,13 @@ class _ContactFormState extends State<_ContactForm> {
   }
 
   void _showSuccessDialog(BuildContext context) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 24.w),
+            Icon(Icons.check_circle, color: theme.colorScheme.secondary, size: 24.w),
             SizedBox(width: 8.w),
             Text('Message Sent!'),
           ],
@@ -632,7 +648,7 @@ class _ContactFormState extends State<_ContactForm> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: TextStyle(color: AppColors.blueColor)),
+            child: Text('OK', style: TextStyle(color: theme.colorScheme.primary)),
           ),
         ],
       ),
@@ -740,60 +756,70 @@ class _ContactFormState extends State<_ContactForm> {
           SizedBox(height: 25.h),
           
           // SUBMIT BUTTON
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : () => _submitForm(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.blueColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                elevation: 2,
-              ),
-              child: _isLoading
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 16.w,
-                          height: 16.w,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Sending...',
+          Builder(
+            builder: (context) {
+              final theme = Theme.of(context);
+              return SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : () => _submitForm(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: _isLoading
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 16.w,
+                              height: 16.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'Sending...',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          'Send Message',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    )
-                  : Text(
-                      'Send Message',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+                ),
+              );
+            },
           ),
           
           // REQUIRED FIELD NOTE
           SizedBox(height: 12.h),
-          Text(
-            '* Required fields',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.blueGrey,
-              fontStyle: FontStyle.italic,
-            ),
+          Builder(
+            builder: (context) {
+              final theme = Theme.of(context);
+              return Text(
+                '* Required fields',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              );
+            },
           ),
         ],
       ),

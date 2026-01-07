@@ -27,6 +27,7 @@ class _CardWidgetState extends State<CardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -38,17 +39,17 @@ class _CardWidgetState extends State<CardWidget> {
         height: 250.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: _isHovered ? Colors.blue.shade50 : Colors.white,
+          color: _isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(_isHovered ? 0.6 : 0.3),
+              color: theme.shadowColor.withOpacity(_isHovered ? 0.12 : 0.06),
               spreadRadius: 3,
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
           ],
           border: Border.all(
-            color: _isHovered ? Colors.blueAccent : Colors.transparent,
+            color: _isHovered ? theme.colorScheme.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -75,7 +76,7 @@ class _CardWidgetState extends State<CardWidget> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -83,7 +84,7 @@ class _CardWidgetState extends State<CardWidget> {
             SmallText(
               text: widget.secondText,
               size: 11.sp,
-              color: Colors.blueGrey,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
           ],
         ),

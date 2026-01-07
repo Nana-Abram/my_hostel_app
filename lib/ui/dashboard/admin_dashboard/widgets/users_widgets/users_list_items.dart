@@ -15,6 +15,7 @@ class UserListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final lastLogin = user.lastLogin != null 
         ? _formatTimeAgo(user.lastLogin!)
         : 'Never';
@@ -22,7 +23,7 @@ class UserListItem extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: Row(
         children: [
@@ -40,7 +41,7 @@ class UserListItem extends StatelessWidget {
             fitWeb: BoxFitWeb.cover,
             backgroundColor: Colors.transparent,
             onLoading: const CircularProgressIndicator(color: Colors.indigoAccent),
-            onError: const Icon(Icons.error, color: Colors.red),
+            onError: Icon(Icons.error, color: theme.colorScheme.error),
           ),
         )
       : Text(
@@ -68,12 +69,12 @@ class UserListItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     SizedBox(width: 4.w),
                     if (user.isEmailVerified)
-                      Icon(Icons.verified, size: 14.w, color: Colors.blue),
+                      Icon(Icons.verified, size: 14.w, color: theme.colorScheme.primary),
                   ],
                 ),
                 SizedBox(height: 2.h),
@@ -81,7 +82,7 @@ class UserListItem extends StatelessWidget {
                   user.email,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.blueGrey,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -89,7 +90,7 @@ class UserListItem extends StatelessWidget {
                   'Joined ${_formatDate(user.createdAt)}',
                   style: TextStyle(
                     fontSize: 11.sp,
-                    color: Colors.grey,
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -125,7 +126,7 @@ class UserListItem extends StatelessWidget {
                   width: 8.w,
                   height: 8.w,
                   decoration: BoxDecoration(
-                    color: user.isEmailVerified ? Colors.green : Colors.grey,
+                    color: user.isEmailVerified ? const Color(0xFF4CAF50) : theme.colorScheme.onSurfaceVariant,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -134,7 +135,7 @@ class UserListItem extends StatelessWidget {
                   user.isEmailVerified ? 'Verified' : 'Unverified',
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: user.isEmailVerified ? Colors.green : Colors.grey,
+                    color: user.isEmailVerified ? const Color(0xFF4CAF50) : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -147,7 +148,7 @@ class UserListItem extends StatelessWidget {
               lastLogin,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: Colors.blueGrey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -162,7 +163,7 @@ class UserListItem extends StatelessWidget {
                   value: 'view',
                   child: Row(
                     children: [
-                      Icon(Icons.visibility, size: 16.w, color: Colors.blueGrey),
+                      Icon(Icons.visibility, size: 16.w, color: theme.colorScheme.onSurfaceVariant),
                       SizedBox(width: 8.w),
                       const Text('View Profile'),
                     ],
@@ -172,7 +173,7 @@ class UserListItem extends StatelessWidget {
                   value: 'edit',
                   child: Row(
                     children: [
-                      Icon(Icons.edit, size: 16.w, color: Colors.blue),
+                      Icon(Icons.edit, size: 16.w, color: theme.colorScheme.primary),
                       SizedBox(width: 8.w),
                       const Text('Edit User'),
                     ],
@@ -183,7 +184,7 @@ class UserListItem extends StatelessWidget {
                     value: 'verify',
                     child: Row(
                       children: [
-                        Icon(Icons.verified, size: 16.w, color: Colors.green),
+                        Icon(Icons.verified, size: 16.w, color: const Color(0xFF4CAF50)),
                         SizedBox(width: 8.w),
                         const Text('Verify'),
                       ],
@@ -193,7 +194,7 @@ class UserListItem extends StatelessWidget {
                   value: 'message',
                   child: Row(
                     children: [
-                      Icon(Icons.message, size: 16.w, color: Colors.orange),
+                      Icon(Icons.message, size: 16.w, color: const Color(0xFFFF9800)),
                       SizedBox(width: 8.w),
                       const Text('Send Message'),
                     ],
@@ -204,7 +205,7 @@ class UserListItem extends StatelessWidget {
                     value: 'promote',
                     child: Row(
                       children: [
-                        Icon(Icons.star, size: 16.w, color: Colors.orange),
+                        Icon(Icons.star, size: 16.w, color: const Color(0xFFFF9800)),
                         SizedBox(width: 8.w),
                         const Text('Promote to Admin'),
                       ],
@@ -214,7 +215,7 @@ class UserListItem extends StatelessWidget {
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete, size: 16.w, color: Colors.red),
+                      Icon(Icons.delete, size: 16.w, color: theme.colorScheme.error),
                       SizedBox(width: 8.w),
                       const Text('Delete User'),
                     ],
@@ -224,10 +225,10 @@ class UserListItem extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
-                child: Icon(Icons.more_vert, size: 16.w, color: Colors.blueGrey),
+                child: Icon(Icons.more_vert, size: 16.w, color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
           ),
@@ -254,14 +255,14 @@ class UserListItem extends StatelessWidget {
   Color _getRoleColor(UserRole role) {
     switch (role) {
       case UserRole.student:
-        return Colors.blue;
+        return const Color(0xFF2196F3);
       case UserRole.hostelOwner:
-        return Colors.orange;
+        return const Color(0xFFFF9800);
       case UserRole.admin:
         return Colors.purple;
       // ignore: unreachable_switch_default
       default:
-        return Colors.grey;
+        return const Color(0xFF9E9E9E);
     }
   }
 }

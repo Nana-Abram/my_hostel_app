@@ -226,6 +226,7 @@ DateTime _parseCheckInDate(String dateString) {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,11 +236,11 @@ DateTime _parseCheckInDate(String dateString) {
           child: Container(
             padding: EdgeInsets.all(40.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(20.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
+                  color: theme.shadowColor.withOpacity(0.08),
                   blurRadius: 10,
                   offset: const Offset(2, 4),
                 ),
@@ -248,7 +249,7 @@ DateTime _parseCheckInDate(String dateString) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BigText(text: "Payment Instructions", color: Colors.black),
+                BigText(text: "Payment Instructions", color:theme.colorScheme.onSurface, size: 18.sp),
                 SizedBox(height: 10.h),
                 SmallText(
                   text: "Please make payment and upload screenshot for verification",
@@ -311,11 +312,11 @@ DateTime _parseCheckInDate(String dateString) {
                 SizedBox(height: 30.h),
 
                 // Screenshot Upload Section
-                BigText(text: "Upload Payment Proof", color: Colors.black, size: 16.sp),
+                BigText(text: "Upload Payment Proof", color: theme.colorScheme.onSurface, size: 16.sp),
                 SizedBox(height: 16.h),
                 SmallText(
                   text: "Upload a clear screenshot of your payment confirmation",
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
                 SizedBox(height: 20.h),
 
@@ -326,7 +327,7 @@ DateTime _parseCheckInDate(String dateString) {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: theme.shadowColor.withOpacity(0.08)),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12.r),

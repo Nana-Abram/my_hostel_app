@@ -8,40 +8,45 @@ class UsersStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(
           child: _buildUserStatCard(
+            context: context,
             title: 'Total Users',
             value: '${stats['totalUsers'] ?? 0}',
             icon: Icons.people_outline,
-            color: Colors.blue,
+            color: theme.colorScheme.primary,
             change: '+12%',
           ),
         ),
         SizedBox(width: 12.w),
         Expanded(
           child: _buildUserStatCard(
+            context: context,
             title: 'Students',
             value: '${stats['students'] ?? 0}',
             icon: Icons.school_outlined,
-            color: Colors.green,
+            color: const Color(0xFF4CAF50),
             change: '+8%',
           ),
         ),
         SizedBox(width: 12.w),
         Expanded(
           child: _buildUserStatCard(
+            context: context,
             title: 'Hostel Owners',
             value: '${stats['hostelOwners'] ?? 0}',
             icon: Icons.business_outlined,
-            color: Colors.orange,
+            color: const Color(0xFFFF9800),
             change: '+15%',
           ),
         ),
         SizedBox(width: 12.w),
         Expanded(
           child: _buildUserStatCard(
+            context: context,
             title: 'Admins',
             value: '${stats['admins'] ?? 0}',
             icon: Icons.admin_panel_settings_outlined,
@@ -54,21 +59,23 @@ class UsersStats extends StatelessWidget {
   }
 
   Widget _buildUserStatCard({
+    required BuildContext context,
     required String title,
     required String value,
     required IconData icon,
     required Color color,
     required String change,
   }) {
+    final theme = Theme.of(context);
     final isPositive = change.startsWith('+');
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -94,7 +101,7 @@ class UsersStats extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -102,7 +109,7 @@ class UsersStats extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.blueGrey,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -111,14 +118,14 @@ class UsersStats extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: isPositive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              color: isPositive ? const Color(0xFF4CAF50).withOpacity(0.1) : theme.colorScheme.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Text(
               change,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: isPositive ? Colors.green : Colors.red,
+                color: isPositive ? const Color(0xFF4CAF50) : theme.colorScheme.error,
                 fontWeight: FontWeight.w600,
               ),
             ),

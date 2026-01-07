@@ -69,28 +69,33 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       {'value': 'cancelled', 'label': 'Cancelled'},
     ];
 
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
-      child: Wrap(
-        spacing: 8.w,
-        children: filters.map((filter) {
-          final isSelected = _selectedFilter == filter['value'];
-          return ChoiceChip(
-            label: Text(filter['label']!),
-            selected: isSelected,
-            onSelected: (selected) {
-              setState(() {
-                _selectedFilter = filter['value']!;
-              });
-            },
-            selectedColor: Colors.blue,
-            labelStyle: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontSize: 12.sp,
-            ),
-          );
-        }).toList(),
-      ),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
+          child: Wrap(
+            spacing: 8.w,
+            children: filters.map((filter) {
+              final isSelected = _selectedFilter == filter['value'];
+              return ChoiceChip(
+                label: Text(filter['label']!),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedFilter = filter['value']!;
+                  });
+                },
+                selectedColor: theme.colorScheme.primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                  fontSize: 12.sp,
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 
@@ -100,16 +105,17 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   }
 
   Widget _buildBookingsList(BuildContext context, List<BookingModel> bookings) {
+    final theme = Theme.of(context);
     if (bookings.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.bookmark_border, size: 60.sp, color: Colors.grey),
+            Icon(Icons.bookmark_border, size: 60.sp, color: theme.colorScheme.onSurfaceVariant),
             SizedBox(height: 16.h),
             Text(
               'No bookings found',
-              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 16.sp, color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -127,6 +133,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   }
 
   Widget _buildBookingCard(BuildContext context, BookingModel booking) {
+    final theme = Theme.of(context);
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       child: Padding(
@@ -140,7 +147,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 Expanded(
                   child: BigText(
                     text: booking.hostelName,
-                    color: Colors.black,
+                    color: theme.colorScheme.onSurface,
                     size: 16.sp,
                   ),
                 ),
@@ -162,23 +169,23 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
               ],
             ),
             SizedBox(height: 8.h),
-            SmallText(text: booking.roomType, color: Colors.blueGrey),
+            SmallText(text: booking.roomType, color: theme.colorScheme.onSurfaceVariant),
             SizedBox(height: 12.h),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 14.sp, color: Colors.blueGrey),
+                Icon(Icons.calendar_today, size: 14.sp, color: theme.colorScheme.onSurfaceVariant),
                 SizedBox(width: 4.w),
                 SmallText(
                   text: 'Check-in: ${_formatDate(booking.checkInDate)}',
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurfaceVariant,
                   size: 11.sp,
                 ),
                 SizedBox(width: 16.w),
-                Icon(Icons.attach_money, size: 14.sp, color: Colors.blueGrey),
+                Icon(Icons.attach_money, size: 14.sp, color: theme.colorScheme.onSurfaceVariant),
                 SizedBox(width: 4.w),
                 SmallText(
                   text: 'GHS ${booking.totalPrice.toStringAsFixed(2)}',
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurfaceVariant,
                   size: 11.sp,
                 ),
               ],
@@ -215,13 +222,13 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return Colors.orange;
+        return const Color(0xFFFF9800); // orange
       case 'confirmed':
-        return Colors.green;
+        return const Color(0xFF4CAF50); // green
       case 'cancelled':
-        return Colors.red;
+        return const Color(0xFFF44336); // red
       default:
-        return Colors.grey;
+        return const Color(0xFF9E9E9E); // grey
     }
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -44,7 +43,7 @@ class FooterSection extends StatelessWidget {
           ),
           SizedBox(height: 40.h),
           Divider(
-            color: Colors.grey.shade700,
+            color: const Color(0xFF4B5563),
             thickness: 0.4,
             indent: 0.1.sw,
             endIndent: 0.1.sw,
@@ -52,7 +51,7 @@ class FooterSection extends StatelessWidget {
           SizedBox(height: 30.h),
           Text(
             "© 2025 HostelHub. All rights reserved.",
-            style: TextStyle(color: Colors.blueGrey, fontSize: 11.sp),
+            style: TextStyle(color: const Color(0xFF6B7280), fontSize: 11.sp),
             textAlign: TextAlign.center,
           ),
         ],
@@ -71,7 +70,7 @@ class FooterSection extends StatelessWidget {
               width: 40.w,
               height: 40.w,
               decoration: BoxDecoration(
-                color: AppColors.blueColor,
+                color: const Color(0xFF2196F3),
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Center(
@@ -80,7 +79,7 @@ class FooterSection extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.sp,
-                    color: Colors.white,
+                    color: const Color(0xFFFFFFFF),
                   ),
                 ),
               ),
@@ -91,7 +90,7 @@ class FooterSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: const Color(0xFFFFFFFF),
                 letterSpacing: 0.8,
               ),
             ),
@@ -100,7 +99,7 @@ class FooterSection extends StatelessWidget {
         SizedBox(height: 20.h),
         Text(
           "Your trusted platform for university\nhostel booking",
-          style: TextStyle(color: Colors.blueGrey, fontSize: 13.sp),
+          style: TextStyle(color: const Color(0xFF6B7280), fontSize: 13.sp),
         ),
       ],
     );
@@ -148,7 +147,7 @@ class FooterSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             letterSpacing: 0.8,
           ),
         ),
@@ -158,7 +157,7 @@ class FooterSection extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 10.h),
             child: Text(
               link,
-              style: TextStyle(color: Colors.blueGrey, fontSize: 13.sp),
+              style: TextStyle(color: const Color(0xFF6B7280), fontSize: 13.sp),
             ),
           ),
         ),

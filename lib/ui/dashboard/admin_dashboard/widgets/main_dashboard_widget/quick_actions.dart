@@ -13,6 +13,7 @@ class QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -21,7 +22,7 @@ class QuickActions extends StatelessWidget {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 16.h),
@@ -31,7 +32,7 @@ class QuickActions extends StatelessWidget {
           children: actions.map((action) {
             return SizedBox(
               width: (MediaQuery.of(context).size.width / 2) - 30.w,
-              child: _buildQuickActionCard(action),
+              child: _buildQuickActionCard(action, theme),
             );
           }).toList(),
         ),
@@ -39,17 +40,17 @@ class QuickActions extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionCard(QuickActionItem action) {
+  Widget _buildQuickActionCard(QuickActionItem action, ThemeData theme) {
     return GestureDetector(
       onTap: action.onTap,
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -76,7 +77,7 @@ class QuickActions extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 4.h),

@@ -61,18 +61,19 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filter = ref.watch(filterProvider);
     return Container(
       width: 0.25.sw,
       height: 0.75.sh,
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade300, width: 0.8),
+        border: Border.all(color: theme.dividerColor, width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 8,
             spreadRadius: 2,
             offset: const Offset(2, 2),
@@ -90,7 +91,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
                 IconAndTextWidget(
                   icon: Icons.filter_alt_outlined,
                   text: "Filters",
-                  iconColor: Colors.blueGrey,
+                  iconColor: theme.colorScheme.onSurfaceVariant,
                 ),
                 GestureDetector(
                   onTap: () {
@@ -109,12 +110,12 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SmallText(text: "Campus", color: Colors.blueGrey),
+                SmallText(text: "Campus", color: theme.colorScheme.onSurfaceVariant),
                 SizedBox(height: 8.h),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
+                    border: Border.all(color: theme.dividerColor),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: TextField(
@@ -125,14 +126,14 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
                       prefixIcon: Icon(
                         Icons.search,
                         size: 20.w,
-                        color: Colors.grey,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       suffixIcon: _campusController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear,
                                 size: 18.w,
-                                color: Colors.grey,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                               onPressed: () {
                                 _campusController.clear();
@@ -198,7 +199,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
               text: _priceValue == 20000
                   ? "Price Range (No max price)"
                   : "Price Range (Up to GHS ${_priceValue.round()})",
-              color: Colors.blueGrey,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             Slider(
               value: _priceValue,
@@ -208,8 +209,8 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
               label: _priceValue == 20000
                   ? "No limit"
                   : "GHS ${_priceValue.round()}",
-              activeColor: Colors.blueAccent,
-              inactiveColor: Colors.grey.shade300,
+              activeColor: theme.colorScheme.primary,
+              inactiveColor: theme.dividerColor,
               onChanged: (value) {
                 setState(() => _priceValue = value);
                 // Only set filter if not at max (no filter)
@@ -221,7 +222,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             SizedBox(height: 20.h),
 
             /// AMENITIES
-            SmallText(text: "Amenities", color: Colors.blueGrey),
+            SmallText(text: "Amenities", color: theme.colorScheme.onSurfaceVariant),
             SizedBox(height: 10.h),
 
             Wrap(
@@ -241,12 +242,13 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
 
   /// REUSABLE CHECKBOX BUILDER
   Widget amenityCheck(String title) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Checkbox(
-          checkColor: Colors.white,
-          activeColor: Colors.blueAccent,
+          checkColor: theme.colorScheme.onPrimary,
+          activeColor: theme.colorScheme.primary,
           value: _amenities[title],
           onChanged: (val) {
             setState(() {
@@ -256,7 +258,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             ref.read(filterProvider.notifier).toggleAmenity(title);
           },
         ),
-        SmallText(text: title, color: Colors.black87),
+        SmallText(text: title, color: theme.colorScheme.onSurface),
       ],
     );
   }

@@ -51,11 +51,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hostelAsync = ref.watch(hostelByIdProvider(widget.hostelId));
     final roomAsync = ref.watch(roomByIdProvider(widget.roomId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: BookingAppBar(),
       body: hostelAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

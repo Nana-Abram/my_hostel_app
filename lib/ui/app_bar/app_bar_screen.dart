@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,7 +7,7 @@ import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/about%20us/about_screen.dart';
 import 'package:my_hostel_app/ui/contact%20us/contact_screen.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
+
 import 'package:my_hostel_app/ui/home/home_screen.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_screen.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
@@ -51,8 +52,11 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
 
   @override
   Widget build(BuildContext context,) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar:PreferredSize(
   preferredSize: Size.fromHeight(120.h),
   child: LayoutBuilder(
@@ -65,10 +69,10 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
         height: 120.h,
         padding: EdgeInsets.symmetric(horizontal: isMobile ? 20.w : 40.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: isDark ? Colors.black26 : Colors.black12,
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -88,7 +92,7 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
                     width: 40.w,
                     height: 40.w,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
+                      color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Center(
@@ -97,19 +101,19 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20.sp,
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                         ),
                       ),
                     ),
                   ),
                   SizedBox(width: 10.w),
                   if (!isMobile) // hide name on mobile to preserve space
-                    const Text(
+                    Text(
                       "HostelHub",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onSurface,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -156,14 +160,15 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
               // MOBILE → show hamburger menu
               if (isMobile) {
                 return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,     
                   children: [
                     if (user != null)
                       _buildUserMenu(user),
 
-                    SizedBox(width: 10.w),
+                    SizedBox(width: 20.w),
 
                     IconButton(
-                      icon: Icon(Icons.menu, size: 26.sp, color: Colors.black87),
+                      icon: Icon(Icons.menu, size: 26.sp, color: theme.colorScheme.onSurface),
                       onPressed: () {
                         Scaffold.of(context).openEndDrawer();
                       },
@@ -220,6 +225,8 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
     );
   }
 Widget _buildRightSection(UserModel? currentUser) {
+  final theme = Theme.of(context);
+  
   if (currentUser == null) {
     // Show login/signup buttons when not logged in
     return Row(
@@ -238,12 +245,33 @@ Widget _buildRightSection(UserModel? currentUser) {
           },
           isPrimary: true,
         ),
+        SizedBox(width: 30.w),
+             IconButton(
+        onPressed: () {
+          final themeMode = AdaptiveTheme.of(context).mode;
+          if (themeMode.isLight) {
+            AdaptiveTheme.of(context).setDark();
+          } else {
+            AdaptiveTheme.of(context).setLight();
+          }
+        }, 
+        icon: Icon(
+          AdaptiveTheme.of(context).mode.isLight 
+            ? Icons.dark_mode 
+            : Icons.light_mode,
+        ),
+        tooltip: AdaptiveTheme.of(context).mode.isLight 
+          ? 'Switch to Dark Mode' 
+          : 'Switch to Light Mode',
+      )
+     
       ],
     );
   }
 
   // Show user avatar with dropdown menu when logged in
-  return Row(
+  return Row(  
+    
     children: [
       GestureDetector(
         onTap: () {
@@ -252,10 +280,10 @@ Widget _buildRightSection(UserModel? currentUser) {
         child: IconAndTextWidget(
                 icon: Icons.dashboard,
                 text: 'View Dashboard',
-                iconColor: Colors.lightBlueAccent,
+                iconColor: theme.colorScheme.primary,
                 iconSize: 25,
                 textSize: 13.sp,
-                textColor: Colors.lightBlueAccent,
+                textColor: theme.colorScheme.primary,
                 
               ),
       ),
@@ -272,7 +300,7 @@ Widget _buildRightSection(UserModel? currentUser) {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.blueGrey.shade800,
+                color: theme.colorScheme.onSurface.withOpacity(0.8),
               ),
             ),
             SizedBox(height: 2.h),
@@ -280,7 +308,7 @@ Widget _buildRightSection(UserModel? currentUser) {
               currentUser.fullName,
               style: TextStyle(
                 fontSize: 11.sp,
-                color: Colors.blueGrey.shade600,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
             if (currentUser.role == UserRole.admin)
@@ -288,14 +316,14 @@ Widget _buildRightSection(UserModel? currentUser) {
                 margin: EdgeInsets.only(top: 2.h),
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: theme.colorScheme.secondary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
                   'Admin',
                   style: TextStyle(
                     fontSize: 8.sp,
-                    color: Colors.green.shade800,
+                    color: theme.colorScheme.secondary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -305,14 +333,14 @@ Widget _buildRightSection(UserModel? currentUser) {
                 margin: EdgeInsets.only(top: 2.h),
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: theme.colorScheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
                   'Hostel owner',
                   style: TextStyle(
                     fontSize: 8.sp,
-                    color: Colors.blue.shade800,
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -323,14 +351,36 @@ Widget _buildRightSection(UserModel? currentUser) {
       
       // User avatar with dropdown - FIXED
       _buildUserMenu(currentUser),
+      SizedBox(width: 30.w,),
+      IconButton(
+        onPressed: () {
+          final themeMode = AdaptiveTheme.of(context).mode;
+          if (themeMode.isLight) {
+            AdaptiveTheme.of(context).setDark();
+          } else {
+            AdaptiveTheme.of(context).setLight();
+          }
+        }, 
+        icon: Icon(
+          AdaptiveTheme.of(context).mode.isLight 
+            ? Icons.dark_mode 
+            : Icons.light_mode,
+        ),
+        tooltip: AdaptiveTheme.of(context).mode.isLight 
+          ? 'Switch to Dark Mode' 
+          : 'Switch to Light Mode',
+      )
+     
     ],
   );
 }
 
 
 
+
 // Separate method for user menu
 Widget _buildUserMenu(UserModel currentUser) {
+  final theme = Theme.of(context);
   return PopupMenuButton<String>(
     offset: Offset(0, 50.h),
     shape: RoundedRectangleBorder(
@@ -342,7 +392,7 @@ Widget _buildUserMenu(UserModel currentUser) {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: AppColors.blueColor,
+          color: theme.colorScheme.primary,
           width: 1.5.w,
         ),
       ),
@@ -360,12 +410,13 @@ Widget _buildUserMenu(UserModel currentUser) {
 
 
   List<PopupMenuEntry<String>> _buildUserMenuItems(UserModel user) {
+    final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[
       PopupMenuItem<String>(
         value: 'profile',
         child: Row(
           children: [
-            Icon(Icons.person, size: 18.sp, color: Colors.blueGrey),
+            Icon(Icons.person, size: 18.sp, color: theme.colorScheme.onSurfaceVariant),
             SizedBox(width: 8.w),
             Text('My Profile', style: TextStyle(fontSize: 12.sp)),
           ],
@@ -380,9 +431,9 @@ Widget _buildUserMenu(UserModel currentUser) {
           value: 'manage_hostels',
           child: Row(
             children: [
-              Icon(Icons.apartment, size: 18.sp, color: Colors.blue),
+              Icon(Icons.apartment, size: 18.sp, color: theme.colorScheme.primary),
               SizedBox(width: 8.w),
-              Text('Manage Hostels', style: TextStyle(fontSize: 12.sp, color: Colors.blue)),
+              Text('Manage Hostels', style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.primary)),
             ],
           ),
         ),
@@ -395,9 +446,9 @@ Widget _buildUserMenu(UserModel currentUser) {
         value: 'logout',
         child: Row(
           children: [
-            Icon(Icons.logout, size: 18.sp, color: Colors.red),
+            Icon(Icons.logout, size: 18.sp, color: theme.colorScheme.error),
             SizedBox(width: 8.w),
-            Text('Logout', style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+            Text('Logout', style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.error)),
           ],
         ),
       ),
@@ -445,7 +496,7 @@ Widget _buildUserMenu(UserModel currentUser) {
                 );
               }
             },
-            child: Text('Logout', style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+            child: Text('Logout', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),

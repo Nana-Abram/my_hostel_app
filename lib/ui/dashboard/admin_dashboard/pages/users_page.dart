@@ -39,6 +39,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: EdgeInsets.all(30.w),
       child: Column(
@@ -48,10 +49,10 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               const IconAndTextWidget(
+               IconAndTextWidget(
               icon: Icons.arrow_back_ios,
               text: 'Back to home',
-              iconColor: Colors.blueGrey,
+              iconColor: theme.colorScheme.onSurfaceVariant,
               isBackArrow: true,
             ),
           SizedBox(height: 20.h),
@@ -60,7 +61,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               _buildUsersFilter(),
@@ -108,17 +109,18 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   }
 
   Widget _buildUsersFilter() {
+    final theme = Theme.of(context);
     return Container(
       height: 40.h,
       padding: EdgeInsets.symmetric(horizontal: 12.w),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
-          Icon(Icons.filter_list, size: 18.w, color: Colors.blueGrey),
+          Icon(Icons.filter_list, size: 18.w, color: theme.colorScheme.onSurfaceVariant),
           SizedBox(width: 8.w),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -129,7 +131,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
               onChanged: (value) {
                 // TODO: implement filter behavior using provider/ref
               },
-              style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+              style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
             ),
           ),
         ],
@@ -138,6 +140,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   }
 
   Widget _buildStatsLoading() {
+    final theme = Theme.of(context);
     return Row(
       children: [
         for (int i = 0; i < 4; i++) ...[
@@ -145,7 +148,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
             child: Container(
               height: 80.h,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: const Center(
@@ -160,21 +163,22 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   }
 
   Widget _buildStatsError(Object error) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.red[50],
+        color: theme.colorScheme.error.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.red),
+        border: Border.all(color: theme.colorScheme.error),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red, size: 20.w),
+          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20.w),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'Failed to load stats: $error',
-              style: TextStyle(color: Colors.red, fontSize: 12.sp),
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12.sp),
             ),
           ),
         ],
@@ -183,10 +187,11 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   }
 
   Widget _buildUsersLoading() {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(40.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Center(
@@ -197,7 +202,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
             SizedBox(height: 16.h),
             Text(
               'Loading users...',
-              style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
+              style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -206,15 +211,16 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   }
 
   Widget _buildUsersError(Object error, WidgetRef ref) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         children: [
-          Icon(Icons.error_outline, size: 48.w, color: Colors.red),
+          Icon(Icons.error_outline, size: 48.w, color: theme.colorScheme.error),
           SizedBox(height: 16.h),
           Text(
             'Failed to load users',
@@ -224,7 +230,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
           Text(
             error.toString(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
+            style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(

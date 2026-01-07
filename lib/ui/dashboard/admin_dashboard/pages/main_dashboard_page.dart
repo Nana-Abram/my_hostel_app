@@ -104,58 +104,6 @@ class MainDashboard extends ConsumerWidget {
     );
   }
 
-
-  // Widget _buildStatsGrid() {
-
-  //    // USERS STATS
-  //         Consumer(
-  //           builder: (context, ref, child) {
-  //             final statsAsync = ref.watch(usersStatsProvider);
-  //             return statsAsync.when(
-  //               data: (stats) => UsersStats(stats: stats),
-  //               loading: () => _buildStatsGrid(),
-  //               error: (error, stack) => _buildStatsGrid(),
-  //             );
-  //           },
-  //         );
-  //   final stats = [
-  //     StatItem(
-  //       title: 'Total Users',
-  //       value:"45",
-  //       change: '+12%',
-  //       isPositive: true,
-  //       icon: Icons.people,
-  //       color: Colors.blue,
-  //     ),
-  //     StatItem(
-  //       title: 'Total Hostels',
-  //       value: '89',
-  //       change: '+5%',
-  //       isPositive: true,
-  //       icon: Icons.business,
-  //       color: Colors.green,
-  //     ),
-  //     StatItem(
-  //       title: 'Bookings',
-  //       value: '324',
-  //       change: '+8%',
-  //       isPositive: true,
-  //       icon: Icons.book_online,
-  //       color: Colors.orange,
-  //     ),
-  //     StatItem(
-  //       title: 'Revenue',
-  //       value: 'GHS 24,580',
-  //       change: '+15%',
-  //       isPositive: true,
-  //       icon: Icons.attach_money,
-  //       color: Colors.purple,
-  //     ),
-  //   ];
-
-  //   return StatsGrid(stats: stats);
-  // }
-
   Widget _buildRecentActivity() {
     final activities = [
       ActivityItem(

@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -21,6 +20,7 @@ class _HostelCardState extends State<HostelCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -32,18 +32,17 @@ class _HostelCardState extends State<HostelCard> {
         width: 0.25.sw,
 
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16.r),
-          // border: Border.all(color: Colors.grey.shade300, width: 0.8),
           border: Border.all(
-            color: _isHovered ? Colors.blueGrey : Colors.transparent,
+            color: _isHovered ? theme.colorScheme.primary.withOpacity(0.4) : Colors.transparent,
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
               color: _isHovered
-                  ? Colors.blueGrey.shade50
-                  : Colors.grey.shade300,
+                  ? theme.colorScheme.primary.withOpacity(0.12)
+                  : theme.shadowColor.withOpacity(0.08),
               blurRadius: _isHovered ? 18 : 8,
               spreadRadius: _isHovered ? 4 : 2,
               offset: const Offset(2, 2),
@@ -92,10 +91,10 @@ class _HostelCardState extends State<HostelCard> {
                   top: 10.h,
                   right: 10.w,
                   child: SmallContainerAndText(
-                    containerColor: Colors.white,
+                    containerColor: theme.colorScheme.surface,
                     text:
                         "From GHS ${widget.hostel.startPrice.toStringAsFixed(0)}/semester",
-                    textColor: Colors.black,
+                    textColor: theme.colorScheme.onSurface,
                     textSize: 9.sp,
                   ),
                 ),
@@ -114,7 +113,7 @@ class _HostelCardState extends State<HostelCard> {
                       Expanded(
                         child: SmallText(
                           text: widget.hostel.name,
-                          color: Colors.black,
+                          color: theme.colorScheme.onSurface,
                           size: 13.sp,
                           overFlow: TextOverflow.ellipsis,
                         ),
@@ -124,12 +123,12 @@ class _HostelCardState extends State<HostelCard> {
                           IconAndTextWidget(
                             icon: Icons.star,
                             text: widget.hostel.rating.toStringAsFixed(1),
-                            iconColor: Colors.orange,
+                            iconColor: theme.colorScheme.tertiary,
                           ),
                           SizedBox(width: 5.w),
                           SmallText(
                             text: "(${widget.hostel.reviewsCount})",
-                            color: Colors.black,
+                            color: theme.colorScheme.onSurface.withOpacity(0.8),
                             size: 11.sp,
                           ),
                         ],
@@ -143,7 +142,7 @@ class _HostelCardState extends State<HostelCard> {
                   IconAndTextWidget(
                     icon: Icons.location_on_outlined,
                     text: "${widget.hostel.campus} - ${widget.hostel.location}",
-                    iconColor: Colors.blueGrey,
+                    iconColor: theme.colorScheme.primary,
                     textSize: 10.sp,
                   ),
 
@@ -168,18 +167,18 @@ class _HostelCardState extends State<HostelCard> {
                           .take(3)
                           .map(
                             (amenity) => SmallContainerAndText(
-                              containerColor: Colors.blueGrey.shade50,
+                                containerColor: theme.colorScheme.primary.withOpacity(0.06),
                               text: amenity,
-                              textColor: Colors.black,
+                                textColor: theme.colorScheme.onSurface,
                               textSize: 9.sp,
                             ),
                           ),
                       // Add "+more" if there are more than 3 amenities
                       if (widget.hostel.amenities.length > 3)
                         SmallContainerAndText(
-                          containerColor: Colors.blueGrey.shade50,
+                          containerColor: theme.colorScheme.primary.withOpacity(0.06),
                           text: "+${widget.hostel.amenities.length - 3} more",
-                          textColor: Colors.black,
+                          textColor: theme.colorScheme.onSurface,
                           textSize: 9.sp,
                         ),
                     ],
@@ -201,7 +200,7 @@ class _HostelCardState extends State<HostelCard> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16.r),
-                        color: AppColors.blueColor,
+                        color: theme.colorScheme.primary,
                       ),
                       child: Center(
                         child: Text(
@@ -209,7 +208,7 @@ class _HostelCardState extends State<HostelCard> {
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                           ),
                         ),
                       ),
