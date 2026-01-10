@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/service/image_upload_service.dart';
-import 'package:my_hostel_app/ui/admin/add_rooms.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/add_rooms.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 

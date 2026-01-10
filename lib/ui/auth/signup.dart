@@ -1,4 +1,13 @@
-import 'dart:ui';
+// ignore_for_file: use_build_context_synchronously
+
+/// SignUp Screen with Role-Based Security
+/// 
+/// Security PINs (for testing/development):
+/// - Admin PIN: 2468
+/// - Owner PIN: 1357
+/// - Student: No PIN required
+/// 
+/// NOTE: In production, store PINs in environment variables or secure backend
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,9 +30,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _pinController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _obscurePin = true;
   UserRole _selectedRole = UserRole.student;
+  
+  // Security PINs for admin and hostel owner roles
+  static const String _adminPin = '2468';
+  static const String _hostelOwnerPin = '1357';
 
   @override
   void dispose() {
@@ -32,6 +47,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -75,6 +91,24 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (value != _passwordController.text) {
       return 'Passwords do not match';
     }
+    return null;
+  }
+
+  String? _validatePin(String? value) {
+    // Only validate PIN for admin and owner roles
+    if (_selectedRole == UserRole.student) {
+      return null;
+    }
+    
+    if (value == null || value.isEmpty) {
+      return 'Please enter security PIN';
+    }
+    
+    final correctPin = _selectedRole == UserRole.admin ? _adminPin : _hostelOwnerPin;
+    if (value != correctPin) {
+      return 'Invalid PIN for ${_selectedRole.displayName} role';
+    }
+    
     return null;
   }
 
@@ -124,25 +158,34 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
   }
 
-  // Future<void> _signUpWithGoogle() async {
-  //   try {
-  //     ref.read(authLoadingProvider.notifier).state = true;
+  Future<void> _signUpWithGoogle() async {
+    try {
+      ref.read(authLoadingProvider.notifier).state = true;
 
-  //     // final authService = ref.read(authServiceProvider);
-  //     // await authService.signInWithGoogle();
+      final authService = ref.read(authServiceProvider);
+      await authService.signInWithGoogle();
 
-  //     Navigator.pop(context);
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Google sign up failed: ${e.toString()}'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   } finally {
-  //     ref.read(authLoadingProvider.notifier).state = false;
-  //   }
-  // }
+      // Success - navigate to dashboard
+      GoRouter.of(context).goNamed('dashboard');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully signed in with Google!'),
+          backgroundColor: const Color(0xFF4CAF50), // green
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google sign up failed: ${e.toString()}'),
+          backgroundColor: const Color(0xFFF44336), // red
+        ),
+      );
+    } finally {
+      ref.read(authLoadingProvider.notifier).state = false;
+    }
+  }
 
   void _navigateToLogin() {
     GoRouter.of(context).goNamed('login');
@@ -165,52 +208,56 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           },
         ),
       ),
-      body: Stack(
-        children: [
-         Stack(
-  children: [
-    SizedBox(
-      width: double.infinity,
-      child: Image.asset(
-        "assets/images/h1.jpg",
-        fit: BoxFit.cover,
-      ),
-    ),
-
-    // Blur effect
-    Positioned.fill(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          color: const Color(0xFF000000).withOpacity(0.2), // light dim
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.8),
+              theme.colorScheme.secondary.withOpacity(0.6),
+              theme.colorScheme.tertiary.withOpacity(0.9),
+            ],
+          ),
         ),
-      ),
-    ),
-  ],
-),
-
-          SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: Center(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 30.h),
               child: Container(
-                margin: EdgeInsets.all(20.w),
-                width: 500.w,
-                padding: EdgeInsets.all(20.w),
+                constraints: BoxConstraints(maxWidth: 550.w),
+                padding: EdgeInsets.all(40.w),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(14.r),
-                  boxShadow: [BoxShadow(color: theme.shadowColor.withOpacity(0.1), blurRadius: 6)],
+                  color: theme.colorScheme.surface.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 30,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    width: 1,
+                  ),
                 ),
 
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // HEADER
-                    SizedBox(height: 20.h),
+                    Icon(
+                      Icons.person_add_rounded,
+                      size: 55.sp,
+                      color: theme.colorScheme.primary,
+                    ),
+                    SizedBox(height: 16.h),
                     Text(
                       'Create Account',
                       style: TextStyle(
-                        fontSize: 30.sp,
+                        fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -218,9 +265,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     SizedBox(height: 8.h),
                     Text(
                       'Join thousands of students finding their perfect hostel',
-                      style: TextStyle(fontSize: 16.sp, color: theme.colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 40.h),
+                    SizedBox(height: 32.h),
 
                     // SIGNUP FORM
                     Form(
@@ -262,6 +313,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       onSelected: (selected) {
                                         setState(() {
                                           _selectedRole = role;
+                                          // Clear PIN when switching roles
+                                          _pinController.clear();
                                         });
                                       },
                                       backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -274,6 +327,40 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                     );
                                   }).toList(),
                                 ),
+                                
+                                // Info message for admin/owner roles
+                                if (_selectedRole == UserRole.admin || _selectedRole == UserRole.hostelOwner) ...[
+                                  SizedBox(height: 12.h),
+                                  Container(
+                                    padding: EdgeInsets.all(10.w),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.errorContainer.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: theme.colorScheme.error.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.warning_amber_rounded,
+                                          size: 18.sp,
+                                          color: theme.colorScheme.error,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Text(
+                                            '${_selectedRole.displayName} accounts require a security PIN. Contact support if you need access.',
+                                            style: TextStyle(
+                                              fontSize: 11.sp,
+                                              color: theme.colorScheme.onErrorContainer,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -283,7 +370,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             controller: _fullNameController,
                             decoration: InputDecoration(
                               labelText: 'Full Name *',
+                              hintText: 'John Doe',
                               prefixIcon: Icon(Icons.person_outline),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
@@ -296,7 +386,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             controller: _emailController,
                             decoration: InputDecoration(
                               labelText: 'Email Address *',
+                              hintText: 'your.email@example.com',
                               prefixIcon: Icon(Icons.email_outlined),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
@@ -310,7 +403,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             controller: _phoneController,
                             decoration: InputDecoration(
                               labelText: 'Phone Number (Optional)',
+                              hintText: '+1 234 567 8900',
                               prefixIcon: Icon(Icons.phone_outlined),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
@@ -323,7 +419,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             controller: _passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password *',
+                              hintText: 'Min. 6 characters',
                               prefixIcon: Icon(Icons.lock_outline),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
@@ -349,7 +448,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             controller: _confirmPasswordController,
                             decoration: InputDecoration(
                               labelText: 'Confirm Password *',
+                              hintText: 'Re-enter password',
                               prefixIcon: Icon(Icons.lock_outline),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscureConfirmPassword
@@ -370,6 +472,72 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             obscureText: _obscureConfirmPassword,
                             validator: _validateConfirmPassword,
                           ),
+                          
+                          // PIN FIELD (Only for Admin and Hostel Owner roles)
+                          if (_selectedRole == UserRole.admin || _selectedRole == UserRole.hostelOwner) ...[
+                            SizedBox(height: 20.h),
+                            Container(
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.security,
+                                    size: 16.sp,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: Text(
+                                      'Security PIN required for ${_selectedRole.displayName} role',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: theme.colorScheme.onSurface,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            TextFormField(
+                              controller: _pinController,
+                              decoration: InputDecoration(
+                                labelText: 'Security PIN *',
+                                hintText: 'Enter 4-digit PIN',
+                                prefixIcon: Icon(Icons.pin),
+                                filled: true,
+                                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePin
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePin = !_obscurePin;
+                                    });
+                                  },
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                              ),
+                              keyboardType: TextInputType.number,
+                              maxLength: 4,
+                              obscureText: _obscurePin,
+                              validator: _validatePin,
+                            ),
+                          ],
+                          
                           SizedBox(height: 30.h),
 
                           // TERMS AGREEMENT
@@ -469,44 +637,47 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           SizedBox(height: 20.h),
 
                           // GOOGLE SIGN UP
-                          // SizedBox(
-                          //   width: double.infinity,
-                          //   height: 56.h,
-                          //   child: OutlinedButton(
-                          //     onPressed: isLoading ? null : _signUpWithGoogle,
-                          //     style: OutlinedButton.styleFrom(
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(12.r),
-                          //       ),
-                          //       side: BorderSide(color: Colors.grey.shade300),
-                          //     ),
-                          //     child: Row(
-                          //       mainAxisAlignment: MainAxisAlignment.center,
-                          //       children: [
-                          //         Image.asset(
-                          //           'assets/images/contact1',
-                          //           width: 24.w,
-                          //           height: 24.w,
-                          //           errorBuilder: (context, error, stackTrace) {
-                          //             return Icon(
-                          //               Icons.account_circle,
-                          //               size: 24.w,
-                          //             );
-                          //           },
-                          //         ),
-                          //         SizedBox(width: 12.w),
-                          //         Text(
-                          //           'Continue with Google',
-                          //           style: TextStyle(
-                          //             fontSize: 16.sp,
-                          //             color: Colors.black87,
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
-                          // SizedBox(height: 30.h),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56.h,
+                            child: OutlinedButton(
+                              onPressed: isLoading ? null : _signUpWithGoogle,
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                side: BorderSide(color: Colors.grey.shade300),
+                                backgroundColor: theme.colorScheme.surface,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.network(
+                                    'https://www.google.com/favicon.ico',
+                                    width: 20.w,
+                                    height: 20.h,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.login,
+                                        size: 20.sp,
+                                        color: theme.colorScheme.primary,
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Continue with Google',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: theme.colorScheme.onSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30.h),
 
                           // LOGIN LINK
                           Row(
@@ -537,7 +708,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

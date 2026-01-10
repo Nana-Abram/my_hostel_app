@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:my_hostel_app/ui/core/dimensions.dart';
 import 'package:my_hostel_app/ui/home/foster_section.dart';
+import 'package:my_hostel_app/ui/home/image_container.dart';
 import 'package:my_hostel_app/ui/widgets/avatar_and_text_wiget.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/card_widget.dart';
@@ -163,7 +164,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          
           SizedBox(height: 40.h),
+          ImageContainer(),
+          SizedBox(height: 40.h),
+
           Container(
             width: double.infinity,
             height: 400.h,

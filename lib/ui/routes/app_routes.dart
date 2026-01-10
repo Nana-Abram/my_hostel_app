@@ -9,6 +9,7 @@ import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/profile_page.d
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/my_booking_screen.dart';
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/student_dashboard.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_details_page.dart';
+import 'package:my_hostel_app/ui/hostels/room_details_page.dart';
 
 
 class AppRouter {
@@ -66,6 +67,19 @@ GoRoute(
 ),
 
 // My bookings route
+GoRoute(
+  path: '/room-details/:hostelId/:roomId',
+  name: 'room-details',
+  builder: (context, state){
+    final hostelId = state.pathParameters['hostelId']!;
+    final roomId = state.pathParameters['roomId']!;
+    final room = state.extra as Map<String, dynamic>?;
+    return RoomDetailsPage(
+      room: room?['room'],
+      hostel: room?['hostel'],
+    );
+  },
+),
 GoRoute(
   path: '/my-bookings',
   name: 'my-bookings',

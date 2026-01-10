@@ -29,9 +29,10 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
   late int availableRooms;
   late double price;
 
-  Uint8List? imageBytes;
-  String? uploadedImageUrl;
-  bool useExistingImage = true;
+  List<Uint8List> imageBytesList = [];
+  List<String> uploadedImageUrls = [];
+  List<String> existingImageUrls = [];
+  bool useExistingImages = true;
 
   List<String> selectedFeatures = [];
 
@@ -66,33 +67,45 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     availableRooms = widget.room.availableRooms;
     price = widget.room.price;
     selectedFeatures = List.from(widget.room.features);
-    uploadedImageUrl = widget.room.image;
+    existingImageUrls = List.from(widget.room.images);
   }
 
-  /// Pick room image from computer (Web supported)
-  Future<void> pickImage() async {
+  /// Pick room images from computer (Web supported)
+  Future<void> pickImages() async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       type: FileType.image,
+      allowMultiple: true,
     );
 
     if (result != null) {
       setState(() {
-        imageBytes = result.files.single.bytes;
-        useExistingImage = false;
+        for (var file in result.files) {
+          if (file.bytes != null) {
+            imageBytesList.add(file.bytes!);
+          }
+        }
+        useExistingImages = false;
       });
     }
   }
 
-  /// Upload image to Firebase Storage
-  Future<String> uploadImage() async {
-    if (imageBytes == null) return uploadedImageUrl ?? "";
+  /// Upload images to Firebase Storage
+  Future<List<String>> uploadImages() async {
+    if (imageBytesList.isEmpty) return useExistingImages ? existingImageUrls : [];
     
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final ref = FirebaseStorage.instance.ref("room_images/$id.jpg");
+    List<String> urls = [];
+    
+    for (int i = 0; i < imageBytesList.length; i++) {
+      final id = "${DateTime.now().millisecondsSinceEpoch}_$i";
+      final ref = FirebaseStorage.instance.ref("room_images/$id.jpg");
 
-    await ref.putData(imageBytes!, SettableMetadata(contentType: "image/jpeg"));
-    return await ref.getDownloadURL();
+      await ref.putData(imageBytesList[i], SettableMetadata(contentType: "image/jpeg"));
+      final url = await ref.getDownloadURL();
+      urls.add(url);
+    }
+    
+    return urls;
   }
 
   /// Update room in Firestore
@@ -104,12 +117,12 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
       return;
     }
 
-    // Upload new image if selected, otherwise use existing
-    final imageUrl = useExistingImage ? uploadedImageUrl : await uploadImage();
+    // Upload new images if selected, otherwise use existing
+    final imageUrls = useExistingImages ? existingImageUrls : await uploadImages();
 
-    if (imageUrl == null || imageUrl.isEmpty) {
+    if (imageUrls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select an image"))
+        const SnackBar(content: Text("Please select at least one image"))
       );
       return;
     }
@@ -118,7 +131,8 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
       id: widget.room.id, // Keep the same ID
       hostelId: selectedHostel!,
       type: selectedType!,
-      image: imageUrl,
+      image: imageUrls.first,
+      images: imageUrls,
       gender: selectedGender!,
       capacity: capacity,
       availableRooms: availableRooms,
@@ -357,58 +371,149 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
                         SizedBox(height: 20.h),
                       
                         /// Image Section
-                        Text("Room Image:", style: TextStyle(fontSize: 14.sp)),
+                        Text("Room Images:", style: TextStyle(fontSize: 14.sp)),
                         SizedBox(height: 10.h),
                         
-                        // Current Image
-                        if (useExistingImage && uploadedImageUrl != null && uploadedImageUrl!.isNotEmpty)
+                        // Current/Existing Images
+                        if (useExistingImages && existingImageUrls.isNotEmpty)
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Current Image:", style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
+                              Row(
+                                children: [
+                                  Text("Current Images:", style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
+                                  SizedBox(width: 10.w),
+                                  Text("${existingImageUrls.length} image(s)", 
+                                    style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
+                                ],
+                              ),
                               SizedBox(height: 10.h),
-                              
-                              ImageNetwork(
-                                image: uploadedImageUrl!,
-                                 height: 200.h, width: 300.w,
-                                fitAndroidIos: BoxFit.cover,
-                                fitWeb: BoxFitWeb.cover,
-                                borderRadius: BorderRadius.circular(12.r)
+                              Container(
+                                height: 200.h,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: existingImageUrls.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      margin: EdgeInsets.only(right: 10.w),
+                                      width: 200.w,
+                                      child: Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(12.r),
+                                            child: ImageNetwork(
+                                              image: existingImageUrls[index],
+                                              height: 200.h,
+                                              width: 200.w,
+                                              fitAndroidIos: BoxFit.cover,
+                                              fitWeb: BoxFitWeb.cover,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 5,
+                                            right: 5,
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                              ),
+                                              style: IconButton.styleFrom(
+                                                backgroundColor: Colors.black54,
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  existingImageUrls.removeAt(index);
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
-
-
+                              ),
                               SizedBox(height: 10.h),
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    useExistingImage = false;
-                                    uploadedImageUrl = null;
-                                  });
-                                },
-                                child: Text("Change Image", style: TextStyle(color: Colors.red)),
+                              Row(
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: pickImages,
+                                    icon: const Icon(Icons.add_photo_alternate),
+                                    label: const Text("Add More Images"),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        useExistingImages = false;
+                                        existingImageUrls.clear();
+                                      });
+                                    },
+                                    child: Text("Replace All Images", style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         
                         // New Image Picker
-                        if (!useExistingImage || uploadedImageUrl == null)
+                        if (!useExistingImages || existingImageUrls.isEmpty)
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              TextButton.icon(
-                                onPressed: pickImage,
-                                icon: const Icon(Icons.image),
-                                label: const Text("Choose New Image"),
+                              Row(
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: pickImages,
+                                    icon: const Icon(Icons.add_photo_alternate),
+                                    label: const Text("Choose New Images"),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Text("${imageBytesList.length} image(s) selected"),
+                                ],
                               ),
-                              if (imageBytes != null)
+                              if (imageBytesList.isNotEmpty)
                                 Container(
                                   margin: EdgeInsets.only(top: 20.h),
                                   height: 200.h,
-                                  width: 300.w,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12.r),
-                                    image: DecorationImage(
-                                      image: MemoryImage(imageBytes!),
-                                      fit: BoxFit.cover,
-                                    ),
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: imageBytesList.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.only(right: 10.w),
+                                        width: 200.w,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12.r),
+                                          image: DecorationImage(
+                                            image: MemoryImage(imageBytesList[index]),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                              top: 5,
+                                              right: 5,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.close,
+                                                  color: Colors.white,
+                                                ),
+                                                style: IconButton.styleFrom(
+                                                  backgroundColor: Colors.black54,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    imageBytesList.removeAt(index);
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                             ],

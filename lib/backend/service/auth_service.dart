@@ -1,16 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-// final GoogleSignIn _googleSignIn = GoogleSignIn(
-//   clientId: '748344550395-si3ijk6dl618eftn10gmtfc6kam1bca0.apps.googleusercontent.com', // For web only
-//   scopes: ['email', 'profile'],
-// );
 
   // Admin emails - store this in Firestore for better management
   final List<String> _adminEmails = [
@@ -144,45 +138,38 @@ class AuthService {
     }
   }
 
-  // // Google Sign In - Fixed for latest google_sign_in
-  // Future<UserModel> signInWithGoogle() async {
-  //   try {
-  //     // Check if user is already signed in with Google
-  //     if (await _googleSignIn.isSignedIn()) {
-  //       await _googleSignIn.signOut();
-  //     }
-
-  //     // Trigger Google authentication flow
-  //     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-  //     if (googleUser == null) {
-  //       throw 'Google sign in cancelled';
-  //     }
-
-  //     // Obtain auth details from request
-  //     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  // Google Sign In - Using Firebase Auth Provider (works on web)
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      // Create Google Auth Provider
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
       
-  //     // Create credentials
-  //     final credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth.accessToken,
-  //       idToken: googleAuth.idToken,
-  //     );
+      // Add scopes
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+      
+      // Sign in with popup (for web)
+      final UserCredential userCredential = await _auth.signInWithPopup(googleProvider);
+      
+      final firebaseUser = userCredential.user!;
 
-  //     // Sign in to Firebase with credentials
-  //     final userCredential = await _auth.signInWithCredential(credential);
-  //     final firebaseUser = userCredential.user!;
+      // Check if user document exists, if not it will be created by _getUserFromFirebaseUser
+      final userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      
+      if (userDoc.exists) {
+        // Update last login for existing user
+        await _firestore.collection('users').doc(firebaseUser.uid).update({
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+      }
 
-  //     // Update last login
-  //     await _firestore.collection('users').doc(firebaseUser.uid).update({
-  //       'lastLogin': DateTime.now().toIso8601String(),
-  //     });
-
-  //     return await _getUserFromFirebaseUser(firebaseUser);
-  //   } on FirebaseAuthException catch (e) {
-  //     throw _handleAuthError(e);
-  //   } catch (e) {
-  //     throw 'Google sign in failed: ${e.toString()}';
-  //   }
-  // }
+      return await _getUserFromFirebaseUser(firebaseUser);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthError(e);
+    } catch (e) {
+      throw 'Google sign in failed: ${e.toString()}';
+    }
+  }
 
   // Facebook Sign In (Optional - requires setup)
   Future<UserModel> signInWithFacebook() async {
@@ -210,18 +197,17 @@ class AuthService {
     }
   }
 
-
   // Update user profile
-Future<void> updateUserProfile({
-  required String userId,
-  required Map<String, dynamic> updates,
-}) async {
-  try {
-    await _firestore.collection('users').doc(userId).update(updates);
-  } catch (e) {
-    throw 'Failed to update user profile: $e';
+  Future<void> updateUserProfile({
+    required String userId,
+    required Map<String, dynamic> updates,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update(updates);
+    } catch (e) {
+      throw 'Failed to update user profile: $e';
+    }
   }
-}
 
   // Change Password
   Future<void> changePassword(String newPassword) async {
@@ -307,7 +293,6 @@ Future<void> updateUserProfile({
   Future<void> signOut() async {
     try {
       await _auth.signOut();
-      // await _googleSignIn.signOut();
     } catch (e) {
       throw 'Sign out failed: ${e.toString()}';
     }

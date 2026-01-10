@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-import '../../backend/model/room_model.dart';
+import '../../../backend/model/room_model.dart';
 
 class AdminAddRoomPage extends ConsumerStatefulWidget {
   const AdminAddRoomPage({super.key});
@@ -26,8 +26,8 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
   int availableRooms = 0;
   double price = 3000;
 
-  Uint8List? imageBytes;
-  String? uploadedImageUrl;
+  List<Uint8List> imageBytesList = [];
+  List<String> uploadedImageUrls = [];
 
   List<String> selectedFeatures = [];
 
@@ -51,45 +51,60 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
     'Free mattress',
   ];
 
-  /// Pick room image from computer (Web supported)
-  Future<void> pickImage() async {
+  /// Pick room images from computer (Web supported)
+  Future<void> pickImages() async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       type: FileType.image,
+      allowMultiple: true,
     );
 
     if (result != null) {
-      setState(() => imageBytes = result.files.single.bytes);
+      setState(() {
+        for (var file in result.files) {
+          if (file.bytes != null) {
+            imageBytesList.add(file.bytes!);
+          }
+        }
+      });
     }
   }
 
-  /// Upload image to Firebase Storage
-  Future<String> uploadImage() async {
-    if (imageBytes == null) return "";
+  /// Upload images to Firebase Storage
+  Future<List<String>> uploadImages() async {
+    if (imageBytesList.isEmpty) return [];
 
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final ref = FirebaseStorage.instance.ref("room_images/$id.jpg");
+    List<String> urls = [];
+    
+    for (int i = 0; i < imageBytesList.length; i++) {
+      final id = "${DateTime.now().millisecondsSinceEpoch}_$i";
+      final ref = FirebaseStorage.instance.ref("room_images/$id.jpg");
 
-    await ref.putData(imageBytes!, SettableMetadata(contentType: "image/jpeg"));
-    return await ref.getDownloadURL();
+      await ref.putData(imageBytesList[i], SettableMetadata(contentType: "image/jpeg"));
+      final url = await ref.getDownloadURL();
+      urls.add(url);
+    }
+    
+    return urls;
   }
 
   /// Save room to Firestore through service
   Future<void> saveRoom() async {
-    if (selectedHostel == null || selectedType == null || imageBytes == null || selectedGender == null) {
+    if (selectedHostel == null || selectedType == null || imageBytesList.isEmpty || selectedGender == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields and add at least one image")));
       return;
     }
 
-    uploadedImageUrl = await uploadImage();
+    uploadedImageUrls = await uploadImages();
 
     final room = RoomModel(
       id: FirebaseFirestore.instance.collection("rooms").doc().id,
       hostelId: selectedHostel!,
       type: selectedType!,
-      image: uploadedImageUrl!,
+      image: uploadedImageUrls.first,
+      images: uploadedImageUrls,
       gender:selectedGender!,
       capacity: capacity,
       availableRooms: availableRooms,
@@ -109,8 +124,8 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
       selectedHostel = null;
       selectedType = null;
       selectedGender = null;
-      imageBytes = null;
-      uploadedImageUrl = null;
+      imageBytesList.clear();
+      uploadedImageUrls.clear();
       selectedFeatures.clear();
     });
   }
@@ -275,22 +290,59 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                         SizedBox(height: 20.h),
                       
                         /// Image Picker
-                        TextButton.icon(
-                          onPressed: pickImage,
-                          icon: const Icon(Icons.image),
-                          label: const Text("Choose Image"),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: pickImages,
+                              icon: const Icon(Icons.add_photo_alternate),
+                              label: const Text("Choose Images"),
+                            ),
+                            SizedBox(width: 10.w),
+                            Text("${imageBytesList.length} image(s) selected"),
+                          ],
                         ),
-                        if (imageBytes != null)
+                        if (imageBytesList.isNotEmpty)
                           Container(
                             margin: EdgeInsets.only(top: 20.h),
                             height: 200.h,
-                            width: 300.w,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.r),
-                              image: DecorationImage(
-                                image: MemoryImage(imageBytes!),
-                                fit: BoxFit.cover,
-                              ),
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: imageBytesList.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: EdgeInsets.only(right: 10.w),
+                                  width: 200.w,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    image: DecorationImage(
+                                      image: MemoryImage(imageBytesList[index]),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Positioned(
+                                        top: 5,
+                                        right: 5,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                          style: IconButton.styleFrom(
+                                            backgroundColor: Colors.black54,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              imageBytesList.removeAt(index);
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           ),
                       

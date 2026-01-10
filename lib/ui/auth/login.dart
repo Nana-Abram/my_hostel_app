@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -111,9 +109,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       ref.read(authLoadingProvider.notifier).state = true;
 
-      // TODO: Uncomment and implement your Google sign-in
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithGoogle();
+      final authService = ref.read(authServiceProvider);
+      await authService.signInWithGoogle();
 
       // Handle success
       _handleLoginSuccess();
@@ -122,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Google sign in failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -156,56 +153,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           },
         ),
       ),
-      body: Stack(
-        children: [
-          Stack(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: Image.asset("assets/images/h1.jpg", fit: BoxFit.cover),
-              ),
-
-              // Blur effect
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    color: Colors.black.withOpacity(0.2), // light dim
-                  ),
-                ),
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.8),
+              theme.colorScheme.secondary.withOpacity(0.6),
+              theme.colorScheme.tertiary.withOpacity(0.9),
             ],
           ),
-          SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: Center(
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
               child: Container(
-                margin: EdgeInsets.all(50.w),
-                width: 0.4.sw,
-                padding: EdgeInsets.all(20),
+                constraints: BoxConstraints(maxWidth: 500.w),
+                padding: EdgeInsets.all(40.w),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(14.r),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                  color: theme.colorScheme.surface.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 30,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    width: 1,
+                  ),
                 ),
 
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // HEADER
+                    Icon(
+                      Icons.lock_person_rounded,
+                      size: 60.sp,
+                      color: theme.colorScheme.primary,
+                    ),
                     SizedBox(height: 20.h),
                     Text(
                       'Welcome Back',
                       style: TextStyle(
-                        fontSize: 36.sp,
+                        fontSize: 32.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'Sign in to continue your hostel search',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     
                     // Show redirect info if applicable
@@ -214,20 +223,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.blue.shade200),
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withOpacity(0.2),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info, color: Colors.blue, size: 16.sp),
+                            Icon(
+                              Icons.info_outline,
+                              color: theme.colorScheme.primary,
+                              size: 18.sp,
+                            ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
                                 'You will be redirected after login',
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  color: Colors.blue.shade800,
+                                  color: theme.colorScheme.onPrimaryContainer,
                                 ),
                               ),
                             ),
@@ -247,7 +262,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _emailController,
                             decoration: InputDecoration(
                               labelText: 'Email Address',
+                              hintText: 'Enter your email',
                               prefixIcon: Icon(Icons.email_outlined),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
@@ -261,7 +279,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password',
+                              hintText: 'Enter your password',
                               prefixIcon: Icon(Icons.lock_outline),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
@@ -357,15 +378,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 side: BorderSide(color: Colors.grey.shade300),
+                                backgroundColor: theme.colorScheme.surface,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  Image.network(
+                                    'https://www.google.com/favicon.ico',
+                                    width: 20.w,
+                                    height: 20.h,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.login,
+                                        size: 20.sp,
+                                        color: theme.colorScheme.primary,
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(width: 12.w),
                                   Text(
                                     'Continue with Google',
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      color: Colors.black87,
+                                      color: theme.colorScheme.onSurface,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
@@ -406,7 +442,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

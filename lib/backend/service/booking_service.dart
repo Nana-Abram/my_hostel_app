@@ -30,6 +30,11 @@ Stream<List<BookingModel>> getBookingsByOwner(String ownerId) {
       });
 }
 
+// Alias for clarity in dashboard
+Stream<List<BookingModel>> getBookingsByOwnerStream(String ownerId) {
+  return getBookingsByOwner(ownerId);
+}
+
   // Get booking by ID
   Future<BookingModel?> getBookingById(String bookingId) async {
     try {

@@ -5,6 +5,7 @@ class RoomModel {
   final String hostelId;
   final String type;
   final String image;
+  final List<String> images; // Multiple room images
   final String gender;
   final int capacity;
   final double price;
@@ -17,20 +18,32 @@ class RoomModel {
     required this.hostelId,
     required this.type,
     required this.image,
+    List<String>? images,
     required this.gender,
     required this.capacity,
     required this.price,
     required this.available,
     required this.availableRooms,
     required this.features,
-  });
+  }) : images = images ?? [image];
 
   factory RoomModel.fromMap(Map<String, dynamic> map, String id) {
+    final String mainImage = map['image'];
+    final List<String> imagesList = map['images'] != null 
+        ? List<String>.from(map['images'])
+        : [mainImage];
+    
+    // Debug logging
+    print('Loading room $id: image field = $mainImage');
+    print('Loading room $id: images field = ${map['images']}');
+    print('Loading room $id: final imagesList = $imagesList (length: ${imagesList.length})');
+    
     return RoomModel(
       id: id,
       hostelId: map['hostelId'],
       type: map['type'],
-      image: map['image'],
+      image: mainImage,
+      images: imagesList,
       gender: map['gender'],
       capacity: map['capacity'],
       price: (map['price'] as num).toDouble(),
@@ -45,6 +58,7 @@ class RoomModel {
       "hostelId": hostelId,
       "type": type,
       "image": image,
+      "images": images,
       "gender": gender,
       "capacity": capacity,
       "price": price,

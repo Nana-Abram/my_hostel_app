@@ -7,12 +7,28 @@ import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   final Function(int) onIndexChanged;
   const DashboardPage({super.key, required this.onIndexChanged});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  // Key for RefreshIndicator
+  final GlobalKey<RefreshIndicatorState> _refreshKey = GlobalKey<RefreshIndicatorState>();
+
+  Future<void> _onRefresh() async {
+    // Invalidate providers to force refresh
+    ref.invalidate(hostelsByOwnerProvider);
+    
+    // Wait a bit for the streams to update
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final currentUserId = authState.value?.id;
     
@@ -24,7 +40,12 @@ class DashboardPage extends ConsumerWidget {
     final bookingService = BookingService();
     
     return Scaffold(
-     body: LayoutBuilder(
+     body: RefreshIndicator(
+       key: _refreshKey,
+       onRefresh: _onRefresh,
+       color: Colors.blue[700],
+       backgroundColor: Colors.white,
+       child: LayoutBuilder(
   builder: (context, constraints) {
     // final isSmall = constraints.maxWidth < 600; 
 
@@ -91,7 +112,7 @@ class DashboardPage extends ConsumerWidget {
     );
   },
 ),
-
+       ),
     
     );
   }
@@ -101,32 +122,32 @@ class DashboardPage extends ConsumerWidget {
     BookingService bookingService,
     AsyncValue<List<dynamic>> hostelsAsync
   ) async* {
-    // Get total hostels count
+    // Initial data
     int totalHostels = 0;
     if (hostelsAsync.value != null) {
       totalHostels = hostelsAsync.value!.length;
     }
     
-    // Get booking stats
-    try {
-      final bookings = await bookingService.getBookingsByOwnerOnce(ownerId);
-      
-      final activeBookings = bookings
-          .where((b) => b.status == 'confirmed' || b.status == 'checked-in')
-          .length;
-      
-      final pendingRequests = bookings
-          .where((b) => b.status == 'pending')
-          .length;
-      
-      final totalEarnings = bookings
-          .where((b) => b.status == 'confirmed' || b.status == 'checked-in')
-          .fold(0.0, (sum, booking) => sum + booking.totalPrice);
-      
-      yield [totalHostels, activeBookings, pendingRequests, totalEarnings];
-    } catch (e) {
-      print('Error getting booking stats: $e');
-      yield [totalHostels, 0, 0, 0.0];
+    // Stream booking stats for real-time updates
+    await for (final bookings in bookingService.getBookingsByOwnerStream(ownerId)) {
+      try {
+        final activeBookings = bookings
+            .where((b) => b.status == 'confirmed' || b.status == 'checked-in')
+            .length;
+        
+        final pendingRequests = bookings
+            .where((b) => b.status == 'pending')
+            .length;
+        
+        final totalEarnings = bookings
+            .where((b) => b.status == 'confirmed' || b.status == 'checked-in')
+            .fold(0.0, (sum, booking) => sum + booking.totalPrice);
+        
+        yield [totalHostels, activeBookings, pendingRequests, totalEarnings];
+      } catch (e) {
+        print('Error getting booking stats: $e');
+        yield [totalHostels, 0, 0, 0.0];
+      }
     }
   }
 
@@ -194,7 +215,6 @@ Widget _buildQuickStats({
           value: totalHostels.toString(),
           icon: Icons.business,
           color: Colors.blue,
-          isLoading: totalHostels == 0,
         ),
       ),
       SizedBox(
@@ -204,7 +224,6 @@ Widget _buildQuickStats({
           value: activeBookings.toString(),
           icon: Icons.calendar_today,
           color: Colors.green,
-          isLoading: activeBookings == 0 && pendingRequests == 0,
         ),
       ),
       SizedBox(
@@ -214,7 +233,6 @@ Widget _buildQuickStats({
           value: pendingRequests.toString(),
           icon: Icons.pending_actions,
           color: Colors.orange,
-          isLoading: pendingRequests == 0 && activeBookings == 0,
         ),
       ),
       SizedBox(
@@ -224,7 +242,6 @@ Widget _buildQuickStats({
           value: 'GHS ${totalEarnings.toStringAsFixed(2)}',
           icon: Icons.attach_money,
           color: Colors.purple,
-          isLoading: totalEarnings == 0,
         ),
       ),
     ],
@@ -291,25 +308,15 @@ Widget _buildStatCard({
 
             SizedBox(height: 12.h),
 
-            // Value or Loader
-            if (isLoading)
-              SizedBox(
-                height: 22.h,
-                width: 22.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: color,
-                ),
-              )
-            else
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                ),
+            // Value
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
               ),
+            ),
 
             SizedBox(height: 6.h),
 
@@ -346,7 +353,7 @@ Widget _buildStatCard({
             ),
             TextButton(
               onPressed: () {
-                onIndexChanged(2); // Navigate to bookings page
+                widget.onIndexChanged(2); // Navigate to bookings page
               },
               child: Text('View All'),
             ),
@@ -419,75 +426,75 @@ Widget _buildStatCard({
     String ownerId, 
     BookingService bookingService
   ) async* {
-    try {
-      final bookings = await bookingService.getBookingsByOwnerOnce(ownerId);
-      
-      // Sort by most recent
-      bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
-      // Take only recent bookings (last 10)
-      final recentBookings = bookings.take(10).toList();
-      
-      final activities = recentBookings.map((booking) {
-        String title;
-        IconData icon;
-        Color color;
+    await for (final bookings in bookingService.getBookingsByOwnerStream(ownerId)) {
+      try {
+        // Sort by most recent
+        bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         
-        switch (booking.status) {
-          case 'pending':
-            title = 'New booking request';
-            icon = Icons.pending_actions;
-            color = Colors.orange;
-            break;
-          case 'confirmed':
-            title = 'Booking confirmed';
-            icon = Icons.check_circle;
-            color = Colors.green;
-            break;
-          case 'checked-in':
-            title = 'Guest checked in';
-            icon = Icons.key;
-            color = Colors.blue;
-            break;
-          case 'cancelled':
-            title = 'Booking cancelled';
-            icon = Icons.cancel;
-            color = Colors.red;
-            break;
-          default:
-            title = 'Booking updated';
-            icon = Icons.update;
-            color = Colors.grey;
-        }
+        // Take only recent bookings (last 10)
+        final recentBookings = bookings.take(10).toList();
         
-        // Calculate time ago
-        final now = DateTime.now();
-        final difference = now.difference(booking.createdAt);
-        String time;
+        final activities = recentBookings.map((booking) {
+          String title;
+          IconData icon;
+          Color color;
+          
+          switch (booking.status) {
+            case 'pending':
+              title = 'New booking request';
+              icon = Icons.pending_actions;
+              color = Colors.orange;
+              break;
+            case 'confirmed':
+              title = 'Booking confirmed';
+              icon = Icons.check_circle;
+              color = Colors.green;
+              break;
+            case 'checked-in':
+              title = 'Guest checked in';
+              icon = Icons.key;
+              color = Colors.blue;
+              break;
+            case 'cancelled':
+              title = 'Booking cancelled';
+              icon = Icons.cancel;
+              color = Colors.red;
+              break;
+            default:
+              title = 'Booking updated';
+              icon = Icons.update;
+              color = Colors.grey;
+          }
+          
+          // Calculate time ago
+          final now = DateTime.now();
+          final difference = now.difference(booking.createdAt);
+          String time;
+          
+          if (difference.inMinutes < 60) {
+            time = '${difference.inMinutes} min ago';
+          } else if (difference.inHours < 24) {
+            time = '${difference.inHours} hours ago';
+          } else if (difference.inDays < 7) {
+            time = '${difference.inDays} days ago';
+          } else {
+            time = '${booking.createdAt.day}/${booking.createdAt.month}/${booking.createdAt.year}';
+          }
+          
+          return {
+            'title': title,
+            'time': time,
+            'icon': icon,
+            'color': color,
+            'booking': booking,
+          };
+        }).toList();
         
-        if (difference.inMinutes < 60) {
-          time = '${difference.inMinutes} min ago';
-        } else if (difference.inHours < 24) {
-          time = '${difference.inHours} hours ago';
-        } else if (difference.inDays < 7) {
-          time = '${difference.inDays} days ago';
-        } else {
-          time = '${booking.createdAt.day}/${booking.createdAt.month}/${booking.createdAt.year}';
-        }
-        
-        return {
-          'title': title,
-          'time': time,
-          'icon': icon,
-          'color': color,
-          'booking': booking,
-        };
-      }).toList();
-      
-      yield activities;
-    } catch (e) {
-      print('Error getting activity: $e');
-      yield [];
+        yield activities;
+      } catch (e) {
+        print('Error getting activity: $e');
+        yield [];
+      }
     }
   }
 
