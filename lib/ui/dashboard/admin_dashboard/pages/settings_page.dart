@@ -487,7 +487,7 @@ void _editProfile() {
         builder: (context) => EditProfilePage(currentUser: currentUser),
       ),
     ).then((updatedUser) {
-      if (updatedUser != null) {
+      if (updatedUser != null && context.mounted) {
         // The auth provider is already updated, so UI will refresh automatically
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),

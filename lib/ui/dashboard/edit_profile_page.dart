@@ -562,9 +562,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
         // Validate file size (optional - limit to 5MB)
         if (file.size > 5 * 1024 * 1024) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image size should be less than 5MB')),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Image size should be less than 5MB')),
+            );
+          }
           return;
         }
 
@@ -576,13 +578,15 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           'gif',
           'webp',
         ].contains(file.extension?.toLowerCase())) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Please select a valid image file (JPG, PNG, GIF, WEBP)',
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Please select a valid image file (JPG, PNG, GIF, WEBP)',
+                ),
               ),
-            ),
-          );
+            );
+          }
           return;
         }
 
@@ -590,14 +594,18 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           _selectedImage = file;
         });
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Image selected: ${file.name}')));
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Image selected: ${file.name}')));
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
+      }
     }
   }
 
@@ -701,11 +709,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       // Method 3: Force refresh from Firebase (if you want latest data)
       // await ref.read(authProvider.notifier).refreshUser();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
 
-      Navigator.pop(context, updatedUser);
+        Navigator.pop(context, updatedUser);
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,

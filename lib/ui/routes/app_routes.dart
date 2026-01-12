@@ -71,8 +71,6 @@ GoRoute(
   path: '/room-details/:hostelId/:roomId',
   name: 'room-details',
   builder: (context, state){
-    final hostelId = state.pathParameters['hostelId']!;
-    final roomId = state.pathParameters['roomId']!;
     final room = state.extra as Map<String, dynamic>?;
     return RoomDetailsPage(
       room: room?['room'],

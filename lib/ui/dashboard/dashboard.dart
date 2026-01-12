@@ -35,7 +35,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           builder: (context) => EditProfilePage(currentUser: currentUser),
         ),
       ).then((updatedUser) {
-        if (updatedUser != null) {
+        if (updatedUser != null && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile updated successfully!')),
           );
@@ -545,9 +545,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       await authService.signOut();
       // Auth state provider will handle the navigation
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Logout failed: ${e.toString()}')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Logout failed: ${e.toString()}')));
+      }
     }
   }
 

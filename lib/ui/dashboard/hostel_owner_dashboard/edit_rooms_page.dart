@@ -121,9 +121,11 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     final imageUrls = useExistingImages ? existingImageUrls : await uploadImages();
 
     if (imageUrls.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select at least one image"))
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select at least one image"))
+        );
+      }
       return;
     }
 
@@ -145,16 +147,20 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
       final service = ref.read(roomServiceProvider);
       await service.updateRoom(widget.room.id, updatedRoom);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Room updated successfully"))
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Room updated successfully"))
+        );
 
-      Navigator.pop(context); // Go back to previous page
+        Navigator.pop(context); // Go back to previous page
+      }
       
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update room: $e"))
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to update room: $e"))
+        );
+      }
     }
   }
 
@@ -388,7 +394,7 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
                                 ],
                               ),
                               SizedBox(height: 10.h),
-                              Container(
+                              SizedBox(
                                 height: 200.h,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,

@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/ui/widgets/dropdown_button_widet.dart';
-import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
 class FilterSection extends ConsumerStatefulWidget {
@@ -15,7 +13,7 @@ class FilterSection extends ConsumerStatefulWidget {
 }
 
 class _FilterSectionState extends ConsumerState<FilterSection> {
-  late double _priceValue;
+  late RangeValues _priceRange;
   late Map<String, bool> _amenities;
   final TextEditingController _campusController = TextEditingController();
 
@@ -34,12 +32,13 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
   void _initializeFromFilter() {
     final filter = ref.read(filterProvider);
 
-    // Initialize price from filter or set to max (no filter)
-    _priceValue = filter.maxPrice ?? 20000;
+    // Initialize price range from filter
+    _priceRange = RangeValues(
+      filter.minPrice ?? 0,
+      filter.maxPrice ?? 20000,
+    );
 
     _campusController.text = filter.campus ?? '';
-
-
 
     // Initialize amenities from filter
     _amenities = {
@@ -63,6 +62,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filter = ref.watch(filterProvider);
+    
     return Container(
       width: 0.25.sw,
       height: 0.75.sh,
@@ -84,87 +84,130 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// HEADER
+            /// HEADER WITH ACTIVE FILTER COUNT
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconAndTextWidget(
-                  icon: Icons.filter_alt_outlined,
-                  text: "Filters",
-                  iconColor: theme.colorScheme.onSurfaceVariant,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    ref.read(filterProvider.notifier).clearFilters();
-                    _initializeFromFilter();
-                    setState(() {});
-                  },
-                  child: ElvButtonWidget(text: "Clear all", isFilter: true),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 25.h),
-
-            /// CAMPUS - WITH CONTROLLER
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SmallText(text: "Campus", color: theme.colorScheme.onSurfaceVariant),
-                SizedBox(height: 8.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: theme.dividerColor),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: TextField(
-                    controller: _campusController,
-                    decoration: InputDecoration(
-                      hintText: "Search campus...",
-                      border: InputBorder.none,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        size: 20.w,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      suffixIcon: _campusController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                size: 18.w,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              onPressed: () {
-                                _campusController.clear();
-                                ref
-                                    .read(filterProvider.notifier)
-                                    .setCampus(null);
-                              },
-                            )
-                          : null,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.filter_alt_outlined,
+                      color: theme.colorScheme.primary,
+                      size: 24.w,
                     ),
-                    onChanged: (value) {
-                      // Real-time filtering as user types
-                      if (value.isEmpty) {
-                        ref.read(filterProvider.notifier).setCampus(null);
-                      } else {
-                        ref.read(filterProvider.notifier).setCampus(value);
-                      }
-                    },
-                  ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      "Filters",
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    if (filter.activeFilterCount > 0) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Text(
+                          '${filter.activeFilterCount}',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+                if (filter.hasActiveFilters)
+                  GestureDetector(
+                    onTap: () {
+                      ref.read(filterProvider.notifier).clearFilters();
+                      _initializeFromFilter();
+                      setState(() {});
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        "Clear",
+                        style: TextStyle(
+                          color: theme.colorScheme.onErrorContainer,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
+
             SizedBox(height: 25.h),
+
+            /// CAMPUS SEARCH
+            _buildSectionTitle("Campus", Icons.school_outlined, theme),
+            SizedBox(height: 8.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.dividerColor),
+                borderRadius: BorderRadius.circular(8.r),
+                color: theme.colorScheme.background,
+              ),
+              child: TextField(
+                controller: _campusController,
+                decoration: InputDecoration(
+                  hintText: "Search campus...",
+                  hintStyle: TextStyle(fontSize: 14.sp),
+                  border: InputBorder.none,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 20.w,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  suffixIcon: _campusController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18.w,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          onPressed: () {
+                            _campusController.clear();
+                            ref.read(filterProvider.notifier).setCampus(null);
+                          },
+                        )
+                      : null,
+                ),
+                onChanged: (value) {
+                  setState(() {});
+                  if (value.isEmpty) {
+                    ref.read(filterProvider.notifier).setCampus(null);
+                  } else {
+                    ref.read(filterProvider.notifier).setCampus(value);
+                  }
+                },
+              ),
+            ),
+            
             SizedBox(height: 25.h),
 
             /// ROOM TYPE
+            _buildSectionTitle("Room Type", Icons.meeting_room_outlined, theme),
+            SizedBox(height: 8.h),
             DropdownButtonWidget(
               icon: Icons.meeting_room_outlined,
-              label: "Room Type",
-              hint: "Single, Shared, etc.",
-              value: filter.roomType, // Get current value from filter
+              label: "",
+              hint: "Select room type",
+              value: filter.roomType,
               isFilter: true,
               items: [
                 "Single Room with washroom",
@@ -181,66 +224,148 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             SizedBox(height: 25.h),
 
             /// GENDER
+            _buildSectionTitle("Gender Preference", Icons.people_outline, theme),
+            SizedBox(height: 8.h),
             DropdownButtonWidget(
               icon: Icons.people_outline,
-              label: "Gender Preference",
-              hint: "Select gender type",
+              label: "",
+              hint: "Select gender",
               isFilter: true,
-              value: filter.gender, // Get current value from filter
+              value: filter.gender,
               items: ["Male", "Female", "Mixed"],
               onChanged: (val) {
                 ref.read(filterProvider.notifier).setGender(val);
               },
             ),
+            
             SizedBox(height: 25.h),
 
-            /// PRICE RANGE
-            SmallText(
-              text: _priceValue == 20000
-                  ? "Price Range (No max price)"
-                  : "Price Range (Up to GHS ${_priceValue.round()})",
-              color: theme.colorScheme.onSurfaceVariant,
+            /// PRICE RANGE WITH RANGE SLIDER
+            _buildSectionTitle("Price Range", Icons.attach_money, theme),
+            SizedBox(height: 4.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "GHS ${_priceRange.start.round()}",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  Text(
+                    "to",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    _priceRange.end == 20000
+                        ? "No limit"
+                        : "GHS ${_priceRange.end.round()}",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Slider(
-              value: _priceValue,
+            RangeSlider(
+              values: _priceRange,
               min: 0,
               max: 20000,
-              divisions: 20,
-              label: _priceValue == 20000
-                  ? "No limit"
-                  : "GHS ${_priceValue.round()}",
+              divisions: 40,
               activeColor: theme.colorScheme.primary,
               inactiveColor: theme.dividerColor,
-              onChanged: (value) {
-                setState(() => _priceValue = value);
-                // Only set filter if not at max (no filter)
-                final maxPrice = value == 20000 ? null : value;
-                ref.read(filterProvider.notifier).setMaxPrice(maxPrice!);
+              labels: RangeLabels(
+                'GHS ${_priceRange.start.round()}',
+                _priceRange.end == 20000
+                    ? 'No limit'
+                    : 'GHS ${_priceRange.end.round()}',
+              ),
+              onChanged: (values) {
+                setState(() => _priceRange = values);
+                ref.read(filterProvider.notifier).setPriceRange(
+                  values.start == 0 ? 0 : values.start,
+                  values.end == 20000 ? 20000 : values.end,
+                );
               },
             ),
 
             SizedBox(height: 20.h),
 
             /// AMENITIES
-            SmallText(text: "Amenities", color: theme.colorScheme.onSurfaceVariant),
+            _buildSectionTitle("Amenities", Icons.home_work_outlined, theme),
             SizedBox(height: 10.h),
-
             Wrap(
-              runSpacing: 6.h,
+              spacing: 8.w,
+              runSpacing: 8.h,
               children: _amenities.keys.map((title) {
-                return amenityCheck(title);
+                return _buildAmenityChip(title, theme);
               }).toList(),
             ),
 
             SizedBox(height: 30.h),
-
           ],
         ),
       ),
     );
   }
 
-  /// REUSABLE CHECKBOX BUILDER
+  Widget _buildSectionTitle(String title, IconData icon, ThemeData theme) {
+    return Row(
+      children: [
+        Icon(icon, size: 18.w, color: theme.colorScheme.primary),
+        SizedBox(width: 8.w),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAmenityChip(String title, ThemeData theme) {
+    final isSelected = _amenities[title] ?? false;
+    return FilterChip(
+      label: Text(title),
+      selected: isSelected,
+      onSelected: (val) {
+        setState(() {
+          _amenities[title] = val;
+        });
+        ref.read(filterProvider.notifier).toggleAmenity(title);
+      },
+      selectedColor: theme.colorScheme.primaryContainer,
+      checkmarkColor: theme.colorScheme.primary,
+      backgroundColor: theme.colorScheme.surface,
+      side: BorderSide(
+        color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
+        width: 1.5,
+      ),
+      labelStyle: TextStyle(
+        fontSize: 12.sp,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+      ),
+    );
+  }
+
+  /// REUSABLE CHECKBOX BUILDER (kept for backward compatibility)
   Widget amenityCheck(String title) {
     final theme = Theme.of(context);
     return Row(
@@ -254,7 +379,6 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             setState(() {
               _amenities[title] = val ?? false;
             });
-
             ref.read(filterProvider.notifier).toggleAmenity(title);
           },
         ),

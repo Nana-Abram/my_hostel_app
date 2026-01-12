@@ -371,7 +371,7 @@ Widget _buildContactForm(BuildContext context) {
           question: faq['question']!,
           answer: faq['answer']!,
           theme: theme,
-        )).toList(),
+        )),
       ],
     );
   }
@@ -619,7 +619,9 @@ class _ContactFormState extends State<_ContactForm> {
         });
         
         // Show success dialog
-        _showSuccessDialog(context);
+        if (context.mounted) {
+          _showSuccessDialog(context);
+        }
         
         // Clear form
         _formKey.currentState!.reset();

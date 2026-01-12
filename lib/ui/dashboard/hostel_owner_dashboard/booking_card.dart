@@ -59,19 +59,23 @@ class _BookingCardState extends State<BookingCard> {
         widget.onStatusUpdated!();
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Booking ${newStatus}d successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Booking ${newStatus}d successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update booking: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update booking: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() => _isUpdating = false);
     }
@@ -392,7 +396,7 @@ class _BookingCardState extends State<BookingCard> {
 
             SizedBox(height: 8.h),
 
-            Divider(),
+            const Divider(),
             SizedBox(height: 16.h),
 
             // Customer Section

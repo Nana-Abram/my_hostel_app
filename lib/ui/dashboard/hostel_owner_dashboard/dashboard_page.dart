@@ -253,7 +253,6 @@ Widget _buildStatCard({
   required String value,
   required IconData icon,
   required Color color,
-  bool isLoading = false,
 }) {
   return Container(
     decoration: BoxDecoration(

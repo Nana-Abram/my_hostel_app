@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
-import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
 import 'package:my_hostel_app/ui/hostels/room_details_page.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
@@ -246,25 +244,6 @@ class AvailableRooms extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _handleBookNow(BuildContext context, WidgetRef ref) {
-    final authState = ref.read(authProvider);
-    final user = authState.value;
-    // final user = null; // Temporary - replace with your auth check
-
-    if (user == null) {
-      // Not logged in → redirect to login with return URL
-      final bookingUrl = '/booking/${hostel.id}/${room.id}';
-      final encodedUrl = Uri.encodeComponent(bookingUrl);
-
-      context.push('/login?redirect=$encodedUrl');
-      return;
-    }
-
-    // Logged in → go directly to booking page
-
-    context.go('/booking/${hostel.id}/${room.id}');
   }
 }
 

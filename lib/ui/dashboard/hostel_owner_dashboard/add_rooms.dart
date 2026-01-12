@@ -116,9 +116,11 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
     final service = ref.read(roomServiceProvider);
     await service.addRoom(room);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+    }
 
     setState(() {
       selectedHostel = null;

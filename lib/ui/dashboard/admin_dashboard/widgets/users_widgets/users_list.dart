@@ -96,7 +96,7 @@ class UsersList extends StatelessWidget {
           ...users.map((user) => UserListItem(
             user: user,
             onAction: onUserAction,
-          )).toList(),
+          )),
         ],
       ),
     );

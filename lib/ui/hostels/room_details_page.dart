@@ -40,8 +40,6 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(authProvider);
-    final user = authState.value;
     final images = widget.room.images.isNotEmpty 
         ? widget.room.images 
         : [widget.room.image];
@@ -683,54 +681,6 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildHostelInfo(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(
-            icon,
-            size: 18.sp,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 

@@ -452,6 +452,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 class ForgotPasswordDialog extends ConsumerWidget {
   final _emailController = TextEditingController();
 
+  ForgotPasswordDialog({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(

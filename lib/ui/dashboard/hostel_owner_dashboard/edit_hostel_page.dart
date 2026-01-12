@@ -80,9 +80,11 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
       final file = result.files.first;
 
       if (file.bytes == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not read image file")),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not read image file")),
+          );
+        }
         return;
       }
 
@@ -95,13 +97,17 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
         images.add(url);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Image uploaded successfully!")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Image uploaded successfully!")),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Upload failed: ${e.toString()}")));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Upload failed: ${e.toString()}")));
+      }
     } finally {
       if (mounted) {
         setState(() => isUploading = false);
@@ -138,11 +144,13 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
       final service = ref.read(hostelServiceProvider);
       await service.updateHostel(widget.hostel.id, updatedHostel);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Hostel updated successfully")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Hostel updated successfully")),
+        );
 
-      Navigator.pop(context); // Go back to previous page
+        Navigator.pop(context); // Go back to previous page
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,

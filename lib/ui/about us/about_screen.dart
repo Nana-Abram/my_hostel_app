@@ -17,23 +17,23 @@ class AboutScreen extends StatelessWidget {
         children: [
           // HEADER SECTION
               _buildHeaderSection(context, theme),
-          SizedBox(height: 60.h),
+          const SizedBox(height: 60),
 
           // MISSION SECTION
           _buildMissionSection(theme),
-          SizedBox(height: 60.h),
+          const SizedBox(height: 60),
 
           // FEATURES GRID
               _buildFeaturesSection(theme),
-          SizedBox(height: 60.h),
+          const SizedBox(height: 60),
 
           // TEAM SECTION
           _buildTeamSection(theme),
-          SizedBox(height: 60.h),
+          const SizedBox(height: 60),
 
           // STATS SECTION
           _buildStatsSection(),
-          SizedBox(height: 40.h),
+          const SizedBox(height: 40),
 
           // CTA SECTION
           _buildCTASection(context, theme),
@@ -55,7 +55,7 @@ class AboutScreen extends StatelessWidget {
             height: 1.1,
           ),
         ),
-        SizedBox(height: 16.h),
+        const SizedBox(height: 16),
         Text(
           'Your Gateway to Comfortable Student Living',
           style: TextStyle(
@@ -64,7 +64,7 @@ class AboutScreen extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
-        SizedBox(height: 30.h),
+        const SizedBox(height: 30),
         Container(
           width: double.infinity,
           height: 500.h,
@@ -97,7 +97,7 @@ class AboutScreen extends StatelessWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              SizedBox(height: 20.h),
+              const SizedBox(height: 20),
               Text(
                 'At HostelHub, we believe that finding the perfect student accommodation should be simple, transparent, and stress-free. We\'re dedicated to connecting students with safe, affordable, and comfortable living spaces near their educational institutions.',
                 style: TextStyle(
@@ -106,7 +106,7 @@ class AboutScreen extends StatelessWidget {
                   height: 1.6,
                 ),
               ),
-              SizedBox(height: 20.h),
+              const SizedBox(height: 20),
               Text(
                 'Our platform brings together hostel owners and students, creating a seamless marketplace that prioritizes safety, convenience, and community.',
                 style: TextStyle(
@@ -130,7 +130,7 @@ class AboutScreen extends StatelessWidget {
             child: Column(
               children: [
                 Icon(Icons.school, size: 50.w, color: theme.colorScheme.primary),
-                SizedBox(height: 16.h),
+                const SizedBox(height: 16),
                 Text(
                   'For Students',
                   style: TextStyle(
@@ -139,7 +139,7 @@ class AboutScreen extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                SizedBox(height: 10.h),
+                const SizedBox(height: 10),
                 SmallText(
                   text:
                       'Find your perfect home away from home with verified listings and transparent pricing.',
@@ -200,12 +200,12 @@ class AboutScreen extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
           ),
         ),
-        SizedBox(height: 10.h),
+        const SizedBox(height: 10),
         Text(
           'We\'re revolutionizing student accommodation with technology and trust',
               style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
-        SizedBox(height: 40.h),
+        const SizedBox(height: 40),
         LayoutBuilder(
           builder: (context, constraints) {
             final cardWidth = constraints.maxWidth > 600
@@ -246,7 +246,7 @@ class AboutScreen extends StatelessWidget {
                               color: theme.colorScheme.primary,
                         ),
                       ),
-                      SizedBox(height: 20.h),
+                      const SizedBox(height: 20),
                       Text(
                         feature['title'] as String,
                         style: TextStyle(
@@ -255,7 +255,7 @@ class AboutScreen extends StatelessWidget {
                               color: theme.colorScheme.onSurface,
                         ),
                       ),
-                      SizedBox(height: 8.h),
+                      const SizedBox(height: 8),
                       Text(
                         feature['description'] as String,
                         style: TextStyle(
@@ -310,12 +310,12 @@ Widget _buildTeamSection(ThemeData theme) {
           color:theme.colorScheme.onSurface,
         ),
       ),
-      SizedBox(height: 10.h),
+      const SizedBox(height: 10),
       Text(
         'Passionate individuals dedicated to improving student living',
         style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
       ),
-      SizedBox(height: 40.h),
+      const SizedBox(height: 40),
       Wrap(
         spacing: 40.w,
         runSpacing: 40.h,
@@ -354,7 +354,7 @@ Widget _buildTeamSection(ThemeData theme) {
                     ),
                   ),
                 ),
-                SizedBox(height: 16.h),
+                const SizedBox(height: 16),
                 Text(
                   member['name']!,
                   style: TextStyle(
@@ -364,7 +364,7 @@ Widget _buildTeamSection(ThemeData theme) {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 4.h),
+                const SizedBox(height: 4),
                 Text(
                   member['role']!,
                   style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
@@ -410,7 +410,7 @@ Widget _buildTeamSection(ThemeData theme) {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: 8.h),
+              const SizedBox(height: 8),
               Text(
                 stat['label']!,
                 style: TextStyle(
@@ -460,7 +460,7 @@ Widget _buildTeamSection(ThemeData theme) {
               ],
             ),
           ),
-          SizedBox(width: 40.w),
+          const SizedBox(width: 40),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(

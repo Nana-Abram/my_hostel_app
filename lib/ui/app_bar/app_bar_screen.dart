@@ -489,11 +489,15 @@ Widget _buildUserMenu(UserModel currentUser) {
                 // Get auth notifier from context
                 final authNotifier = ref.read(authProvider.notifier);
                 await authNotifier.signOut();
-                GoRouter.of(context).go('/');
+                if (context.mounted) {
+                  GoRouter.of(context).go('/');
+                }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Logout failed: $e')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Logout failed: $e')),
+                  );
+                }
               }
             },
             child: Text('Logout', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.error)),

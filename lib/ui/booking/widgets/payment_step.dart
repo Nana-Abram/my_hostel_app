@@ -61,9 +61,11 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
     }
   }
 
@@ -88,9 +90,11 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to take photo: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to take photo: $e')),
+        );
+      }
     }
   }
 
@@ -170,15 +174,17 @@ Future<void> _submitPayment() async {
     );
 
     // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Booking submitted successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Booking submitted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-    // Move to confirmation step
-    widget.onNextStep();
+      // Move to confirmation step
+      widget.onNextStep();
+    }
     
   } catch (e) {
     
@@ -189,12 +195,14 @@ Future<void> _submitPayment() async {
       errorMessage = 'Failed to upload payment screenshot.';
     }
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(errorMessage),
-        backgroundColor: Colors.red,
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   } finally {
     setState(() => _isUploading = false);
   }

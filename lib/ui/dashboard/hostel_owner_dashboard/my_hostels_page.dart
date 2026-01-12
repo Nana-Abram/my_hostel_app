@@ -12,7 +12,7 @@ import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/view_hostel_pa
 
 
 class MyHostelsPage extends ConsumerStatefulWidget {
-  const MyHostelsPage({Key? key}) : super(key: key);
+  const MyHostelsPage({super.key});
 
   @override
   ConsumerState<MyHostelsPage> createState() => _MyHostelsPageState();
@@ -85,8 +85,8 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _onAddHostelPressed(),
-            child: Icon(Icons.add),
             backgroundColor: Colors.blue[700],
+            child: Icon(Icons.add),
           ),
         );
       },
@@ -285,7 +285,7 @@ Widget _buildHostelCard(HostelModel hostel) {
                 '(${hostel.reviewsCount.toInt()} reviews)',
                 style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
-              Spacer(),
+              const Spacer(),
               Icon(Icons.attach_money, color: Colors.green, size: 16),
               SizedBox(width: 4),
               Text(
@@ -311,7 +311,7 @@ Widget _buildHostelCard(HostelModel hostel) {
                 '${hostel.amenities.length} Amenities',
                 style: TextStyle(fontSize: 12),
               ),
-              Spacer(),
+              const Spacer(),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(

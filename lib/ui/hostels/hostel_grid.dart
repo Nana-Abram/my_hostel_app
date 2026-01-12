@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
 import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
@@ -43,8 +44,16 @@ class HostelGrid extends ConsumerWidget {
           return Center(
             child: EmptyHostelsState(
               onExplore: () {
-                // Clear filters or navigate
-                // You can add filter reset logic here
+                // Clear all filters to show all hostels
+                ref.read(filterProvider.notifier).clearFilters();
+                
+                // Show a snackbar to inform the user
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('All filters cleared. Showing all hostels.'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               },
             ),
           );

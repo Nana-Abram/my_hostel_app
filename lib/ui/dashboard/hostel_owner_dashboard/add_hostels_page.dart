@@ -54,9 +54,11 @@ Future<void> pickAndUploadImage() async {
     
     // Null safety check
     if (file.bytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Could not read image file")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not read image file")),
+        );
+      }
       return;
     }
 
@@ -69,9 +71,11 @@ Future<void> pickAndUploadImage() async {
       images.add(url);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Image uploaded successfully!")),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Image uploaded successfully!")),
+      );
+    }
     
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -137,9 +141,11 @@ if (currentUser == null) {
     final service = ref.read(hostelServiceProvider);
     await service.addHostel(hostel);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Hostel added successfully")),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Hostel added successfully")),
+      );
+    }
 
     // Clear form
     _formKey.currentState!.reset();
@@ -148,9 +154,11 @@ if (currentUser == null) {
     setState(() {
     });
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Failed to add hostel: $e")),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to add hostel: $e")),
+      );
+    }
   }
 }
 

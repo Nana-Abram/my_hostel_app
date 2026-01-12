@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/backend/model/filter_model.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/backend/service/hostel_service.dart';
@@ -99,7 +100,18 @@ final filteredHostelsProvider = Provider<List<HostelModel>>((ref) {
   final hostels = hostelsAsync.value ?? [];
   final rooms = roomsAsync.value ?? [];
 
-  return hostels.where((hostel) {
+  // Filter hostels
+  var filteredHostels = hostels.where((hostel) {
+    // Search query filter
+    if (filter.searchQuery != null && filter.searchQuery!.isNotEmpty) {
+      final query = filter.searchQuery!.toLowerCase();
+      final matchesSearch = hostel.name.toLowerCase().contains(query) ||
+          hostel.description.toLowerCase().contains(query) ||
+          hostel.location.toLowerCase().contains(query) ||
+          hostel.campus.toLowerCase().contains(query);
+      if (!matchesSearch) return false;
+    }
+
     // Get all rooms for this hostel
     final hostelRooms = rooms.where((room) => room.hostelId == hostel.id).toList();
     
@@ -120,13 +132,37 @@ final filteredHostelsProvider = Provider<List<HostelModel>>((ref) {
       
       final roomTypeMatch = filter.roomType == null || room.type == filter.roomType;
       final genderMatch = filter.gender == null || room.gender == filter.gender;
-      final priceMatch = filter.maxPrice == null || room.price <= filter.maxPrice!;
       
-      return roomTypeMatch && genderMatch && priceMatch;
+      // Price range filter
+      final minPriceMatch = filter.minPrice == null || room.price >= filter.minPrice!;
+      final maxPriceMatch = filter.maxPrice == null || room.price <= filter.maxPrice!;
+      
+      return roomTypeMatch && genderMatch && minPriceMatch && maxPriceMatch;
     });
 
     return campusMatch && amenitiesMatch && hasAvailableRooms;
   }).toList();
+
+  // Apply sorting
+  switch (filter.sortBy) {
+    case SortBy.priceAsc:
+      filteredHostels.sort((a, b) => a.startPrice.compareTo(b.startPrice));
+      break;
+    case SortBy.priceDesc:
+      filteredHostels.sort((a, b) => b.startPrice.compareTo(a.startPrice));
+      break;
+    case SortBy.rating:
+      filteredHostels.sort((a, b) => b.rating.compareTo(a.rating));
+      break;
+    case SortBy.popularity:
+      filteredHostels.sort((a, b) => b.reviewsCount.compareTo(a.reviewsCount));
+      break;
+    case SortBy.newest:
+      // Assuming hostels are already sorted by newest in the stream
+      break;
+  }
+
+  return filteredHostels;
 });
 
 // // Optional: Provider for hostel owner's hostels

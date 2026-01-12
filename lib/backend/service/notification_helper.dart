@@ -1,5 +1,4 @@
 import 'package:my_hostel_app/backend/service/notification_service.dart';
-import 'package:my_hostel_app/backend/model/booking_model.dart';
 
 /// Helper class to send notifications for various app events
 class NotificationHelper {

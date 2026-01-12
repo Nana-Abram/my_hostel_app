@@ -8,6 +8,8 @@
 /// - Student: No PIN required
 /// 
 /// NOTE: In production, store PINs in environment variables or secure backend
+library;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
