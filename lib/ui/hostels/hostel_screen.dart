@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/hostels/filter_section.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_grid.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
-class HostelsScreen extends StatelessWidget {
+class HostelsScreen extends ConsumerWidget {
   const HostelsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-    
-    });
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
@@ -39,13 +39,23 @@ class HostelsScreen extends StatelessWidget {
               
                   SizedBox(width: 40.w),
               
-                 
+                  /// HOSTEL GRID WITH PULL-TO-REFRESH
                   Expanded(
-                    child: SingleChildScrollView(child: Column(
-                      children: [
-                        const HostelGrid(),
-                      ],
-                    )),
+                    child: PullToRefreshWrapper(
+                      onRefresh: () async {
+                        // Refresh hostels data
+                        ref.invalidate(hostelsStreamProvider);
+                        // Wait a bit for the data to reload
+                        await Future.delayed(const Duration(milliseconds: 500));
+                      },
+                      child: const SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            HostelGrid(),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

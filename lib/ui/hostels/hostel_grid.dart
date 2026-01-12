@@ -2,24 +2,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class HostelGrid extends ConsumerWidget {
   const HostelGrid({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // This returns a List<HostelModel>
-    final filteredList = ref.watch(filteredHostelsProvider);
-
-    return filteredList.isEmpty
-        ? const Center(child: Text("No hostels found"))
-        : Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: filteredList
-                .map((hostel) => HostelCard(hostel: hostel))
-                .toList(),
+    final hostelsAsync = ref.watch(hostelsStreamProvider);
+    
+    return hostelsAsync.when(
+      // Loading state - show skeleton loaders
+      loading: () => Wrap(
+        spacing: 20,
+        runSpacing: 20,
+        children: List.generate(
+          6,
+          (index) => const SizedBox(
+            width: 300,
+            child: SkeletonHostelCard(),
+          ),
+        ),
+      ),
+      
+      // Error state - show error widget with retry
+      error: (error, stack) => Center(
+        child: NetworkErrorState(
+          onRetry: () {
+            ref.invalidate(hostelsStreamProvider);
+          },
+        ),
+      ),
+      
+      // Data loaded
+      data: (hostels) {
+        final filteredList = ref.watch(filteredHostelsProvider);
+        
+        // Empty state
+        if (filteredList.isEmpty) {
+          return Center(
+            child: EmptyHostelsState(
+              onExplore: () {
+                // Clear filters or navigate
+                // You can add filter reset logic here
+              },
+            ),
           );
+        }
+        
+        // Show data with staggered animation
+        return Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: List.generate(
+            filteredList.length,
+            (index) {
+              final hostel = filteredList[index];
+              return StaggeredAnimationWrapper(
+                position: index,
+                animationType: AnimationType.scaleAndFade,
+                child: HostelCard(hostel: hostel),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }
 

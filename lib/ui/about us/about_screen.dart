@@ -469,7 +469,7 @@ Widget _buildTeamSection(ThemeData theme) {
                 // Navigate to hostels screen
                 final appBarScreenState = context
                     .findAncestorStateOfType<AppBarScreenState>();
-                appBarScreenState?.onNavSelected(2);
+                appBarScreenState?.onNavSelected(1);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.blueColor,

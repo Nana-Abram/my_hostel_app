@@ -10,6 +10,7 @@ import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
 import 'package:my_hostel_app/ui/hostels/room_details_page.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class AvailableRooms extends ConsumerWidget {
   const AvailableRooms({
@@ -26,15 +27,16 @@ class AvailableRooms extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return GestureDetector(
+    return HapticGestureDetector(
       onTap: () {
-        // Navigate to room details page
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => RoomDetailsPage(room: room, hostel: hostel),
-          ),
+        // Navigate to room details page with animation
+        navigateWithAnimation(
+          context,
+          RoomDetailsPage(room: room, hostel: hostel),
+          transitionType: PageTransitionType.fadeAndSlide,
         );
       },
+      feedbackType: HapticFeedbackType.light,
       child: Container(
         width: isHostelOwner ? 0.9.sw : 0.5.sw,
         height: isHostelOwner ? 300.h : 270.h,

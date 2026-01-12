@@ -12,6 +12,7 @@ import 'package:my_hostel_app/ui/booking/widgets/progress_indicator.dart';
 import 'package:my_hostel_app/ui/booking/widgets/payment_step.dart';
 import 'package:my_hostel_app/ui/booking/widgets/confirmation_step.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class BookingScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -59,36 +60,48 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: BookingAppBar(),
       body: hostelAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => _buildErrorState("Failed to load hostel"),
+        loading: () => Center(
+          child: Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const LoadingCard(
+                  height: 200,
+                  message: 'Loading booking details...',
+                ),
+              ],
+            ),
+          ),
+        ),
+        error: (error, stackTrace) => NotFoundErrorState(
+          resourceName: 'Hostel',
+          onGoBack: () => context.pop(),
+        ),
         data: (hostel) => roomAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => _buildErrorState("Failed to load room"),
+          loading: () => Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.w),
+              child: const LoadingCard(
+                height: 200,
+                message: 'Loading room details...',
+              ),
+            ),
+          ),
+          error: (error, stackTrace) => NotFoundErrorState(
+            resourceName: 'Room',
+            onGoBack: () => context.pop(),
+          ),
           data: (room) {
             if (hostel == null || room == null) {
-              return _buildErrorState("Hostel or room not found");
+              return NotFoundErrorState(
+                resourceName: 'Booking',
+                onGoBack: () => context.pop(),
+              );
             }
             return _buildBookingContent(hostel, room);
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: Colors.red, size: 50.sp),
-          SizedBox(height: 16.h),
-          Text(message, style: TextStyle(fontSize: 16.sp)),
-          SizedBox(height: 16.h),
-          ElevatedButton(
-            onPressed: () => context.pop(),
-            child: const Text("Go Back"),
-          ),
-        ],
       ),
     );
   }

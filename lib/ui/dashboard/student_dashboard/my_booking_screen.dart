@@ -7,6 +7,7 @@ import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/booking_provider.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class MyBookingsScreen extends ConsumerStatefulWidget {
   const MyBookingsScreen({super.key});
@@ -48,11 +49,28 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           // Bookings list
           Expanded(
             child: bookingsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+              loading: () => ListView.builder(
+                padding: EdgeInsets.all(20.w),
+                itemCount: 4,
+                itemBuilder: (context, index) => Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: const SkeletonCard(height: 150),
+                ),
+              ),
+              error: (error, stack) => NetworkErrorState(
+                onRetry: () {
+                  ref.invalidate(userBookingsProvider(currentUser.id));
+                },
+              ),
               data: (bookings) {
                 final filteredBookings = _filterBookings(bookings, _selectedFilter);
-                return _buildBookingsList(context, filteredBookings);
+                return PullToRefreshWrapper(
+                  onRefresh: () async {
+                    ref.invalidate(userBookingsProvider(currentUser.id));
+                    await Future.delayed(const Duration(milliseconds: 500));
+                  },
+                  child: _buildBookingsList(context, filteredBookings),
+                );
               },
             ),
           ),
@@ -82,6 +100,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 label: Text(filter['label']!),
                 selected: isSelected,
                 onSelected: (selected) {
+                  HapticUtils.selectionClick();
                   setState(() {
                     _selectedFilter = filter['value']!;
                   });
@@ -105,20 +124,11 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   }
 
   Widget _buildBookingsList(BuildContext context, List<BookingModel> bookings) {
-    final theme = Theme.of(context);
     if (bookings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bookmark_border, size: 60.sp, color: theme.colorScheme.onSurfaceVariant),
-            SizedBox(height: 16.h),
-            Text(
-              'No bookings found',
-              style: TextStyle(fontSize: 16.sp, color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
+      return EmptyBookingsState(
+        onBrowse: () {
+          context.go('/hostels');
+        },
       );
     }
 

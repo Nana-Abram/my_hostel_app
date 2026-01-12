@@ -5,6 +5,7 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class HostelCard extends StatefulWidget {
   final HostelModel hostel;
@@ -21,9 +22,14 @@ class _HostelCardState extends State<HostelCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+    return HapticGestureDetector(
+      onTap: () {
+        context.push('/hostel-details', extra: widget.hostel);
+      },
+      feedbackType: HapticFeedbackType.light,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
@@ -220,6 +226,7 @@ class _HostelCardState extends State<HostelCard> {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -10,11 +10,9 @@ import 'package:my_hostel_app/ui/hostels/available_rooms.dart';
 import 'package:my_hostel_app/ui/hostels/booking_card.dart';
 import 'package:my_hostel_app/ui/hostels/image_slider_h_d.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
-import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-
-
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class HostelDetailsPage extends ConsumerWidget {
   const HostelDetailsPage({super.key, required this.hostelId});
@@ -32,46 +30,45 @@ class HostelDetailsPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: BookingAppBar(),
       body: hostelAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
+        loading: () => SingleChildScrollView(
+          padding: EdgeInsets.all(40.w),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: theme.colorScheme.error, size: 50.sp),
-              SizedBox(height: 16.h),
-              BigText(text: "Failed to load hostel", color: theme.colorScheme.error),
-              SizedBox(height: 8.h),
-              SmallText(text: "Please try again later"),
-              SizedBox(height: 16.h),
-              ElvButtonWidget(
-                text: "Go Back",
-                onPressed:() {
-                  GoRouter.of(context).go('/');
-                },
+              const SkeletonCard(height: 400),
+              SizedBox(height: 24.h),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      children: [
+                        const SkeletonCard(height: 200),
+                        SizedBox(height: 16.h),
+                        const SkeletonCard(height: 200),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 24.w),
+                  const Expanded(
+                    child: SkeletonCard(height: 300),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        error: (error, stackTrace) => NetworkErrorState(
+          onRetry: () {
+            // Trigger a rebuild by invalidating the provider
+          },
+        ),
         data: (hostel) {
           if (hostel == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.hotel, color: theme.colorScheme.onSurfaceVariant, size: 50.sp),
-                  SizedBox(height: 16.h),
-                  BigText(text: "Hostel not found", color: theme.colorScheme.onSurfaceVariant),
-                  SizedBox(height: 8.h),
-                  SmallText(text: "The requested hostel could not be found"),
-                  SizedBox(height: 16.h),
-                  ElvButtonWidget(
-                    text: "Go Back",
-                    onPressed:() {
-                      GoRouter.of(context).go('/');
-                    },
-                  ),
-                ],
-              ),
+            return NotFoundErrorState(
+              resourceName: 'Hostel',
+              onGoBack: () {
+                GoRouter.of(context).go('/');
+              },
             );
           }
 
