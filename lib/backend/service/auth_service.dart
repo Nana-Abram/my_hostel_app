@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
+import 'package:my_hostel_app/backend/service/notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -132,7 +133,12 @@ class AuthService {
         'lastLogin': DateTime.now().toIso8601String(),
       });
 
-      return await _getUserFromFirebaseUser(firebaseUser);
+      final user = await _getUserFromFirebaseUser(firebaseUser);
+      
+      // Save FCM token for push notifications
+      await NotificationService().saveFCMToken(firebaseUser.uid);
+      
+      return user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthError(e);
     }

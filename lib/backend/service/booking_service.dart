@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
+import 'package:my_hostel_app/backend/service/notification_helper.dart';
 
 class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -8,6 +9,15 @@ class BookingService {
   Future<String> createBooking(BookingModel booking) async {
     try {
       final docRef = await _firestore.collection('bookings').add(booking.toMap());
+      
+      // Send notification to hostel owner
+      await NotificationHelper.sendNewBookingToOwner(
+        ownerId: booking.ownerId,
+        studentName: booking.userName,
+        hostelName: booking.hostelName,
+        bookingId: docRef.id,
+      );
+      
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to create booking: $e');
@@ -54,6 +64,27 @@ Stream<List<BookingModel>> getBookingsByOwnerStream(String ownerId) {
       await _firestore.collection('bookings').doc(bookingId).update({
         'status': newStatus,
       });
+      
+      // Get booking details to send notification
+      final bookingDoc = await _firestore.collection('bookings').doc(bookingId).get();
+      if (bookingDoc.exists) {
+        final booking = BookingModel.fromMap(bookingDoc.data()!, bookingId);
+        
+        // Send notification based on status
+        if (newStatus == 'confirmed') {
+          await NotificationHelper.sendBookingConfirmationToStudent(
+            userId: booking.userId,
+            hostelName: booking.hostelName,
+            bookingId: bookingId,
+          );
+        } else if (newStatus == 'rejected' || newStatus == 'cancelled') {
+          await NotificationHelper.sendBookingRejectionToStudent(
+            userId: booking.userId,
+            hostelName: booking.hostelName,
+            bookingId: bookingId,
+          );
+        }
+      }
     } catch (e) {
       throw Exception('Failed to update booking status: $e');
     }
