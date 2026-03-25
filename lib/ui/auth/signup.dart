@@ -3,8 +3,8 @@
 /// SignUp Screen with Role-Based Security
 /// 
 /// Security PINs (for testing/development):
-/// - Admin PIN: 2468
-/// - Owner PIN: 1357
+/// - Admin PIN: 2020
+/// - Owner PIN: 1234
 /// - Student: No PIN required
 /// 
 /// NOTE: In production, store PINs in environment variables or secure backend
@@ -17,6 +17,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -39,8 +40,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   UserRole _selectedRole = UserRole.student;
   
   // Security PINs for admin and hostel owner roles
-  static const String _adminPin = '2468';
-  static const String _hostelOwnerPin = '1357';
+  static const String _adminPin = '2020';
+  static const String _hostelOwnerPin = '1234';
 
   @override
   void dispose() {
@@ -654,17 +655,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.network(
-                                    'https://www.google.com/favicon.ico',
+                                  EnhancedCachedImage(
+                                    imageUrl: 'https://www.google.com/favicon.ico',
                                     width: 20.w,
                                     height: 20.h,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.login,
-                                        size: 20.sp,
-                                        color: theme.colorScheme.primary,
-                                      );
-                                    },
+                                    showShimmer: false,
+                                    errorWidget: Icon(
+                                      Icons.login,
+                                      size: 20.sp,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                   ),
                                   SizedBox(width: 12.w),
                                   Text(

@@ -58,11 +58,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         if (user == null) {
           // Redirect to login if user is null
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/login',
-              (route) => false,
-            );
+            context.go('/login');
           });
           return _buildLoadingScreen();
         }

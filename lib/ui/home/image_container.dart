@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
 
 class ImageContainer extends StatefulWidget {
   const ImageContainer({super.key});
@@ -156,121 +158,127 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
             curve: Curves.easeInOutCubic,
             child: Transform.scale(
               scale: currentScale,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 16.h),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.shadowColor.withOpacity(0.2),
-                      blurRadius: currentElevation,
-                      spreadRadius: widget.isCenter ? 4 : 2,
-                      offset: Offset(0, currentElevation / 2),
-                    ),
-                    if (widget.isCenter)
+              child: GestureDetector(
+                onTap: () {
+                  //  GoRouter.of(context).push('/0');
+                  _navigateToFilteredResults(context);
+               },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 16.h),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24.r),
+                    boxShadow: [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.25),
-                        blurRadius: 30,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 12),
+                        color: theme.shadowColor.withOpacity(0.2),
+                        blurRadius: currentElevation,
+                        spreadRadius: widget.isCenter ? 4 : 2,
+                        offset: Offset(0, currentElevation / 2),
                       ),
-                    if (_isHovered)
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.3),
-                        blurRadius: 35,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 15),
-                      ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24.r),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Image
-                      Image.asset(
-                        widget.imagePath,
-                        fit: BoxFit.cover,
-                      ),
-                      
-                      // Gradient overlay (subtle, appears on hover or center)
-                      AnimatedOpacity(
-                        duration: const Duration(milliseconds: 400),
-                        opacity: (_isHovered || widget.isCenter) ? 1.0 : 0.0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                theme.colorScheme.primary.withOpacity(
-                                  widget.isCenter ? 0.35 : 0.25,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      // Border effect
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 400),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24.r),
-                          border: Border.all(
-                            color: widget.isCenter || _isHovered
-                                ? theme.colorScheme.primary.withOpacity(0.9)
-                                : Colors.transparent,
-                            width: widget.isCenter ? 4 : 3,
-                          ),
-                        ),
-                      ),
-                      
-                      // Center indicator badge (optional)
                       if (widget.isCenter)
-                        Positioned(
-                          top: 16.h,
-                          right: 16.w,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 6.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              borderRadius: BorderRadius.circular(20.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  color: theme.colorScheme.onPrimary,
-                                  size: 16.sp,
-                                ),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  'Featured',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withOpacity(0.25),
+                          blurRadius: 30,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 12),
+                        ),
+                      if (_isHovered)
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 35,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 15),
                         ),
                     ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24.r),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Image
+                        Image.asset(
+                          widget.imagePath,
+                          fit: BoxFit.cover,
+                        ),
+                        
+                        // Gradient overlay (subtle, appears on hover or center)
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 400),
+                          opacity: (_isHovered || widget.isCenter) ? 1.0 : 0.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  theme.colorScheme.primary.withOpacity(
+                                    widget.isCenter ? 0.35 : 0.25,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        // Border effect
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24.r),
+                            border: Border.all(
+                              color: widget.isCenter || _isHovered
+                                  ? theme.colorScheme.primary.withOpacity(0.9)
+                                  : Colors.transparent,
+                              width: widget.isCenter ? 4 : 3,
+                            ),
+                          ),
+                        ),
+                        
+                        // Center indicator badge (optional)
+                        if (widget.isCenter)
+                          Positioned(
+                            top: 16.h,
+                            right: 16.w,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(20.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary.withOpacity(0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: theme.colorScheme.onPrimary,
+                                    size: 16.sp,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    'Featured',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -279,5 +287,24 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
         },
       ),
     );
+  }
+
+   void _navigateToFilteredResults(BuildContext context) {
+    // Switch to Hostels tab in the main AppBarScreen navigation
+    final appBarScreenState = context.findAncestorStateOfType<AppBarScreenState>();
+    
+    if (appBarScreenState != null) {
+      appBarScreenState.onNavSelected(1);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Showing filtered results in Hostels'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      GoRouter.of(context).push('/0');
+
+    }
   }
 }

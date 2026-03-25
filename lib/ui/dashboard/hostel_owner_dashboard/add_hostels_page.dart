@@ -10,6 +10,7 @@ import 'package:my_hostel_app/backend/service/image_upload_service.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/add_rooms.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class AddHostelPage extends ConsumerStatefulWidget {
   const AddHostelPage({super.key});
@@ -31,6 +32,7 @@ class _AddHostelPageState extends ConsumerState<AddHostelPage> {
   final ratingCtrl = TextEditingController();
   final ownerNameCtrl = TextEditingController();
   final totalRoomsCtrl = TextEditingController();
+  final videoTourUrlCtrl = TextEditingController();
 
   
 
@@ -38,6 +40,76 @@ class _AddHostelPageState extends ConsumerState<AddHostelPage> {
   List<String> amenities = [];
   List<String> images = []; // Firebase Storage URLs (final saved)
   bool isUploading = false;
+  bool isUploadingVideo = false;
+
+  // Pick Video → Upload → Save URL into controller
+  Future<void> pickAndUploadVideo() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+
+      if (file.bytes == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not read video file")),
+          );
+        }
+        return;
+      }
+
+      setState(() => isUploadingVideo = true);
+
+      final imageService = ImageUploadService();
+
+      // Delete old video from Storage if replacing
+      final oldUrl = videoTourUrlCtrl.text.trim();
+      if (oldUrl.isNotEmpty && oldUrl.contains('firebasestorage')) {
+        try {
+          await imageService.deleteImage(oldUrl);
+        } catch (_) {} // Ignore if old file doesn't exist
+      }
+
+      final url = await imageService.uploadVideo(file.bytes!, file.name);
+
+      setState(() {
+        videoTourUrlCtrl.text = url;
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video uploaded successfully!")),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Video upload failed: ${e.toString()}")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isUploadingVideo = false);
+      }
+    }
+  }
+
+  void _removeVideo() {
+    final oldUrl = videoTourUrlCtrl.text.trim();
+    if (oldUrl.isNotEmpty && oldUrl.contains('firebasestorage')) {
+      ImageUploadService().deleteImage(oldUrl).catchError((_) {});
+    }
+    setState(() {
+      videoTourUrlCtrl.clear();
+    });
+  }
 
 // Pick Image → Upload → Save URL
 Future<void> pickAndUploadImage() async {
@@ -135,6 +207,7 @@ if (currentUser == null) {
     location: locationCtrl.text.trim(),
     status: "Pending",
     ownerId: currentUserId, // ADD THIS LINE
+    videoTourUrl: videoTourUrlCtrl.text.trim().isEmpty ? null : videoTourUrlCtrl.text.trim(),
   );
 
   try {
@@ -174,6 +247,7 @@ if (currentUser == null) {
     ratingCtrl.dispose();
     ownerNameCtrl.dispose();
     totalRoomsCtrl.dispose();
+    videoTourUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -238,6 +312,9 @@ if (currentUser == null) {
                         _input("Total Rooms", totalRoomsCtrl,
                             keyboard: TextInputType.number),
                         _input("Description", descriptionCtrl, maxLines: 3),
+
+                        // --- Video Tour Section ---
+                        _buildVideoTourSection(),
                             
                         SizedBox(height: 25.h),
                                   
@@ -319,19 +396,13 @@ if (currentUser == null) {
       ),
       child: Column(
         children: [
-          Image.network(
-            imageUrl,
+          EnhancedCachedImage(
+            imageUrl: imageUrl,
             height: 90.h,
             width: 120.w,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 90.h,
-                width: 120.w,
-                color: Colors.grey[200],
-                child: Icon(Icons.error, color: Colors.red),
-              );
-            },
+            borderRadius: BorderRadius.circular(8.r),
+            showShimmer: false,
           ),
           TextButton(
             onPressed: () => _removeImage(imageUrl),
@@ -394,6 +465,160 @@ if (currentUser == null) {
             color: selected ? Colors.white : Colors.black87,
           ),
         ),
+      ),
+    );
+  }
+
+  /// Video Tour section: pick from gallery OR paste a URL
+  Widget _buildVideoTourSection() {
+    final hasVideo = videoTourUrlCtrl.text.trim().isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Video Tour (Optional)",
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: 10.h),
+
+        // Current video preview / status
+        if (hasVideo) ...[
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: Colors.green.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.videocam, color: Colors.green[700], size: 28.sp),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Video attached",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        videoTourUrlCtrl.text.trim(),
+                        style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.red, size: 20.sp),
+                  tooltip: 'Remove video',
+                  onPressed: _removeVideo,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
+        ],
+
+        // Upload & URL buttons
+        if (isUploadingVideo)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 22.w,
+                  height: 22.h,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 12.w),
+                Text("Uploading video...", style: TextStyle(fontSize: 12.sp)),
+              ],
+            ),
+          )
+        else
+          Row(
+            children: [
+              // Pick from device
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: pickAndUploadVideo,
+                  icon: Icon(Icons.video_library, size: 18.sp),
+                  label: Text("Pick Video", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.blue.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              // Paste URL
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _showVideoUrlDialog,
+                  icon: Icon(Icons.link, size: 18.sp),
+                  label: Text("Paste URL", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.orange.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+        SizedBox(height: 10.h),
+      ],
+    );
+  }
+
+  void _showVideoUrlDialog() {
+    final urlCtrl = TextEditingController(text: videoTourUrlCtrl.text);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Enter Video URL"),
+        content: TextField(
+          controller: urlCtrl,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            hintText: "https://...",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            prefixIcon: Icon(Icons.link),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                videoTourUrlCtrl.text = urlCtrl.text.trim();
+              });
+              Navigator.pop(ctx);
+            },
+            child: Text("Save"),
+          ),
+        ],
       ),
     );
   }

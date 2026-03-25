@@ -18,3 +18,9 @@ export 'bottom_sheet_widgets.dart';
 
 // Haptic feedback widgets
 export 'haptic_widgets.dart';
+
+// Enhanced image widgets (zoom, lightbox, lazy loading, progressive loading)
+export 'image_widgets.dart';
+
+// Video tour widgets (video player with controls)
+export 'video_widgets.dart';

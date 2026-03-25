@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -383,17 +384,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.network(
-                                    'https://www.google.com/favicon.ico',
+                                  EnhancedCachedImage(
+                                    imageUrl: 'https://www.google.com/favicon.ico',
                                     width: 20.w,
                                     height: 20.h,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.login,
-                                        size: 20.sp,
-                                        color: theme.colorScheme.primary,
-                                      );
-                                    },
+                                    showShimmer: false,
+                                    errorWidget: Icon(
+                                      Icons.login,
+                                      size: 20.sp,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                   ),
                                   SizedBox(width: 12.w),
                                   Text(

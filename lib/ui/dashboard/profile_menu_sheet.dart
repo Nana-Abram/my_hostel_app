@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/settings_page.dart';
@@ -97,7 +98,7 @@ class ProfileMenuSheet extends ConsumerWidget {
       children: [
         CircleAvatar(
           radius: 28.r,
-          backgroundImage: NetworkImage(user.profileImage!),
+          backgroundImage: CachedNetworkImageProvider(user.profileImage!),
         ),
         SizedBox(width: 16.w),
         Column(

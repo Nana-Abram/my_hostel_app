@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
@@ -60,39 +59,34 @@ class _HostelCardState extends State<HostelCard> {
             //Image + Price Tag
             Stack(
               children: [
-                SizedBox(
-                  height: 300.h,
-                  width: 0.25.sw,
-                  child: ImageNetwork(
-                    image: widget.hostel.images.first,
-
-                    height: 300.h,
-                    width: 0.25.sw,
-
-                    duration: 1500,
-                    curve: Curves.easeIn,
-                    onPointer: true,
-                    debugPrint: false,
-                    backgroundColor: Colors.blue,
-
-                    fitWeb: BoxFitWeb.cover,
-                    fitAndroidIos: BoxFit.cover,
-
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.r),
-                      topRight: Radius.circular(16.r),
-                    ),
-
-                    onLoading: const CircularProgressIndicator(
-                      color: Colors.indigoAccent,
-                    ),
-                    onError: const Icon(Icons.error, color: Colors.red),
-
-                    onTap: () {
-                      debugPrint("©gabriel_patrick_souza");
-                    },
-                  ),
-                ),
+                widget.hostel.images.isNotEmpty
+                    ? EnhancedCachedImage(
+                        imageUrl: widget.hostel.images.first,
+                        height: 300.h,
+                        width: 0.25.sw,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16.r),
+                          topRight: Radius.circular(16.r),
+                        ),
+                        showShimmer: true,
+                      )
+                    : Container(
+                        height: 300.h,
+                        width: 0.25.sw,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16.r),
+                            topRight: Radius.circular(16.r),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 64.w,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                 Positioned(
                   top: 10.h,
                   right: 10.w,

@@ -12,6 +12,7 @@ import 'package:my_hostel_app/ui/booking/widgets/booking_summary.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 
 class PaymentStep extends ConsumerStatefulWidget {
@@ -332,33 +333,18 @@ DateTime _parseCheckInDate(String dateString) {
                 if (_imageUrl != null) ...[
                   Container(
                     height: 200.h,
-                    width: double.infinity,
+                    width: 400.6.w,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: theme.shadowColor.withOpacity(0.08)),
                     ),
-                    child: ClipRRect(
+                    child: EnhancedCachedImage(
+                      imageUrl: _imageUrl!,
+                      height: 200.h,
+                      width: 400.6.w,
+                      fit: BoxFit.cover,
                       borderRadius: BorderRadius.circular(12.r),
-                      child: Image.network( // Use Image.network for web
-                        _imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey.shade200,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.error, size: 40.sp, color: Colors.grey),
-                                SizedBox(height: 8.h),
-                                SmallText(
-                                  text: "Failed to load image",
-                                  color: Colors.grey.shade600,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                      showShimmer: false,
                     ),
                   ),
                   SizedBox(height: 16.h),
@@ -397,7 +383,7 @@ DateTime _parseCheckInDate(String dateString) {
                 ] else ...[
                   Container(
                     height: 200.h,
-                    width: double.infinity,
+                    width: 400.6.w,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(12.r),
@@ -468,7 +454,7 @@ DateTime _parseCheckInDate(String dateString) {
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: SmallText(
-                      text: "✅ Screenshot ready: ${_paymentScreenshot!.name}",
+                      text: "Screenshot ready: ${_paymentScreenshot!.name}",
                       color: Colors.green.shade800,
                       size: 10.sp,
                     ),

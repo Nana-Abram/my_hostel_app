@@ -15,6 +15,7 @@ class HostelModel {
   final double startPrice;
   final double reviewsCount;
   final String ownerId;
+  final String? videoTourUrl;
 
   HostelModel({
     required this.id,
@@ -31,6 +32,7 @@ class HostelModel {
     required this.reviewsCount,
     required this.status,
     this.ownerId = '',
+    this.videoTourUrl,
   });
 
   factory HostelModel.fromMap(Map<String, dynamic> data, String id) {
@@ -49,6 +51,7 @@ class HostelModel {
       reviewsCount: (data["reviewsCount"] as num).toDouble(),
       status: data['status'],
       ownerId: data['ownerId'] ?? '',
+      videoTourUrl: data['videoTourUrl'],
     );
   }
 
@@ -67,6 +70,7 @@ class HostelModel {
       "reviewsCount": reviewsCount,
       "status": status,
       "ownerId": ownerId,
+      if (videoTourUrl != null) "videoTourUrl": videoTourUrl,
     };
   }
 

@@ -6,6 +6,7 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
+import 'package:my_hostel_app/ui/widgets/modern/video_widgets.dart';
 
 class RoomDetailsPage extends ConsumerStatefulWidget {
   const RoomDetailsPage({
@@ -85,6 +86,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                   PageView.builder(
                     controller: _pageController,
                     itemCount: images.length,
+                    physics: const ClampingScrollPhysics(),
                     onPageChanged: (index) {
                       setState(() {
                         _currentImageIndex = index;
@@ -122,6 +124,67 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                       ),
                     ),
                   ),
+                  // Navigation arrows
+                  if (images.length > 1) ...[
+                    // Left arrow
+                    if (_currentImageIndex > 0)
+                      Positioned(
+                        left: 8.w,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: () {
+                              _pageController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chevron_left,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Right arrow
+                    if (_currentImageIndex < images.length - 1)
+                      Positioned(
+                        right: 8.w,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: () {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chevron_right,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                   // Page indicators
                   if (images.length > 1)
                     Positioned(
@@ -526,6 +589,20 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
 
                   SizedBox(height: 24.h),
 
+                  // Video Tour Section
+                  if (widget.room.videoUrl != null && widget.room.videoUrl!.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 40.w),
+                      padding: EdgeInsets.all(0.w),
+                      // height: 700.h,
+                      width:0.65.sw,
+                      child: VideoTourCard(
+                        videoUrl: widget.room.videoUrl!,
+                        title: 'Room Video Tour',
+                      ),
+                    ),
+
+                    SizedBox(height: 40.h),
                   // Hostel Details Section
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 20.w),

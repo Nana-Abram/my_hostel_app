@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
@@ -43,15 +43,23 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
   late final totalRoomsCtrl = TextEditingController(
     text: widget.hostel.totalRooms.toString(),
   );
-
-  late String selectedStatus = widget.hostel.status;
-
-  // --- DATA HOLDERS ---
-  late List<String> amenities = List.from(widget.hostel.amenities);
-  late List<String> images = List.from(widget.hostel.images);
-  bool isUploading = false;
+  late final videoTourUrlCtrl = TextEditingController(
+    text: widget.hostel.videoTourUrl ?? '',
+  );
 
   final status = ["Verified", "Pending", "Suspended"];
+  late String selectedStatus = status.contains(widget.hostel.status)
+      ? widget.hostel.status
+      : status.first;
+
+  // --- DATA HOLDERS ---
+  late List<String> images = List.from(widget.hostel.images);
+  bool isUploading = false;
+  bool isUploadingVideo = false;
+  
+  // Track images/videos to delete from Firebase Storage
+  final List<String> imagesToDelete = [];
+  String? videoToDelete;
 
   @override
   void dispose() {
@@ -64,7 +72,76 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
     ratingCtrl.dispose();
     ownerNameCtrl.dispose();
     totalRoomsCtrl.dispose();
+    videoTourUrlCtrl.dispose();
     super.dispose();
+  }
+
+  // Pick Video → Upload → Save URL into controller
+  Future<void> pickAndUploadVideo() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+
+      if (file.bytes == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not read video file")),
+          );
+        }
+        return;
+      }
+
+      setState(() => isUploadingVideo = true);
+
+      final imageService = ImageUploadService();
+
+      // Delete old video from Storage if replacing
+      final oldUrl = videoTourUrlCtrl.text.trim();
+      if (oldUrl.isNotEmpty && oldUrl.contains('firebasestorage')) {
+        videoToDelete = oldUrl; // Mark old video for deletion
+      }
+
+      final url = await imageService.uploadVideo(file.bytes!, file.name);
+
+      setState(() {
+        videoTourUrlCtrl.text = url;
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video uploaded successfully!")),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Video upload failed: ${e.toString()}")),
+        );
+        print("Video upload error: $e");
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isUploadingVideo = false);
+      }
+    }
+  }
+
+  void _removeVideo() {
+    final oldUrl = videoTourUrlCtrl.text.trim();
+    if (oldUrl.isNotEmpty && oldUrl.contains('firebasestorage')) {
+      videoToDelete = oldUrl; // Mark for deletion on update
+    }
+    setState(() {
+      videoTourUrlCtrl.clear();
+    });
   }
 
   // Pick Image → Upload → Save URL (same as AddHostelPage)
@@ -115,54 +192,128 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
     }
   }
 
+  // Delete files from Firebase Storage
+  Future<void> _deleteUnusedFiles() async {
+    final imageService = ImageUploadService();
+    
+    // Delete marked video
+    if (videoToDelete != null && videoToDelete!.contains('firebasestorage')) {
+      try {
+        await imageService.deleteImage(videoToDelete!);
+        print("Deleted video from storage: $videoToDelete");
+      } catch (e) {
+        print("Error deleting video from storage: $e");
+        // Continue with update even if deletion fails
+      }
+    }
+    
+    // Delete marked images
+    for (final imageUrl in imagesToDelete) {
+      if (imageUrl.contains('firebasestorage')) {
+        try {
+          await imageService.deleteImage(imageUrl);
+          print("Deleted image from storage: $imageUrl");
+        } catch (e) {
+          print("Error deleting image from storage: $e");
+          // Continue with update even if deletion fails
+        }
+      }
+    }
+  }
+
   // Update Hostel
   Future<void> _updateHostel() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final updatedHostel = HostelModel(
-      id: widget.hostel.id, // Keep the same ID
-      name: nameCtrl.text.trim(),
-      campus: campusCtrl.text.trim(),
-      description: descriptionCtrl.text.trim(),
-      ownerName: ownerNameCtrl.text.trim(),
-      totalRooms: double.parse(totalRoomsCtrl.text),
-      amenities: amenities,
-      images: images,
-      startPrice: double.parse(startPriceCtrl.text),
-      rating: ratingCtrl.text.isEmpty
-          ? widget.hostel.rating
-          : double.parse(ratingCtrl.text),
-      reviewsCount: reviewCountCtrl.text.isEmpty
-          ? widget.hostel.reviewsCount
-          : double.parse(reviewCountCtrl.text),
-      location: locationCtrl.text.trim(),
-      status: selectedStatus,
-      ownerId: widget.hostel.ownerId, // Keep the same ownerId
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
 
     try {
+      // First delete unused files from storage
+      await _deleteUnusedFiles();
+      
+      // Then update the hostel data
+      final updatedHostel = HostelModel(
+        id: widget.hostel.id, // Keep the same ID
+        name: nameCtrl.text.trim(),
+        campus: campusCtrl.text.trim(),
+        description: descriptionCtrl.text.trim(),
+        ownerName: ownerNameCtrl.text.trim(),
+        totalRooms: double.parse(totalRoomsCtrl.text),
+        amenities: amenities,
+        images: images,
+        startPrice: double.parse(startPriceCtrl.text),
+        rating: ratingCtrl.text.isEmpty
+            ? widget.hostel.rating
+            : double.parse(ratingCtrl.text),
+        reviewsCount: reviewCountCtrl.text.isEmpty
+            ? widget.hostel.reviewsCount
+            : double.parse(reviewCountCtrl.text),
+        location: locationCtrl.text.trim(),
+        status: selectedStatus,
+        ownerId: widget.hostel.ownerId, // Keep the same ownerId
+        videoTourUrl: videoTourUrlCtrl.text.trim().isEmpty ? null : videoTourUrlCtrl.text.trim(),
+      );
+
       final service = ref.read(hostelServiceProvider);
       await service.updateHostel(widget.hostel.id, updatedHostel);
 
+      // Clear deletion lists after successful update
+      imagesToDelete.clear();
+      videoToDelete = null;
+
       if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Hostel updated successfully")),
         );
 
-        Navigator.pop(context); // Go back to previous page
+        // Use addPostFrameCallback to pop page after the current frame completes
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Navigator.pop(context); // Go back to previous page
+          }
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Failed to update hostel: $e")));
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to update hostel: $e")),
+        );
+      }
     }
   }
 
   void _removeImage(String imageUrl) {
+    // Check if it's a Firebase Storage URL before marking for deletion
+    if (imageUrl.contains('firebasestorage')) {
+      imagesToDelete.add(imageUrl);
+    }
+    
     setState(() {
       images.remove(imageUrl);
     });
+    
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Image marked for removal. It will be deleted when you save changes.")),
+      );
+    }
   }
+
+  // Helper to get amenities list
+  late List<String> amenities = List.from(widget.hostel.amenities);
 
   @override
   Widget build(BuildContext context) {
@@ -175,13 +326,26 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
         actions: [
-          Tooltip(
-            message: 'Save Changes',
-            child: IconButton(
-              icon: Icon(Icons.save),
-              onPressed: _updateHostel,
-            ),
-          )
+          // Show indicator if there are files to delete
+          if (imagesToDelete.isNotEmpty || videoToDelete != null)
+            Tooltip(
+              message: '${imagesToDelete.length} image(s) and ${videoToDelete != null ? '1 video' : '0 videos'} will be deleted',
+              child: Badge(
+                label: Text('${imagesToDelete.length + (videoToDelete != null ? 1 : 0)}'),
+                child: IconButton(
+                  icon: Icon(Icons.save),
+                  onPressed: _updateHostel,
+                ),
+              ),
+            )
+          else
+            Tooltip(
+              message: 'Save Changes',
+              child: IconButton(
+                icon: Icon(Icons.save),
+                onPressed: _updateHostel,
+              ),
+            )
         ],
       ),
       body: LayoutBuilder(
@@ -263,6 +427,9 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
             ),
             _input("Description", descriptionCtrl, maxLines: 3),
 
+            // --- Video Tour Section ---
+            _buildVideoTourSection(),
+
             SizedBox(height: 25.h),
 
             DropdownButtonFormField(
@@ -308,6 +475,30 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
               style: TextStyle(fontSize: 14.sp),
             ),
             SizedBox(height: 10.h),
+
+            // Show warning if images will be deleted
+            if (imagesToDelete.isNotEmpty)
+              Container(
+                padding: EdgeInsets.all(8.w),
+                margin: EdgeInsets.only(bottom: 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.orange, size: 16.sp),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: Text(
+                        "${imagesToDelete.length} image(s) will be deleted from storage when you save",
+                        style: TextStyle(fontSize: 11.sp, color: Colors.orange.shade800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             isUploading
                 ? CircularProgressIndicator()
@@ -601,26 +792,244 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
   }
 
   Widget _imagePreview(String imageUrl) {
+    final isMarkedForDeletion = imagesToDelete.contains(imageUrl);
+    
     return Container(
       width: 140.w,
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isMarkedForDeletion ? Colors.red.shade300 : Colors.grey.shade300,
+          width: isMarkedForDeletion ? 2 : 1,
+        ),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
         children: [
-          ImageNetwork(
-            image:imageUrl,
-            height: 90.h,
-            width: 120.w,
-            fitWeb: BoxFitWeb.cover,
-            fitAndroidIos: BoxFit.cover,
-            borderRadius: BorderRadius.circular(10.r),
+          Stack(
+            children: [
+              ImageNetwork(
+                image: imageUrl,
+                height: 90.h,
+                width: 120.w,
+                fitWeb: BoxFitWeb.cover,
+                fitAndroidIos: BoxFit.cover,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              if (isMarkedForDeletion)
+                Container(
+                  height: 90.h,
+                  width: 120.w,
+                  color: Colors.red.withOpacity(0.3),
+                  child: Center(
+                    child: Icon(
+                      Icons.delete_forever,
+                      color: Colors.white,
+                      size: 30.sp,
+                    ),
+                  ),
+                ),
+            ],
           ),
           TextButton(
             onPressed: () => _removeImage(imageUrl),
-            child: Text("Remove", style: TextStyle(color: Colors.red)),
+            child: Text(
+              isMarkedForDeletion ? "Will be deleted" : "Remove",
+              style: TextStyle(
+                color: isMarkedForDeletion ? Colors.red : Colors.red,
+                fontWeight: isMarkedForDeletion ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Video Tour section: pick from gallery OR paste a URL
+  Widget _buildVideoTourSection() {
+    final hasVideo = videoTourUrlCtrl.text.trim().isNotEmpty;
+    final isVideoMarkedForDeletion = videoToDelete != null && videoTourUrlCtrl.text.isEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Video Tour (Optional)",
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: 10.h),
+
+        // Current video preview / status
+        if (hasVideo || isVideoMarkedForDeletion) ...[
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: isVideoMarkedForDeletion 
+                ? Colors.red.shade50 
+                : Colors.green.shade50,
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(
+                color: isVideoMarkedForDeletion 
+                  ? Colors.red.shade300 
+                  : Colors.green.shade300,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isVideoMarkedForDeletion ? Icons.delete_forever : Icons.videocam,
+                  color: isVideoMarkedForDeletion ? Colors.red[700] : Colors.green[700],
+                  size: 28.sp,
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isVideoMarkedForDeletion 
+                          ? "Video will be deleted"
+                          : "Video attached",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                          color: isVideoMarkedForDeletion 
+                            ? Colors.red[700]
+                            : Colors.green[700],
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      if (hasVideo)
+                        Text(
+                          videoTourUrlCtrl.text.trim(),
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: isVideoMarkedForDeletion 
+                              ? Colors.red[600]
+                              : Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: isVideoMarkedForDeletion ? Colors.red : Colors.red,
+                    size: 20.sp,
+                  ),
+                  tooltip: isVideoMarkedForDeletion 
+                    ? 'Video marked for deletion' 
+                    : 'Remove video',
+                  onPressed: isVideoMarkedForDeletion ? null : _removeVideo,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
+        ],
+
+        // Upload & URL buttons
+        if (isUploadingVideo)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 22.w,
+                  height: 22.h,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 12.w),
+                Text("Uploading video...", style: TextStyle(fontSize: 12.sp)),
+              ],
+            ),
+          )
+        else
+          Row(
+            children: [
+              // Pick from device
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: pickAndUploadVideo,
+                  icon: Icon(Icons.video_library, size: 18.sp),
+                  label: Text("Pick Video", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.blue.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              // Paste URL
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _showVideoUrlDialog,
+                  icon: Icon(Icons.link, size: 18.sp),
+                  label: Text("Paste URL", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.orange.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+        SizedBox(height: 10.h),
+      ],
+    );
+  }
+
+  void _showVideoUrlDialog() {
+    final urlCtrl = TextEditingController(text: videoTourUrlCtrl.text);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Enter Video URL"),
+        content: TextField(
+          controller: urlCtrl,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            hintText: "https://...",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            prefixIcon: Icon(Icons.link),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newUrl = urlCtrl.text.trim();
+              // If replacing an existing Firebase Storage video, mark it for deletion
+              final oldUrl = videoTourUrlCtrl.text.trim();
+              if (oldUrl.isNotEmpty && 
+                  oldUrl.contains('firebasestorage') &&
+                  oldUrl != newUrl) {
+                videoToDelete = oldUrl;
+              }
+              
+              setState(() {
+                videoTourUrlCtrl.text = newUrl;
+              });
+              Navigator.pop(ctx);
+            },
+            child: Text("Save"),
           ),
         ],
       ),

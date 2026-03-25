@@ -12,6 +12,7 @@ class RoomModel {
   final bool available;
   final int availableRooms;
   final List<String> features; // Bed, Fan, Wardrobe etc.
+  final String? videoUrl; // Room video tour
 
   RoomModel({
     required this.id,
@@ -25,6 +26,7 @@ class RoomModel {
     required this.available,
     required this.availableRooms,
     required this.features,
+    this.videoUrl,
   }) : images = images ?? [image];
 
   factory RoomModel.fromMap(Map<String, dynamic> map, String id) {
@@ -33,10 +35,7 @@ class RoomModel {
         ? List<String>.from(map['images'])
         : [mainImage];
     
-    // Debug logging
-    print('Loading room $id: image field = $mainImage');
-    print('Loading room $id: images field = ${map['images']}');
-    print('Loading room $id: final imagesList = $imagesList (length: ${imagesList.length})');
+
     
     return RoomModel(
       id: id,
@@ -50,6 +49,7 @@ class RoomModel {
       available: map['available'],
       availableRooms: map['availableRooms'],
       features: List<String>.from(map['features'] ?? []),
+      videoUrl: map['videoUrl'],
     );
   }
 
@@ -65,6 +65,7 @@ class RoomModel {
       "available": available,
       "availableRooms": availableRooms,
       "features": features,
+      if (videoUrl != null) "videoUrl": videoUrl,
     };
   }
 

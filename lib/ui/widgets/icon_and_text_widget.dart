@@ -24,28 +24,33 @@ class IconAndTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        isBackArrow
-            ? GestureDetector(
-                onTap: () {
-                  if (context.canPop()) {
-                    // If there's a previous page, go back
-                    context.pop();
-                  } else {
-                    // If this is the first page, go to home
-                    GoRouter.of(context).goNamed('tabs', pathParameters: {'tabIndex':1.toString()});
-                  }
-                },
-                child: Icon(icon, color: iconColor, size: iconSize),
-              )
-            : Icon(icon, color: iconColor, size: iconSize),
-        SizedBox(width: 5.w),
-        Text(
-          text,
-          style: TextStyle(fontSize: textSize, color: textColor),
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      child: Row(
+        children: [
+          Center(
+            child: isBackArrow
+                ? GestureDetector(
+                    onTap: () {
+                      if (context.canPop()) {
+                        // If there's a previous page, go back
+                        context.pop();
+                      } else {
+                        // If this is the first page, go to home
+                        GoRouter.of(context).goNamed('tabs', pathParameters: {'tabIndex':1.toString()});
+                      }
+                    },
+                    child: Icon(icon, color: iconColor, size: iconSize),
+                  )
+                : Icon(icon, color: iconColor, size: iconSize),
+          ),
+          SizedBox(width: 5.w),
+          Text(
+            text,
+            style: TextStyle(fontSize: textSize, color: textColor),
+          ),
+        ],
+      ),
     );
   }
 }

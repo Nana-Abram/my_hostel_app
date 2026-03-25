@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
+import 'package:my_hostel_app/backend/service/image_upload_service.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 import '../../../backend/model/room_model.dart';
 
@@ -28,6 +29,8 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
 
   List<Uint8List> imageBytesList = [];
   List<String> uploadedImageUrls = [];
+  String? videoUrl;
+  bool isUploadingVideo = false;
 
   List<String> selectedFeatures = [];
 
@@ -50,6 +53,92 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
     "Study Area",
     'Free mattress',
   ];
+
+  /// Pick and upload room video
+  Future<void> pickAndUploadVideo() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+      final file = result.files.first;
+      if (file.bytes == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not read video file")),
+          );
+        }
+        return;
+      }
+
+      setState(() => isUploadingVideo = true);
+
+      // Delete old video if replacing
+      if (videoUrl != null && videoUrl!.contains('firebasestorage')) {
+        try {
+          await ImageUploadService().deleteImage(videoUrl!);
+        } catch (_) {}
+      }
+
+      final url = await ImageUploadService().uploadRoomVideo(file.bytes!, file.name);
+      setState(() => videoUrl = url);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video uploaded successfully!")),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Video upload failed: $e")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isUploadingVideo = false);
+    }
+  }
+
+  void _removeVideo() {
+    final oldUrl = videoUrl;
+    if (oldUrl != null && oldUrl.contains('firebasestorage')) {
+      ImageUploadService().deleteImage(oldUrl).catchError((_) {});
+    }
+    setState(() => videoUrl = null);
+  }
+
+  void _showVideoUrlDialog() {
+    final urlCtrl = TextEditingController(text: videoUrl ?? '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Enter Video URL"),
+        content: TextField(
+          controller: urlCtrl,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            hintText: "https://...",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            prefixIcon: const Icon(Icons.link),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => videoUrl = urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim());
+              Navigator.pop(ctx);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Pick room images from computer (Web supported)
   Future<void> pickImages() async {
@@ -82,7 +171,9 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
 
       await ref.putData(imageBytesList[i], SettableMetadata(contentType: "image/jpeg"));
       final url = await ref.getDownloadURL();
-      urls.add(url);
+      if (url.isNotEmpty) {
+        urls.add(url);
+      }
     }
     
     return urls;
@@ -97,29 +188,48 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
       return;
     }
 
-    uploadedImageUrls = await uploadImages();
+    try {
+      uploadedImageUrls = await uploadImages();
 
-    final room = RoomModel(
-      id: FirebaseFirestore.instance.collection("rooms").doc().id,
-      hostelId: selectedHostel!,
-      type: selectedType!,
-      image: uploadedImageUrls.first,
-      images: uploadedImageUrls,
-      gender:selectedGender!,
-      capacity: capacity,
-      availableRooms: availableRooms,
-      price: price,
-      available: selectedAvailability == "True" ? true : false,
-      features: selectedFeatures,
-    );
+      if (uploadedImageUrls.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to upload images. Please try again.")),
+          );
+        }
+        return;
+      }
 
-    final service = ref.read(roomServiceProvider);
-    await service.addRoom(room);
+      final room = RoomModel(
+        id: FirebaseFirestore.instance.collection("rooms").doc().id,
+        hostelId: selectedHostel!,
+        type: selectedType!,
+        image: uploadedImageUrls.first,
+        images: uploadedImageUrls,
+        gender: selectedGender!,
+        capacity: capacity,
+        availableRooms: availableRooms,
+        price: price,
+        available: selectedAvailability == "True" ? true : false,
+        features: selectedFeatures,
+        videoUrl: videoUrl,
+      );
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+      final service = ref.read(roomServiceProvider);
+      await service.addRoom(room);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to add room: $e")),
+        );
+      }
+      return;
     }
 
     setState(() {
@@ -129,6 +239,7 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
       imageBytesList.clear();
       uploadedImageUrls.clear();
       selectedFeatures.clear();
+      videoUrl = null;
     });
   }
 
@@ -350,6 +461,11 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                       
                         SizedBox(height: 30.h),
                       
+                        /// Video Tour Section
+                        _buildVideoSection(),
+
+                        SizedBox(height: 30.h),
+                      
                         /// Submit
                         ElevatedButton(
                           onPressed: saveRoom,
@@ -365,5 +481,105 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
         ),
     );
     
+  }
+
+  Widget _buildVideoSection() {
+    final hasVideo = videoUrl != null && videoUrl!.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Video Tour (Optional)",
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+        SizedBox(height: 10.h),
+        if (hasVideo) ...[
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: Colors.green.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.videocam, color: Colors.green[700], size: 28.sp),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Video attached",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.sp,
+                              color: Colors.green[700])),
+                      SizedBox(height: 4.h),
+                      Text(videoUrl!,
+                          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.red, size: 20.sp),
+                  tooltip: 'Remove video',
+                  onPressed: _removeVideo,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
+        ],
+        if (isUploadingVideo)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Row(
+              children: [
+                SizedBox(
+                    width: 22.w,
+                    height: 22.h,
+                    child: const CircularProgressIndicator(strokeWidth: 2)),
+                SizedBox(width: 12.w),
+                Text("Uploading video...", style: TextStyle(fontSize: 12.sp)),
+              ],
+            ),
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: pickAndUploadVideo,
+                  icon: Icon(Icons.video_library, size: 18.sp),
+                  label: Text("Pick Video", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.blue.shade300),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r)),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _showVideoUrlDialog,
+                  icon: Icon(Icons.link, size: 18.sp),
+                  label: Text("Paste URL", style: TextStyle(fontSize: 12.sp)),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    side: BorderSide(color: Colors.orange.shade300),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        SizedBox(height: 10.h),
+      ],
+    );
   }
 }

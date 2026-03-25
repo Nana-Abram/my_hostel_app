@@ -416,7 +416,7 @@ Widget _buildStatCard({
               );
             },
           ),
-        ),
+        ), 
       ],
     );
   }
@@ -425,7 +425,7 @@ Widget _buildStatCard({
     String ownerId, 
     BookingService bookingService
   ) async* {
-    await for (final bookings in bookingService.getBookingsByOwnerStream(ownerId)) {
+    await for (final List<BookingModel> bookings in bookingService.getBookingsByOwnerStream(ownerId)) {
       try {
         // Sort by most recent
         bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));

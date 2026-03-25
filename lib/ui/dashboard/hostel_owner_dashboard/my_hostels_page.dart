@@ -5,7 +5,7 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
-import 'package:my_hostel_app/ui/auth/login.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/add_hostels_page.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/edit_hostel_page.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/view_hostel_page.dart';
@@ -87,6 +87,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
             onPressed: () => _onAddHostelPressed(),
             backgroundColor: Colors.blue[700],
             child: Icon(Icons.add),
+            tooltip: 'Add New Hostel',
           ),
         );
       },
@@ -127,8 +128,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                // Navigate to your login page
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                context.go('/login');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[700],
@@ -337,28 +337,37 @@ Widget _buildHostelCard(HostelModel hostel) {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: Icon(Icons.edit, size: 16),
-                  label: Text('Edit'),
-                  onPressed: () => _onEditHostelPressed(hostel),
+                child: Tooltip(
+                  message: 'Edit Hostel Details',
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.edit, size: 16),
+                    label: Text('Edit'),
+                    onPressed: () => _onEditHostelPressed(hostel),
+                  ),
                 ),
               ),
               SizedBox(width: 8),
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: Icon(Icons.visibility, size: 16),
-                  label: Text('View'),
-                  onPressed: () => _onViewHostelPressed(hostel),
+                child: Tooltip(
+                  message: 'View Hostel Details',
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.visibility, size: 16),
+                    label: Text('View'),
+                    onPressed: () => _onViewHostelPressed(hostel),
+                  ),
                 ),
               ),
               SizedBox(width: 8),
               Expanded(
-                child: OutlinedButton.icon(
+                child: Tooltip(
+                  message: 'Delete Hostel',
+                  child: OutlinedButton.icon(
                   icon: Icon(Icons.delete, size: 16),
                   label: Text('Delete'),
                   onPressed: () => _onDeleteHostelPressed(hostel),
                 ),
               ),
+              )
             ],
           ),
         ],

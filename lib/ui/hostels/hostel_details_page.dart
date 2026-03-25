@@ -187,6 +187,12 @@ class HostelDetailsPage extends ConsumerWidget {
         _buildAboutSection(hostel, theme),
         SizedBox(height: 20.h),
 
+        // Video tour section (if available)
+        if (hostel.videoTourUrl != null && hostel.videoTourUrl!.isNotEmpty) ...[
+          _buildVideoTourSection(hostel, theme),
+          SizedBox(height: 30.h),
+        ],
+
         // Amenities
         _buildAmenitiesSection(hostel, theme),
         SizedBox(height: 30.h),
@@ -269,6 +275,14 @@ class HostelDetailsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildVideoTourSection(HostelModel hostel, ThemeData theme) {
+    return VideoTourCard(
+      videoUrl: hostel.videoTourUrl!,
+      title: 'Virtual Tour',
+      description: 'Take a virtual tour of ${hostel.name} to explore the facilities and rooms.',
     );
   }
 
