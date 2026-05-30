@@ -14,22 +14,11 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize notifications
+  // Initialize notifications (background handler must be registered before
+  // any other Firebase call, so it stays here at the top level)
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await NotificationService().initialize();
 
-  // // Enable local cache persistence
-  // FirebaseFirestore.instance.settings = const Settings(
-  //   persistenceEnabled: true,
-  //   cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-  // );
-  
-  // if(FirebaseFirestore.instance.settings.persistenceEnabled == true) {
-  //   print("✅ Firestore local cache persistence is ENABLED");
-  // } else {
-  //   print("❌ Firestore local cache persistence is DISABLED");
-  // }
-  
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -38,11 +27,18 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ── IMPORTANT: The router is created here, inside the ConsumerWidget, ──
+    // so its redirect callback has access to Riverpod via `ref`.             
+    // Creating it as a static field (as before) meant the redirect ran       
+    // before any provider was ready → auth state appeared null → double-login.
+    final router = AppRouter.createRouter(ref);
+
     return AdaptiveTheme(
       light: AppTheme.lightTheme(),
       dark: AppTheme.darkTheme(),
-      initial: AdaptiveThemeMode.light,
-      builder:(theme, darkTheme) => ScreenUtilInit(
+      // Follow the device theme automatically; user can override in settings.
+      initial: AdaptiveThemeMode.system,
+      builder: (theme, darkTheme) => ScreenUtilInit(
         designSize: const Size(1440, 1024),
         minTextAdapt: true,
         builder: (context, child) {
@@ -51,7 +47,7 @@ class MyApp extends ConsumerWidget {
             title: 'My Hostel App',
             theme: theme,
             darkTheme: darkTheme,
-            routerConfig: AppRouter.router,
+            routerConfig: router,
           );
         },
       ),

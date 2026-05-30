@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 class AnalyticsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -63,7 +64,7 @@ class AnalyticsService {
         'occupancyRate': totalHostels > 0 ? (activeHostels / totalHostels * 100).toStringAsFixed(1) : '0.0',
       };
     } catch (e) {
-      print('Error getting platform stats: $e');
+      AppLogger.error('Error getting platform stats', e);
       throw Exception('Failed to get platform statistics: $e');
     }
   }
@@ -170,7 +171,7 @@ class AnalyticsService {
         };
       }).toList();
     } catch (e) {
-      print('Error getting top hostels: $e');
+      AppLogger.error('Error getting top hostels', e);
       return [];
     }
   }
@@ -220,7 +221,7 @@ class AnalyticsService {
         'activePercentage': totalUsers > 0 ? (totalActive / totalUsers * 100).toStringAsFixed(1) : '0.0',
       };
     } catch (e) {
-      print('Error getting user demographics: $e');
+      AppLogger.error('Error getting user demographics', e);
       return {
         'students': 0,
         'owners': 0,

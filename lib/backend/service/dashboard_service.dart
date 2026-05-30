@@ -1,5 +1,6 @@
 import 'package:my_hostel_app/backend/model/dashboard_model.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 class DashboardService {
   final BookingService _bookingService;
@@ -44,7 +45,7 @@ class DashboardService {
       );
       
     } catch (e) {
-      print('Error fetching dashboard data: $e');
+      AppLogger.error('Error fetching student dashboard data', e);
       return StudentDashboardData.empty();
     }
   }

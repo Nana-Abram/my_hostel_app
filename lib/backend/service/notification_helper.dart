@@ -1,4 +1,5 @@
 import 'package:my_hostel_app/backend/service/notification_service.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 /// Helper class to send notifications for various app events
 class NotificationHelper {
@@ -219,6 +220,6 @@ class NotificationHelper {
   }) async {
     // This would typically be done server-side via Cloud Functions
     // For now, we just log it
-    print('Broadcasting to topic $topic: $title - $message');
+    AppLogger.info('Broadcasting to topic $topic: $title - $message');
   }
 }

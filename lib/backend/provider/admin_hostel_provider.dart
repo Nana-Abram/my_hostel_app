@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 // Use HostelModel instead of Map
 final hostelsProvider = StreamProvider<List<HostelModel>>((ref) {
@@ -23,8 +24,8 @@ class HostelsService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
+      AppLogger.info('Admin hostels snapshot count: ${snapshot.docs.length}');
       return snapshot.docs.map((doc) {
-        print("====$snapshot");
         return HostelModel.fromMap(doc.data(), doc.id);
       }).toList();
     });

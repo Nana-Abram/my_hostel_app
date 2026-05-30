@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 class RoomService {
   final _db = FirebaseFirestore.instance;
@@ -29,7 +30,7 @@ class RoomService {
       }
       return null;
     } catch (e) {
-      print('Error fetching room by ID: $e');
+      AppLogger.error('Error fetching room by ID', e);
       return null;
     }
   }
@@ -46,7 +47,7 @@ class RoomService {
 
   Stream<List<RoomModel>> getAllRoomsStream() {
     return _db.collection('rooms').snapshots().map((snapshot) {
-      print("Snap for rooms:${snapshot.docs.length}");
+      AppLogger.info('Rooms snapshot length: ${snapshot.docs.length}');
       return snapshot.docs
           .map((doc) => RoomModel.fromMap(doc.data(), doc.id))
           .toList();

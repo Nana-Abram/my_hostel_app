@@ -7,6 +7,7 @@ import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/backend/service/image_upload_service.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/edit_rooms_page.dart';
 
 class EditHostelPage extends ConsumerStatefulWidget {
@@ -125,7 +126,7 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Video upload failed: ${e.toString()}")),
         );
-        print("Video upload error: $e");
+            AppLogger.error('Video upload error', e);
       }
     } finally {
       if (mounted) {
@@ -200,9 +201,9 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
     if (videoToDelete != null && videoToDelete!.contains('firebasestorage')) {
       try {
         await imageService.deleteImage(videoToDelete!);
-        print("Deleted video from storage: $videoToDelete");
+            AppLogger.info('Deleted video from storage: $videoToDelete');
       } catch (e) {
-        print("Error deleting video from storage: $e");
+            AppLogger.error('Error deleting video from storage', e);
         // Continue with update even if deletion fails
       }
     }
@@ -212,9 +213,9 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
       if (imageUrl.contains('firebasestorage')) {
         try {
           await imageService.deleteImage(imageUrl);
-          print("Deleted image from storage: $imageUrl");
+              AppLogger.info('Deleted image from storage: $imageUrl');
         } catch (e) {
-          print("Error deleting image from storage: $e");
+              AppLogger.error('Error deleting image from storage', e);
           // Continue with update even if deletion fails
         }
       }

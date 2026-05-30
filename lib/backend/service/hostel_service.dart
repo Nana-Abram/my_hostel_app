@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 class HostelService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -89,7 +90,7 @@ Stream<HostelModel?> getHostelByIdStream(String id) {
 
 Future<void> deleteHostel(String id) async {
   try {
-    print('🔴 [DELETE START] Deleting hostel with ID: $id');
+    AppLogger.info('Deleting hostel with ID: $id');
     
     if (id.isEmpty) {
       throw Exception('Hostel ID cannot be empty');
@@ -97,18 +98,17 @@ Future<void> deleteHostel(String id) async {
     
     // Check if document exists before deleting
     final doc = await _firestore.collection('hostels').doc(id).get();
-    print('📄 Document exists: ${doc.exists}');
+    AppLogger.info('Hostel exists before delete: ${doc.exists}');
     
     if (!doc.exists) {
       throw Exception('Hostel with ID $id does not exist');
     }
     
-    print('🗑️ Proceeding with deletion...');
     await _firestore.collection('hostels').doc(id).delete();
-    print('✅ [DELETE SUCCESS] Hostel deleted successfully');
+    AppLogger.info('Hostel deleted successfully');
     
-  } catch (e) {
-    print('❌ [DELETE ERROR] Delete hostel error: $e');
+  } catch (e, stack) {
+    AppLogger.error('Delete hostel failed', e, stack);
     throw Exception('Failed to delete hostel: $e');
   }
 }

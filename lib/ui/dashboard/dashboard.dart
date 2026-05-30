@@ -42,9 +42,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         }
       });
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Unable to load user data')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to load user data')),
+      );
     }
   }
 
@@ -54,35 +54,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final authState = ref.watch(authProvider);
 
     return authState.when(
+      // ── The GoRouter redirect now handles unauthenticated navigation,
+      //    so this data: branch only has to deal with the happy path.
       data: (user) {
         if (user == null) {
-          // Redirect to login if user is null
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.go('/login');
-          });
-          return _buildLoadingScreen();
+          // GoRouter redirect will kick in on the next frame; show a blank
+          // loader rather than scheduling a navigation inside build.
+          return _buildLoadingScreen(theme);
         }
-
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
-          appBar: _buildAppBar(user, context),
+          appBar: _buildAppBar(user, context, theme),
           body: _buildBody(user),
           bottomNavigationBar: _buildBottomNavigationBar(user, theme),
         );
       },
-      loading: () => _buildLoadingScreen(),
-      error: (error, stack) => _buildErrorScreen(error),
+      loading: () => _buildLoadingScreen(theme),
+      error: (error, stack) => _buildErrorScreen(error, theme),
     );
   }
 
-  AppBar _buildAppBar(UserModel user, BuildContext context) {
-    final theme = Theme.of(context);
+  // ── AppBar ────────────────────────────────────────────────────────────────
+
+  AppBar _buildAppBar(UserModel user, BuildContext context, ThemeData theme) {
     return AppBar(
       backgroundColor: theme.colorScheme.surface,
       elevation: 1,
       title: Row(
         children: [
-          // Logo
           Container(
             width: 32.w,
             height: 32.w,
@@ -94,7 +93,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: Text(
                 'H',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 16.sp,
                 ),
@@ -115,59 +114,66 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               Text(
                 _getGreeting(),
-                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
               ),
             ],
           ),
         ],
       ),
       actions: [
-        // Notification Icon
         IconButton(
           icon: Badge(
-            label: Text('3'), // You can make this dynamic
-            child: Icon(Icons.notifications_outlined, size: 24.w),
+            label: const Text('3'),
+            child: Icon(
+              Icons.notifications_outlined,
+              size: 24.w,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
           onPressed: () {
-            // Navigate to notifications
+            // TODO: navigate to notifications screen
           },
         ),
-
-        // User Profile
         Padding(
           padding: EdgeInsets.only(right: 16.w),
           child: Tooltip(
             message: 'Profile Menu',
             child: CircleAvatar(
               radius: 18.w,
-              backgroundColor: AppColors.blueColor.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primaryContainer,
               child: user.profileImage != null
                   ? ClipOval(
                       child: ImageNetwork(
                         image: user.profileImage!,
-                        height: 36.w, // Diameter = radius * 2
+                        height: 36.w,
                         width: 36.w,
                         fitAndroidIos: BoxFit.cover,
                         fitWeb: BoxFitWeb.cover,
                         backgroundColor: Colors.transparent,
-                        onLoading: const CircularProgressIndicator(
-                          color: Colors.indigoAccent,
+                        onLoading: CircularProgressIndicator(
+                          color: theme.colorScheme.primary,
                         ),
-                        onError: const Icon(Icons.error, color: Colors.red),
+                        onError: Icon(
+                          Icons.error,
+                          color: theme.colorScheme.error,
+                        ),
                         onTap: _showProfileMenu,
                       ),
                     )
                   : InkWell(
                       onTap: _showProfileMenu,
-                    child: Text(
+                      child: Text(
                         user.fullName[0].toUpperCase(),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.blueColor,
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
                       ),
-                  ),
+                    ),
             ),
           ),
         ),
@@ -175,8 +181,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  // ── Body ──────────────────────────────────────────────────────────────────
+
   Widget _buildBody(UserModel user) {
-    // Show different dashboard based on user role
     switch (user.role) {
       case UserRole.admin:
         return AdminDashboard(
@@ -189,17 +196,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onIndexChanged: (index) => setState(() => _currentIndex = index),
         );
       case UserRole.student:
-        return StudentDashboard();
+        return const StudentDashboard();
       default:
-        return StudentDashboard();
+        return const StudentDashboard();
     }
   }
 
+  // ── Bottom nav ────────────────────────────────────────────────────────────
+
   Widget _buildBottomNavigationBar(UserModel user, ThemeData theme) {
-    final navItems = _getNavigationItems(user.role);
-      if (user.role == UserRole.student) {
-    return const SizedBox.shrink();
-  }
+    if (user.role == UserRole.student) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
@@ -208,7 +214,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           BoxShadow(
             color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 8,
-            offset: Offset(0, -2),
+            offset: const Offset(0, -2),
           ),
         ],
       ),
@@ -217,23 +223,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
         backgroundColor: theme.colorScheme.surface,
-        selectedItemColor: AppColors.blueColor,
-        unselectedItemColor: Colors.blueGrey,
-        selectedLabelStyle: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w500,
-        ),
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.5),
+        selectedLabelStyle:
+            TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
         unselectedLabelStyle: TextStyle(fontSize: 11.sp),
-        items: navItems,
+        items: _getNavigationItems(user.role),
       ),
     );
   }
 
   List<BottomNavigationBarItem> _getNavigationItems(UserRole role) {
-    
     switch (role) {
       case UserRole.admin:
-        return [
+        return const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),
@@ -257,7 +260,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ];
 
       case UserRole.hostelOwner:
-        return [
+        return const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),
@@ -286,8 +289,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ];
 
       case UserRole.student:
-        return
-         [
+      default:
+        return const [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore),
@@ -314,9 +317,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             label: 'Profile',
           ),
         ];
-    
     }
   }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -325,9 +329,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return 'Good Evening';
   }
 
+  // ── Profile bottom sheet ──────────────────────────────────────────────────
+
   void _showProfileMenu() {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
+      backgroundColor: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -337,63 +345,66 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Profile Header
+              // Profile header
               Consumer(
                 builder: (context, ref, child) {
                   final user = ref.watch(authProvider).value;
-                  return user != null ? _buildProfileHeader(user) : SizedBox();
+                  return user != null
+                      ? _buildProfileHeader(user, theme)
+                      : const SizedBox();
                 },
               ),
               SizedBox(height: 20.h),
 
-              // Menu Items
               _buildMenuButton(
                 icon: Icons.person_outline,
                 title: 'Edit Profile',
-                onTap:(){
-                 Navigator.pop(context);
-                 _editProfile();
-                }
+                theme: theme,
+                onTap: () {
+                  Navigator.pop(context);
+                  _editProfile();
+                },
               ),
               _buildMenuButton(
                 icon: Icons.settings_outlined,
                 title: 'Settings',
+                theme: theme,
                 onTap: () {
-                 Navigator.pop(context);
+                  Navigator.pop(context);
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsPage(isAppBarVisible: true,),
-                      ),
-                    );
-                  // Navigate to settings
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const SettingsPage(isAppBarVisible: true),
+                    ),
+                  );
                 },
               ),
               _buildMenuButton(
                 icon: Icons.help_outline,
                 title: 'Help & Support',
+                theme: theme,
                 onTap: () {
                   Navigator.pop(context);
-
-                  // Navigate to help
+                  // TODO: navigate to help screen
                 },
               ),
               SizedBox(height: 16.h),
 
-              // Logout Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _confirmLogout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.1),
-                    foregroundColor: Colors.red,
+                    backgroundColor:
+                        theme.colorScheme.errorContainer,
+                    foregroundColor: theme.colorScheme.onErrorContainer,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
-                  child: Text('Log Out'),
+                  child: const Text('Log Out'),
                 ),
               ),
             ],
@@ -403,41 +414,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildProfileHeader(UserModel user) {
+  Widget _buildProfileHeader(UserModel user, ThemeData theme) {
     return Row(
       children: [
-        // User Profile
-        Padding(
-          padding: EdgeInsets.only(right: 16.w),
-          child: CircleAvatar(
-            radius: 18.w,
-            backgroundColor: AppColors.blueColor.withOpacity(0.1),
-            child: user.profileImage != null
-                ? ClipOval(
-                    child: ImageNetwork(
-                      image: user.profileImage!,
-                      height: 36.w, // Diameter = radius * 2
-                      width: 36.w,
-                      fitAndroidIos: BoxFit.cover,
-                      fitWeb: BoxFitWeb.cover,
-                      backgroundColor: Colors.transparent,
-                      onLoading: const CircularProgressIndicator(
-                        color: Colors.indigoAccent,
-                      ),
-                      onError: const Icon(Icons.error, color: Colors.red),
+        CircleAvatar(
+          radius: 24.w,
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: user.profileImage != null
+              ? ClipOval(
+                  child: ImageNetwork(
+                    image: user.profileImage!,
+                    height: 48.w,
+                    width: 48.w,
+                    fitAndroidIos: BoxFit.cover,
+                    fitWeb: BoxFitWeb.cover,
+                    backgroundColor: Colors.transparent,
+                    onLoading: CircularProgressIndicator(
+                      color: theme.colorScheme.primary,
                     ),
-                  )
-                : Text(
-                    user.fullName[0].toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.blueColor,
+                    onError: Icon(
+                      Icons.error,
+                      color: theme.colorScheme.error,
                     ),
                   ),
-          ),
+                )
+              : Text(
+                  user.fullName[0].toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
         ),
-
         SizedBox(width: 16.w),
         Expanded(
           child: Column(
@@ -448,26 +457,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 user.email,
-                style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
               SizedBox(height: 4.h),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: _getRoleColor(user.role).withOpacity(0.1),
+                  color: _getRoleColor(user.role, theme).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
                   user.role.displayName,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: _getRoleColor(user.role),
+                    color: _getRoleColor(user.role, theme),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -483,20 +496,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required ThemeData theme,
   }) {
     return ListTile(
-      leading: Icon(icon, size: 24.w, color: Colors.blueGrey),
+      leading: Icon(
+        icon,
+        size: 24.w,
+        color: theme.colorScheme.onSurface.withOpacity(0.6),
+      ),
       title: Text(
         title,
-        style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: theme.colorScheme.onSurface,
+        ),
       ),
-      trailing: Icon(Icons.chevron_right, size: 20.w, color: Colors.grey),
+      trailing: Icon(
+        Icons.chevron_right,
+        size: 20.w,
+        color: theme.colorScheme.onSurface.withOpacity(0.4),
+      ),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
     );
   }
 
-  Color _getRoleColor(UserRole role) {
+  Color _getRoleColor(UserRole role, ThemeData theme) {
     switch (role) {
       case UserRole.admin:
         return Colors.orange;
@@ -504,31 +529,46 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return Colors.purple;
       case UserRole.student:
       default:
-        return AppColors.blueColor;
+        return theme.colorScheme.primary;
     }
   }
 
+  // ── Logout ────────────────────────────────────────────────────────────────
+
   void _confirmLogout() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Log Out'),
-        content: Text('Are you sure you want to log out?'),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(
+          'Log Out',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        content: Text(
+          'Are you sure you want to log out?',
+          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
-              GoRouter.of(context).goNamed('login'); // Close bottom sheet
+              Navigator.pop(context); // Close dialog
               _logout();
+              // GoRouter redirect will automatically send the user to /login
+              // once Firebase auth state emits null — no manual navigation needed.
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
             ),
-            child: Text('Log Out'),
+            child: const Text('Log Out'),
           ),
         ],
       ),
@@ -539,28 +579,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     try {
       final authService = ref.read(authServiceProvider);
       await authService.signOut();
-      // Auth state provider will handle the navigation
+      // The GoRouter redirect watches authStateProvider and will automatically
+      // navigate to /login once the stream emits null. No manual go() needed.
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Logout failed: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logout failed: ${e.toString()}')),
+        );
       }
     }
   }
 
-  Widget _buildLoadingScreen() {
+  // ── Loading / Error screens ───────────────────────────────────────────────
+
+  Widget _buildLoadingScreen(ThemeData theme) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: AppColors.blueColor),
+            CircularProgressIndicator(color: theme.colorScheme.primary),
             SizedBox(height: 20.h),
             Text(
               'Loading your dashboard...',
-              style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
             ),
           ],
         ),
@@ -568,35 +614,42 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildErrorScreen(Object error) {
+  Widget _buildErrorScreen(Object error, ThemeData theme) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(40.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64.w, color: Colors.red),
+              Icon(
+                Icons.error_outline,
+                size: 64.w,
+                color: theme.colorScheme.error,
+              ),
               SizedBox(height: 20.h),
               Text(
                 'Something went wrong',
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 12.h),
               Text(
                 error.toString(),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
               SizedBox(height: 30.h),
               ElevatedButton(
                 onPressed: () => ref.refresh(authProvider),
-                child: Text('Try Again'),
+                child: const Text('Try Again'),
               ),
             ],
           ),

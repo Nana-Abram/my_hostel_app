@@ -1,118 +1,55 @@
+# My Hostel App
 
-# Hostel Booking App
+My Hostel App is a Flutter + Firebase hostel discovery, booking, and management platform.
 
-A Flutter-based hostel booking application that enables students to discover and book hostels, while allowing hostel owners to manage bookings efficiently through a dedicated dashboard.
+## Core Features
 
-> Project Status: Completed (Pre-Deployment Phase)
+- Student flow: browse hostels, inspect room details, submit bookings, and view booking history.
+- Owner flow: manage hostels/rooms and monitor bookings, revenue, and activity.
+- Admin flow: monitor platform stats and manage users/hostels.
+- Firebase integrations: Auth, Firestore, Storage, Cloud Messaging.
+- Modern UI stack: adaptive theming, responsive layout, loading/error/empty states, and animations.
 
----
+## Tech Stack
 
- Overview
+- Flutter (Dart)
+- Riverpod for state management
+- GoRouter for navigation
+- Firebase (Auth, Firestore, Storage, Messaging)
 
-This application provides a role-based experience:
+## Run Locally
 
-* **Students** can browse hostels, view details, and book rooms.
-* **Hostel Owners** can manage booking requests and monitor activity.
+1. Install Flutter SDK and verify with:
+   flutter doctor
+2. Install dependencies:
+   flutter pub get
+3. Ensure Firebase config files are in place:
+   - Android: android/app/google-services.json
+   - iOS: ios/Runner/GoogleService-Info.plist
+   - Web/Desktop: lib/firebase_options.dart
+4. Run app:
+   flutter run
 
-The system is built with clean architecture principles and optimized state management.
+## Deployment Readiness Checklist
 
----
+Before release, complete all items in DEPLOYMENT_CHECKLIST.md.
 
-##  Features
+High-priority items:
 
- Student Features
+- Replace default package identifiers (example values are still present in Android files).
+- Configure production Firebase project and security rules.
+- Configure Android release signing (keystore.properties).
+- Validate push notifications on each target platform.
+- Build and test release artifacts for Android/iOS/Web.
 
-* Browse available hostels
-* View detailed hostel information
-* Book rooms
-* Track booking status
-* View booking history
+## Build Commands
 
-Owner Features
+- Android APK: flutter build apk --release
+- Android App Bundle: flutter build appbundle --release
+- iOS: flutter build ios --release
+- Web: flutter build web --release
 
-* Owner dashboard
-* View recent booking activity
-* Confirm / Cancel bookings
-* Revenue tracking
-* Booking management system
+## Notes
 
----
-
-Tech Stack
-
-* **Flutter**
-* **Dart**
-* **Riverpod** (State Management)
-* **Firebase Authentication**
-* **Cloud Firestore**
-* **Responsive UI**
-
----
-
-Architecture Highlights
-
-* Modular folder structure
-* Riverpod state management
-* Optimized stream handling
-* Clean separation between UI and business logic
-* Scalable booking model structure
-
----
-
-Testing Status
-
-* Core booking logic tested
-* Error handling implemented
-* Authentication flow validated
-* Performance improvements applied
-
-> Additional automated test coverage planned before deployment.
-
----
-
- Getting Started
-
- Clone the repository
-
-```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
-```
-
-Install dependencies
-
-```bash
-flutter pub get
-```
-
-Run the app
-
-```bash
-flutter run
-```
-
----
-
-Firebase Setup
-
-To run this project locally:
-
-1. Create a Firebase project
-2. Enable Authentication
-3. Enable Cloud Firestore
-4. Add configuration files:
-
-   * `google-services.json` (Android)
-   * `GoogleService-Info.plist` (iOS)
-
-
-Deployment Status
-
-Not yet deployed
- Currently undergoing final testing and optimization
-
-
-Author
-
-Addai Yeboah Abraham
-BSc. Computer Science
+- Payment screenshot uploads are now platform-safe and work with XFile across mobile/web.
+- Camera and photo library permissions are configured for iOS and Android manifests.

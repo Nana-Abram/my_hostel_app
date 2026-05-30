@@ -1,358 +1,237 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_hostel_app/ui/core/responsive.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final r = Responsive.of(context);
     final theme = Theme.of(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
+      padding: EdgeInsets.symmetric(
+          horizontal: r.pagePadding, vertical: r.spacingXL),
       child: Column(
         children: [
-          _buildHeaderSection(theme),
-          SizedBox(height: 60.h),
-          _buildContactMethods(context),
-          SizedBox(height: 60.h),
-          _buildContactForm(context),
-          SizedBox(height: 40.h),
-          _buildFAQSection(theme),
+          _buildHeader(r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildContactMethods(context, r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildContactForm(context, r, theme),
+          SizedBox(height: r.spacingXL),
+          _buildFAQ(r, theme),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderSection(ThemeData theme) {
+  // ── Header ────────────────────────────────────────────────────────────────
+
+  Widget _buildHeader(Responsive r, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Get In Touch',
           style: TextStyle(
-            fontSize: 25.sp,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
+              fontSize: r.h1,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: r.spacingM),
         Text(
           'We\'re here to help you find your perfect student accommodation',
           style: TextStyle(
-            fontSize: 14.sp,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
-            fontWeight: FontWeight.w400,
-          ),
-          textAlign: TextAlign.center,
+              fontSize: r.bodyLarge,
+              color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
-        SizedBox(height: 30.h),
-        Container(
-          width: double.infinity,
-          height: 500.h,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
-            image: const DecorationImage(
-              image: AssetImage('assets/images/contact2.jpg'),
-              fit: BoxFit.cover,
-            ),
+        SizedBox(height: r.spacingL),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: AspectRatio(
+            aspectRatio: r.isMobile ? 16 / 9 : 21 / 7,
+            child:
+                Image.asset('assets/images/contact2.jpg', fit: BoxFit.cover),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContactMethods(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return Row(
+  // ── Contact methods + office hours ────────────────────────────────────────
+
+  Widget _buildContactMethods(
+      BuildContext context, Responsive r, ThemeData theme) {
+    final leftCol = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Contact Information',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              SizedBox(height: 20.h),
-              Text(
-                'Choose your preferred method to reach out to us. Our team is always ready to assist you with any questions about hostels, bookings, or partnerships.',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  height: 1.6,
-                ),
-              ),
-              SizedBox(height: 40.h),
-              
-              _buildContactCard(
-                icon: Icons.phone,
-                title: 'Call Us',
-                subtitle: 'Available 24/7 for urgent inquiries',
-                contact: '+233 12 345 6789', // Ghana number format
-                onTap: () => _showPhoneDialog(context),
-                context: context,
-              ),
-              SizedBox(height: 20.h),
-              
-              _buildContactCard(
-                icon: Icons.email,
-                title: 'Email Us',
-                subtitle: 'We respond within 2 hours',
-                contact: 'support@hostelhub.com',
-                onTap: () => _showEmailDialog(context),
-                context: context,
-              ),
-              SizedBox(height: 20.h),
-              
-              _buildContactCard(
-                icon: Icons.chat,
-                title: 'Live Chat',
-                subtitle: 'Instant help from our team',
-                contact: 'Start Chat',
-                onTap: () => _showChatDialog(context),
-                context: context,
-              ),
-              SizedBox(height: 20.h),
-              
-              _buildContactCard(
-                icon: Icons.location_on,
-                title: 'Visit Us',
-                subtitle: 'Come say hello at our office',
-                contact: 'University of Energy and Natural Resource, Sunyani',
-                onTap: () => _showLocationDialog(context),
-                context: context,
-              ),
-            ],
-          ),
+        Text(
+          'Contact Information',
+          style: TextStyle(
+              fontSize: r.h3,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
         ),
-        SizedBox(width: 60.w),
-        
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(30.w),
+        SizedBox(height: r.spacingM),
+        Text(
+          'Choose your preferred method to reach out to us. Our team is always '
+          'ready to assist you with any questions about hostels, bookings, or partnerships.',
+          style: TextStyle(
+              fontSize: r.body,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              height: 1.6),
+        ),
+        SizedBox(height: r.spacingXL),
+        ...[
+          (
+            icon: Icons.phone,
+            title: 'Call Us',
+            subtitle: 'Available 24/7 for urgent inquiries',
+            contact: '+233 12 345 6789'
+          ),
+          (
+            icon: Icons.email,
+            title: 'Email Us',
+            subtitle: 'We respond within 2 hours',
+            contact: 'support@hostelhub.com'
+          ),
+          (
+            icon: Icons.chat,
+            title: 'Live Chat',
+            subtitle: 'Instant help from our team',
+            contact: 'Start Chat'
+          ),
+          (
+            icon: Icons.location_on,
+            title: 'Visit Us',
+            subtitle: 'Come say hello at our office',
+            contact: 'University of Energy and Natural Resource, Sunyani'
+          ),
+        ]
+            .map((c) => Padding(
+                  padding: EdgeInsets.only(bottom: r.spacingM),
+                  child: _ContactCard(
+                    icon: c.icon,
+                    title: c.title,
+                    subtitle: c.subtitle,
+                    contact: c.contact,
+                    r: r,
+                    theme: theme,
+                  ),
+                ))
+            .toList(),
+      ],
+    );
+
+    final rightCol = Container(
+      padding: EdgeInsets.all(r.cardPadding),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Office Hours',
+            style: TextStyle(
+                fontSize: r.h4,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface),
+          ),
+          SizedBox(height: r.spacingL),
+          _OfficeHourRow('Monday – Friday', '9:00 AM – 6:00 PM', r, theme),
+          _OfficeHourRow('Saturday', '10:00 AM – 4:00 PM', r, theme),
+          _OfficeHourRow('Sunday', 'Emergency Support Only', r, theme),
+          SizedBox(height: r.spacingL),
+          Container(
+            padding: EdgeInsets.all(r.spacingM),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(isDark ? 0.08 : 0.05),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
+              color: theme.colorScheme.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Office Hours',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                _buildOfficeHour('Monday - Friday', '9:00 AM - 6:00 PM'),
-                _buildOfficeHour('Saturday', '10:00 AM - 4:00 PM'),
-                _buildOfficeHour('Sunday', 'Emergency Support Only'),
-                SizedBox(height: 30.h),
-                Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(isDark ? 0.14 : 0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.warning_amber, color: theme.colorScheme.tertiary, size: 20.w),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Text(
-                          'For urgent hostel emergencies outside office hours, call our 24/7 support line.',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                    ],
+                Icon(Icons.warning_amber,
+                    color: theme.colorScheme.tertiary,
+                    size: r.isMobile ? 18 : 20),
+                SizedBox(width: r.spacingM),
+                Expanded(
+                  child: Text(
+                    'For urgent hostel emergencies outside office hours, '
+                    'call our 24/7 support line.',
+                    style: TextStyle(
+                        fontSize: r.bodySmall,
+                        color: theme.colorScheme.onSurface.withOpacity(0.7)),
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
+      ),
+    );
+
+    if (r.isMobile) {
+      return Column(children: [
+        leftCol,
+        SizedBox(height: r.spacingXL),
+        rightCol,
+      ]);
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: leftCol),
+        SizedBox(width: r.spacingXL),
+        Expanded(child: rightCol),
       ],
     );
   }
 
-  Widget _buildContactCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String contact,
-    required VoidCallback onTap,
-    required BuildContext context,
-  }) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(icon, size: 24.w, color: theme.colorScheme.primary),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    contact,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, size: 16.w, color: theme.colorScheme.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
+  // ── Contact form ──────────────────────────────────────────────────────────
 
-  Widget _buildOfficeHour(String day, String time) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                day,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                time,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-Widget _buildContactForm(BuildContext context) {
-  final theme = Theme.of(context);
-  return Container(
-    padding: EdgeInsets.all(30.w),
-    decoration: BoxDecoration(
-      color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(16.r),
-      boxShadow: [
-        BoxShadow(
-          color: theme.shadowColor.withOpacity(0.1),
-          blurRadius: 10,
-          offset: const Offset(0, 3),
-        ),
-      ],
-    ),
-    child: Column(
+  Widget _buildContactForm(
+      BuildContext context, Responsive r, ThemeData theme) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Send us a Message',
+          'Send Us a Message',
           style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
+              fontSize: r.h3,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
         ),
-        SizedBox(height: 8.h),
-        Text(
-          'Have a question? We\'ll get back to you quickly.',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        SizedBox(height: 25.h),
-        
-        // FORM FIELDS WITH VALIDATION
-        _ContactForm(),
+        SizedBox(height: r.spacingL),
+        _ContactForm(r: r, theme: theme),
       ],
-    ),
-  );
-}
+    );
+  }
 
-  Widget _buildFAQSection(ThemeData theme) {
+  // ── FAQ ───────────────────────────────────────────────────────────────────
+
+  Widget _buildFAQ(Responsive r, ThemeData theme) {
     final faqs = [
-      {
-        'question': 'How do I book a hostel through HostelHub?',
-        'answer': 'Simply browse available hostels, select your preferred room, and complete the booking process through our secure platform.'
-      },
-      {
-        'question': 'Are all hostels verified?',
-        'answer': 'Yes! Every hostel on our platform undergoes a thorough verification process to ensure safety and quality standards.'
-      },
-      {
-        'question': 'What payment methods do you accept?',
-        'answer': 'We accept mobile money, credit/debit cards, and bank transfers for your convenience.'
-      },
-      {
-        'question': 'Can I cancel my booking?',
-        'answer': 'Cancellation policies vary by hostel. Check the specific hostel\'s cancellation policy before booking.'
-      },
+      (
+        q: 'How do I book a hostel?',
+        a: 'Browse available hostels, select your preferred room, and follow the booking steps. You\'ll receive confirmation via email.'
+      ),
+      (
+        q: 'What payment methods are accepted?',
+        a: 'We accept mobile money, bank transfers, and major credit/debit cards through our secure payment gateway.'
+      ),
+      (
+        q: 'Can I cancel my booking?',
+        a: 'Yes, cancellations are allowed up to 48 hours before check-in. Please review the hostel\'s specific cancellation policy.'
+      ),
+      (
+        q: 'How are hostels verified?',
+        a: 'Our team personally visits and inspects each hostel before listing. We check safety, hygiene, and amenity standards.'
+      ),
     ];
 
     return Column(
@@ -361,193 +240,195 @@ Widget _buildContactForm(BuildContext context) {
         Text(
           'Frequently Asked Questions',
           style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
+              fontSize: r.h3,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
         ),
-        SizedBox(height: 20.h),
-        ...faqs.map((faq) => _buildFAQItem(
-          question: faq['question']!,
-          answer: faq['answer']!,
-          theme: theme,
-        )),
+        SizedBox(height: r.spacingL),
+        ...faqs.map((f) => Padding(
+              padding: EdgeInsets.only(bottom: r.spacingM),
+              child: _FAQCard(q: f.q, a: f.a, r: r, theme: theme),
+            )),
       ],
     );
   }
-
-  Widget _buildFAQItem({required String question, required String answer, required ThemeData theme}) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ExpansionTile(
-        title: Text(
-          question,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Text(
-              answer,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Web-compatible contact methods
-  void _showPhoneDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Call Us'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Phone: +233 12 345 6789'),
-            SizedBox(height: 10.h),
-            Text('Copy the number to call us directly.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Copy to clipboard
-              // You can add clipboard functionality here
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Phone number copied to clipboard!')),
-              );
-            },
-            child: Text('Copy Number'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEmailDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Email Us'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Email: support@hostelhub.com'),
-            SizedBox(height: 10.h),
-            Text('Copy the email address to contact us.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Email copied to clipboard!')),
-              );
-            },
-            child: Text('Copy Email'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLocationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Our Location'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('University of Energy and Natural Resources'),
-            Text('Sunyani, Ghana'),
-            SizedBox(height: 10.h),
-            Text('Visit us at our campus office.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showChatDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Live Chat'),
-        content: Text('Our live chat feature is coming soon! In the meantime, please use email or phone support.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // void _showSuccessDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: Text('Message Sent!'),
-  //       content: Text('Thank you for reaching out! We\'ll get back to you within 2 hours.'),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: Text('OK'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }
 
+// ── Private sub-widgets ───────────────────────────────────────────────────────
 
+class _ContactCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String contact;
+  final Responsive r;
+  final ThemeData theme;
 
-// Separate stateful widget for form validation
+  const _ContactCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.contact,
+    required this.r,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(r.spacingM),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: theme.shadowColor.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2))
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(r.spacingM),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: r.isMobile ? 20 : 24,
+                color: theme.colorScheme.primary),
+          ),
+          SizedBox(width: r.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        fontSize: r.h5,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface)),
+                SizedBox(height: 4),
+                Text(subtitle,
+                    style: TextStyle(
+                        fontSize: r.bodySmall,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                SizedBox(height: 4),
+                Text(contact,
+                    style: TextStyle(
+                        fontSize: r.body,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.primary)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right,
+              color: theme.colorScheme.onSurface.withOpacity(0.4)),
+        ],
+      ),
+    );
+  }
+}
+
+class _OfficeHourRow extends StatelessWidget {
+  final String day;
+  final String hours;
+  final Responsive r;
+  final ThemeData theme;
+  const _OfficeHourRow(this.day, this.hours, this.r, this.theme);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.only(bottom: r.spacingM),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(day,
+                style: TextStyle(
+                    fontSize: r.body,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7))),
+            Text(hours,
+                style: TextStyle(
+                    fontSize: r.body,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface)),
+          ],
+        ),
+      );
+}
+
+class _FAQCard extends StatefulWidget {
+  final String q;
+  final String a;
+  final Responsive r;
+  final ThemeData theme;
+  const _FAQCard(
+      {required this.q,
+      required this.a,
+      required this.r,
+      required this.theme});
+
+  @override
+  State<_FAQCard> createState() => _FAQCardState();
+}
+
+class _FAQCardState extends State<_FAQCard> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.r;
+    final theme = widget.theme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+              color: theme.shadowColor.withOpacity(0.06),
+              blurRadius: 6,
+              offset: const Offset(0, 2))
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(widget.q,
+                style: TextStyle(
+                    fontSize: r.body,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface)),
+            trailing: Icon(
+              _open ? Icons.expand_less : Icons.expand_more,
+              color: theme.colorScheme.primary,
+            ),
+            onTap: () => setState(() => _open = !_open),
+          ),
+          if (_open)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                  r.spacingM, 0, r.spacingM, r.spacingM),
+              child: Text(
+                widget.a,
+                style: TextStyle(
+                    fontSize: r.body,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    height: 1.5),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Contact Form ──────────────────────────────────────────────────────────────
+
 class _ContactForm extends StatefulWidget {
-  const _ContactForm();
+  final Responsive r;
+  final ThemeData theme;
+  const _ContactForm({required this.r, required this.theme});
 
   @override
   State<_ContactForm> createState() => _ContactFormState();
@@ -555,103 +436,45 @@ class _ContactForm extends StatefulWidget {
 
 class _ContactFormState extends State<_ContactForm> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _subjectController = TextEditingController();
-  final _messageController = TextEditingController();
-  
-  // Validation states
-  bool _isLoading = false;
+  final _firstNameCtrl = TextEditingController();
+  final _lastNameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _subjectCtrl = TextEditingController();
+  final _messageCtrl = TextEditingController();
+  bool _loading = false;
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _subjectController.dispose();
-    _messageController.dispose();
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
+    _emailCtrl.dispose();
+    _subjectCtrl.dispose();
+    _messageCtrl.dispose();
     super.dispose();
   }
 
-  // Validation methods
-  String? _validateRequired(String? value, String fieldName) {
-    if (value == null || value.trim().isEmpty) {
-      return '$fieldName is required';
-    }
-    return null;
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _validateMessage(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Message is required';
-    }
-    if (value.trim().length < 10) {
-      return 'Message must be at least 10 characters long';
-    }
-    return null;
-  }
-
-  void _submitForm(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      // Form is valid - process the data
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API call delay
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() {
-          _isLoading = false;
-        });
-        
-        // Show success dialog
-        if (context.mounted) {
-          _showSuccessDialog(context);
-        }
-        
-        // Clear form
-        _formKey.currentState!.reset();
-        _firstNameController.clear();
-        _lastNameController.clear();
-        _emailController.clear();
-        _subjectController.clear();
-        _messageController.clear();
-      });
-    }
-  }
-
-  void _showSuccessDialog(BuildContext context) {
-    final theme = Theme.of(context);
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _loading = true);
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    setState(() => _loading = false);
+    _formKey.currentState!.reset();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: theme.colorScheme.secondary, size: 24.w),
-            SizedBox(width: 8.w),
-            Text('Message Sent!'),
-          ],
-        ),
-        content: Text('Thank you for your message! We\'ll get back to you within 2 hours.'),
+      builder: (_) => AlertDialog(
+        title: Row(children: [
+          Icon(Icons.check_circle,
+              color: widget.theme.colorScheme.secondary),
+          const SizedBox(width: 8),
+          const Text('Message Sent!'),
+        ]),
+        content: const Text(
+            'Thank you! We\'ll get back to you within 2 hours.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: TextStyle(color: theme.colorScheme.primary)),
-          ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'))
         ],
       ),
     );
@@ -659,170 +482,106 @@ class _ContactFormState extends State<_ContactForm> {
 
   @override
   Widget build(BuildContext context) {
+    final r = widget.r;
+    final theme = widget.theme;
+    final inputDecoration = InputDecoration(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      contentPadding:
+          EdgeInsets.symmetric(horizontal: r.spacingM, vertical: r.spacingM),
+    );
+
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          // NAME ROW
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(
-                    labelText: 'First Name *',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 12.h,
-                    ),
+          // Name row — stacks on mobile
+          r.isMobile
+              ? Column(children: [
+                  TextFormField(
+                      controller: _firstNameCtrl,
+                      decoration:
+                          inputDecoration.copyWith(labelText: 'First Name *'),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null),
+                  SizedBox(height: r.spacingM),
+                  TextFormField(
+                      controller: _lastNameCtrl,
+                      decoration:
+                          inputDecoration.copyWith(labelText: 'Last Name *'),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null),
+                ])
+              : Row(children: [
+                  Expanded(
+                    child: TextFormField(
+                        controller: _firstNameCtrl,
+                        decoration:
+                            inputDecoration.copyWith(labelText: 'First Name *'),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? 'Required' : null),
                   ),
-                  validator: (value) => _validateRequired(value, 'First name'),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: TextFormField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Last Name *',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 12.h,
-                    ),
+                  SizedBox(width: r.spacingM),
+                  Expanded(
+                    child: TextFormField(
+                        controller: _lastNameCtrl,
+                        decoration:
+                            inputDecoration.copyWith(labelText: 'Last Name *'),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? 'Required' : null),
                   ),
-                  validator: (value) => _validateRequired(value, 'Last name'),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          
-          // EMAIL
+                ]),
+          SizedBox(height: r.spacingM),
           TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'Email Address *',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 12.h,
-              ),
-            ),
-            keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
-          ),
-          SizedBox(height: 16.h),
-          
-          // SUBJECT
+              controller: _emailCtrl,
+              decoration: inputDecoration.copyWith(labelText: 'Email *'),
+              keyboardType: TextInputType.emailAddress,
+              validator: (v) =>
+                  (v == null || !v.contains('@')) ? 'Invalid email' : null),
+          SizedBox(height: r.spacingM),
           TextFormField(
-            controller: _subjectController,
-            decoration: InputDecoration(
-              labelText: 'Subject *',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 12.h,
-              ),
-            ),
-            validator: (value) => _validateRequired(value, 'Subject'),
-          ),
-          SizedBox(height: 16.h),
-          
-          // MESSAGE
+              controller: _subjectCtrl,
+              decoration: inputDecoration.copyWith(labelText: 'Subject *'),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null),
+          SizedBox(height: r.spacingM),
           TextFormField(
-            controller: _messageController,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: 'Your Message *',
-              alignLabelWithHint: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+              controller: _messageCtrl,
+              maxLines: r.isMobile ? 4 : 5,
+              decoration:
+                  inputDecoration.copyWith(labelText: 'Your Message *'),
+              validator: (v) => (v == null || v.trim().length < 10)
+                  ? 'Message too short'
+                  : null),
+          SizedBox(height: r.spacingL),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _loading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                padding: EdgeInsets.symmetric(vertical: r.spacingM),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 16.h,
-              ),
+              child: _loading
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: theme.colorScheme.onPrimary))
+                  : Text('Send Message',
+                      style: TextStyle(
+                          fontSize: r.body, fontWeight: FontWeight.w600)),
             ),
-            validator: _validateMessage,
           ),
-          SizedBox(height: 25.h),
-          
-          // SUBMIT BUTTON
-          Builder(
-            builder: (context) {
-              final theme = Theme.of(context);
-              return SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : () => _submitForm(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: _isLoading
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 16.w,
-                              height: 16.w,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: theme.colorScheme.onPrimary,
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              'Sending...',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Text(
-                          'Send Message',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              );
-            },
-          ),
-          
-          // REQUIRED FIELD NOTE
-          SizedBox(height: 12.h),
-          Builder(
-            builder: (context) {
-              final theme = Theme.of(context);
-              return Text(
-                '* Required fields',
-                style: TextStyle(
-                  fontSize: 12.sp,
+          SizedBox(height: r.spacingS),
+          Text('* Required fields',
+              style: TextStyle(
+                  fontSize: r.bodySmall,
                   color: theme.colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-              );
-            },
-          ),
+                  fontStyle: FontStyle.italic)),
         ],
       ),
     );

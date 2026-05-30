@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/service/auth_service.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
@@ -52,14 +53,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   // In your auth_provider.dart, update the refreshUser method
 Future<void> refreshUser() async {
   try {
-    print("🔄 [Auth] Starting refreshUser...");
+    AppLogger.info('Auth refresh started');
     state = const AsyncValue.loading();
     final authService = ref.read(authServiceProvider);
     final currentUser = await authService.getCurrentUser();
-    print("✅ [Auth] refreshUser completed. User: ${currentUser?.id}");
+    AppLogger.info('Auth refresh completed. User: ${currentUser?.id}');
     state = AsyncData(currentUser);
   } catch (e, stack) {
-    print("❌ [Auth] refreshUser failed: $e");
+    AppLogger.error('Auth refresh failed', e, stack);
     state = AsyncValue.error(e, stack);
   }
 }

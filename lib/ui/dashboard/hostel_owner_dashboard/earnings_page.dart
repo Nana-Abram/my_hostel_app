@@ -6,6 +6,7 @@ import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class EarningsPage extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _EarningsPageState extends ConsumerState<EarningsPage> {
       _confirmedBookings = await bookingService.getConfirmedBookingsByOwnerOnce(user.id);
       _calculateStats();
     } catch (e) {
-      print('Error loading earnings data: $e');
+      AppLogger.error('Error loading earnings data', e);
       
       // Fallback without orderBy
       if (e.toString().contains('index') || e.toString().contains('failed-precondition')) {
@@ -61,7 +62,7 @@ class _EarningsPageState extends ConsumerState<EarningsPage> {
           _confirmedBookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           _calculateStats();
         } catch (e2) {
-          print('Fallback failed: $e2');
+          AppLogger.error('Earnings fallback query failed', e2);
         }
       }
     }

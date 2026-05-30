@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() {
           _redirectUrl = redirect;
         });
-        print("Redirect URL detected: $_redirectUrl");
+        AppLogger.info('Redirect URL detected: $_redirectUrl');
       }
     });
   }

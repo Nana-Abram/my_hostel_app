@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/service/notification_helper.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -165,8 +166,7 @@ Future<List<BookingModel>> getBookingsByUserOnce(String userId) async {
         .toList();
   } on FirebaseException catch (e) {
     if (e.code == 'failed-precondition') {
-      print('Index not created yet. Please create the composite index.');
-      print('Or use the client-side sorting approach.');
+      AppLogger.warn('Bookings composite index missing. Using client-side sorting fallback.');
       // Fallback to client-side sorting
       final querySnapshot = await _firestore
           .collection('bookings')
@@ -221,38 +221,31 @@ Future<List<BookingModel>> getConfirmedBookingsByOwnerOnce(String ownerId) async
 // Get bookings by owner ID once (for dashboard and initial loads)
 Future<List<BookingModel>> getBookingsByOwnerOnce(String ownerId) async {
   try {
-    
     final querySnapshot = await _firestore
         .collection('bookings')
         .where('ownerId', isEqualTo: ownerId)
         .orderBy('createdAt', descending: true)
         .get();
-    
-    
+
     final bookings = querySnapshot.docs
         .map((doc) {
           try {
             return BookingModel.fromMap(doc.data(), doc.id);
           } catch (e) {
-
+            AppLogger.warn('Skipping malformed booking document: ${doc.id}');
             return null;
           }
         })
         .where((booking) => booking != null)
         .cast<BookingModel>()
         .toList();
-    
-    
-    if (bookings.isNotEmpty) {
-    }
-    
+
     return bookings;
-    
+
   } on FirebaseException catch (e) {
-    
     // Fallback if index is not created yet
     if (e.code == 'failed-precondition') {
-      
+      AppLogger.warn('Owner bookings index missing. Using fallback query for ownerId=$ownerId');
       try {
         final querySnapshot = await _firestore
             .collection('bookings')
@@ -264,6 +257,7 @@ Future<List<BookingModel>> getBookingsByOwnerOnce(String ownerId) async {
               try {
                 return BookingModel.fromMap(doc.data(), doc.id);
               } catch (e) {
+                AppLogger.warn('Skipping malformed fallback booking document: ${doc.id}');
                 return null;
               }
             })
@@ -273,16 +267,16 @@ Future<List<BookingModel>> getBookingsByOwnerOnce(String ownerId) async {
         
         // Sort client-side
         bookings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
+
         return bookings;
-        
+
       } catch (fallbackError) {
         throw Exception('Failed to get owner bookings even with fallback: $fallbackError');
       }
     }
-    
+
     throw Exception('Failed to get owner bookings: $e');
-    
+
   } catch (e) {
     throw Exception('Failed to get owner bookings: $e');
   }

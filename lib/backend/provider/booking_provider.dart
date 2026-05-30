@@ -1,6 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 import 'package:my_hostel_app/backend/service/storage_service.dart';
@@ -45,7 +46,7 @@ class BookingCreationNotifier extends StateNotifier<AsyncValue<String>> {
   // Create booking with payment screenshot
   Future<void> createBookingWithPayment({
     required BookingModel booking,
-    required paymentScreenshot,
+    required XFile paymentScreenshot,
   }) async {
     state = const AsyncValue.loading();
     

@@ -18,6 +18,7 @@ class MyBookingsScreen extends ConsumerStatefulWidget {
 
 class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   String _selectedFilter = 'all';
+  bool _isCancelling = false;
 
   @override
   Widget build(BuildContext context) {
@@ -310,13 +311,35 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             child: Text('No'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement cancel booking functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Booking cancellation feature coming soon')),
-              );
-            },
+            onPressed: _isCancelling
+                ? null
+                : () async {
+                    Navigator.pop(context);
+                    setState(() => _isCancelling = true);
+
+                    try {
+                      await ref.read(bookingServiceProvider).cancelBooking(bookingId);
+
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Booking cancelled successfully')),
+                      );
+
+                      final currentUser = ref.read(authProvider).value;
+                      if (currentUser != null) {
+                        ref.invalidate(userBookingsProvider(currentUser.id));
+                      }
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to cancel booking: $e')),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isCancelling = false);
+                      }
+                    }
+                  },
             child: Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
           ),
         ],

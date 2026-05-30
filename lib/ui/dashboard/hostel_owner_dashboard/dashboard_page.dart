@@ -5,6 +5,7 @@ import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
@@ -145,7 +146,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         
         yield [totalHostels, activeBookings, pendingRequests, totalEarnings];
       } catch (e) {
-        print('Error getting booking stats: $e');
+        AppLogger.error('Error getting owner booking stats', e);
         yield [totalHostels, 0, 0, 0.0];
       }
     }
@@ -491,7 +492,7 @@ Widget _buildStatCard({
         
         yield activities;
       } catch (e) {
-        print('Error getting activity: $e');
+        AppLogger.error('Error getting owner recent activity', e);
         yield [];
       }
     }
@@ -550,7 +551,7 @@ Widget _buildStatCard({
         ),
         onTap: booking != null ? () {
           // You could show booking details here
-          print('Booking tapped: ${booking.id}');
+          AppLogger.info('Owner activity booking tapped: ${booking.id}');
         } : null,
       ),
     );

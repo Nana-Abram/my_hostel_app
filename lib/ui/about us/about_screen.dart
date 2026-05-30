@@ -1,231 +1,214 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/ui/core/responsive.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
+import 'package:path/path.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final r = Responsive.of(context);
     final theme = Theme.of(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
+      padding: EdgeInsets.symmetric(
+          horizontal: r.pagePadding, vertical: r.spacingXL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADER SECTION
-              _buildHeaderSection(context, theme),
-          const SizedBox(height: 60),
-
-          // MISSION SECTION
-          _buildMissionSection(theme),
-          const SizedBox(height: 60),
-
-          // FEATURES GRID
-              _buildFeaturesSection(theme),
-          const SizedBox(height: 60),
-
-          // TEAM SECTION
-          _buildTeamSection(theme),
-          const SizedBox(height: 60),
-
-          // STATS SECTION
-          _buildStatsSection(),
-          const SizedBox(height: 40),
-
-          // CTA SECTION
-          _buildCTASection(context, theme),
+          _buildHeader(context, r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildMission(r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildFeatures(r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildTeam(context, r, theme),
+          SizedBox(height: r.spacingXXL),
+          _buildStats(r, theme),
+          SizedBox(height: r.spacingXL),
+          _buildCTA(context, r, theme),
+          SizedBox(height: r.spacingL),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderSection(BuildContext context, ThemeData theme) {
+  // ── Header ────────────────────────────────────────────────────────────────
+
+  Widget _buildHeader(BuildContext context, Responsive r, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'About HostelHub',
           style: TextStyle(
-            fontSize: 26.sp,
+            fontSize: r.h1,
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurface,
-            height: 1.1,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: r.spacingM),
         Text(
           'Your Gateway to Comfortable Student Living',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: r.bodyLarge,
             color: theme.colorScheme.onSurface.withOpacity(0.7),
-            fontWeight: FontWeight.w400,
           ),
         ),
-        const SizedBox(height: 30),
-        Container(
-          width: double.infinity,
-          height: 500.h,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
-            image: const DecorationImage(
-              image: AssetImage('assets/images/new.jpg'),
-              fit: BoxFit.cover,
-            ),
+        SizedBox(height: r.spacingL),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: AspectRatio(
+            // Taller on mobile, wider on desktop
+            aspectRatio: r.isMobile ? 16 / 9 : 21 / 7,
+            child: Image.asset('assets/images/new.jpg', fit: BoxFit.cover),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMissionSection(ThemeData theme) {
+  // ── Mission ───────────────────────────────────────────────────────────────
+
+  Widget _buildMission(Responsive r, ThemeData theme) {
+    final textCol = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Our Mission',
+          style: TextStyle(
+              fontSize: r.h3,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
+        ),
+        SizedBox(height: r.spacingM),
+        Text(
+          'At HostelHub, we believe that finding the perfect student accommodation '
+          'should be simple, transparent, and stress-free. We\'re dedicated to '
+          'connecting students with safe, affordable, and comfortable living spaces '
+          'near their educational institutions.',
+          style: TextStyle(
+            fontSize: r.body,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            height: 1.6,
+          ),
+        ),
+        SizedBox(height: r.spacingM),
+        Text(
+          'Our platform brings together hostel owners and students, creating a '
+          'seamless marketplace that prioritises safety, convenience, and community.',
+          style: TextStyle(
+            fontSize: r.body,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            height: 1.6,
+          ),
+        ),
+      ],
+    );
+
+    final infoCard = Container(
+      padding: EdgeInsets.all(r.cardPadding),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border:
+            Border.all(color: theme.colorScheme.primary.withOpacity(0.25)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.school, size: r.isMobile ? 40 : 50,
+              color: theme.colorScheme.primary),
+          SizedBox(height: r.spacingM),
+          Text(
+            'For Students',
+            style: TextStyle(
+                fontSize: r.h4,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary),
+          ),
+          SizedBox(height: r.spacingS),
+          SmallText(
+            text: 'Find your perfect home away from home with verified listings '
+                'and transparent pricing.',
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ],
+      ),
+    );
+
+    if (r.isMobile) {
+      return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [textCol, SizedBox(height: r.spacingL), infoCard]);
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Our Mission',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'At HostelHub, we believe that finding the perfect student accommodation should be simple, transparent, and stress-free. We\'re dedicated to connecting students with safe, affordable, and comfortable living spaces near their educational institutions.',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  height: 1.6,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Our platform brings together hostel owners and students, creating a seamless marketplace that prioritizes safety, convenience, and community.',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  height: 1.6,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 60.w),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(30.w),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.school, size: 50.w, color: theme.colorScheme.primary),
-                const SizedBox(height: 16),
-                Text(
-                  'For Students',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SmallText(
-                  text:
-                      'Find your perfect home away from home with verified listings and transparent pricing.',
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ],
-            ),
-          ),
-        ),
+        Expanded(flex: 2, child: textCol),
+        SizedBox(width: r.spacingXL),
+        Expanded(child: infoCard),
       ],
     );
   }
 
-  Widget _buildFeaturesSection(ThemeData theme) {
+  // ── Features ──────────────────────────────────────────────────────────────
+
+  Widget _buildFeatures(Responsive r, ThemeData theme) {
     final features = [
-      {
-        'icon': Icons.verified_user,
-        'title': 'Verified Listings',
-        'description':
-            'Every hostel is personally verified for safety and quality standards',
-      },
-      {
-        'icon': Icons.price_check,
-        'title': 'Transparent Pricing',
-        'description': 'No hidden costs. See exactly what you\'ll pay upfront',
-      },
-      {
-        'icon': Icons.map,
-        'title': 'Campus Proximity',
-        'description':
-            'Find hostels within walking distance to your institution',
-      },
-      {
-        'icon': Icons.support_agent,
-        'title': '24/7 Support',
-        'description': 'Our team is always here to help you with any concerns',
-      },
-      {
-        'icon': Icons.reviews,
-        'title': 'Student Reviews',
-        'description': 'Real feedback from students who\'ve lived there',
-      },
-      {
-        'icon': Icons.payment,
-        'title': 'Easy Booking',
-        'description': 'Secure online booking with multiple payment options',
-      },
+      (icon: Icons.verified_user, title: 'Verified Listings',
+          desc: 'Every hostel is personally verified for safety and quality standards'),
+      (icon: Icons.price_check, title: 'Transparent Pricing',
+          desc: 'No hidden costs. See exactly what you\'ll pay upfront'),
+      (icon: Icons.map, title: 'Campus Proximity',
+          desc: 'Find hostels within walking distance to your institution'),
+      (icon: Icons.support_agent, title: '24/7 Support',
+          desc: 'Our team is always here to help you with any concerns'),
+      (icon: Icons.reviews, title: 'Student Reviews',
+          desc: 'Real feedback from students who\'ve lived there'),
+      (icon: Icons.payment, title: 'Easy Booking',
+          desc: 'Secure online booking with multiple payment options'),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text('Why Choose HostelHub?',
+            style: TextStyle(
+                fontSize: r.h3,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface)),
+        SizedBox(height: r.spacingS),
         Text(
-          'Why Choose HostelHub?',
+          'We\'re revolutionising student accommodation with technology and trust',
           style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-          ),
+              fontSize: r.body,
+              color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
-        const SizedBox(height: 10),
-        Text(
-          'We\'re revolutionizing student accommodation with technology and trust',
-              style: TextStyle(fontSize: 13.sp, color: theme.colorScheme.onSurface.withOpacity(0.7)),
-        ),
-        const SizedBox(height: 40),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final cardWidth = constraints.maxWidth > 600
-                ? 280.w
-                : constraints.maxWidth * 0.8;
+        SizedBox(height: r.spacingXL),
+        LayoutBuilder(builder: (context, constraints) {
+          // 1 col mobile, 2 cols tablet, 3 cols desktop
+          final cols = r.gridColumns;
+          final spacing = r.spacingM;
+          final cardW =
+              (constraints.maxWidth - spacing * (cols - 1)) / cols;
 
-            return Wrap(
-              spacing: 30.w,
-              runSpacing: 30.h,
-              alignment: WrapAlignment.start,
-              children: features.map((feature) {
-                return Container(
-                  width: cardWidth,
-                  padding: EdgeInsets.all(24.w),
+          return Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: features.map((f) {
+              return SizedBox(
+                width: cardW,
+                child: Container(
+                  padding: EdgeInsets.all(r.cardPadding),
                   decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16.r),
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: theme.shadowColor.withOpacity(0.08),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -235,261 +218,254 @@ class AboutScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.all(12.w),
+                        padding: EdgeInsets.all(r.spacingS),
                         decoration: BoxDecoration(
-                          color: AppColors.blueColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12.r),
+                          color:
+                              theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          feature['icon'] as IconData,
-                          size: 32.w,
-                              color: theme.colorScheme.primary,
-                        ),
+                        child: Icon(f.icon,
+                            size: r.isMobile ? 22 : 26,
+                            color: theme.colorScheme.primary),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: r.spacingM),
                       Text(
-                        feature['title'] as String,
+                        f.title,
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
-                        ),
+                            fontSize: r.h5,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: r.spacingS),
                       Text(
-                        feature['description'] as String,
+                        f.desc,
                         style: TextStyle(
-                          fontSize: 12.sp,
-                              color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          height: 1.4,
-                        ),
+                            fontSize: r.bodySmall,
+                            color: theme.colorScheme.onSurface
+                                .withOpacity(0.7),
+                            height: 1.4),
                       ),
                     ],
                   ),
-                );
-              }).toList(),
+                ),
+              );
+            }).toList(),
+          );
+        }),
+      ],
+    );
+  }
+
+  // ── Team ──────────────────────────────────────────────────────────────────
+
+  Widget _buildTeam(BuildContext context, Responsive r, ThemeData theme) {
+    final team = [
+      (name: 'Kwabena Yeboah', role: 'Founder & CEO', image: 'assets/images/me.jpg'),
+      (name: 'Saaka Ahmed', role: 'Tech Lead', image: 'assets/images/top2.jpg'),
+      (name: 'Emily Davis', role: 'Student Relations', image: 'assets/images/h2.jpg'),
+      (name: 'Osei Frank', role: 'Partnerships', image: 'assets/images/vegas1.jpg'),
+    ];
+
+    final avatarSize = r.isMobile ? 80.0 : 110.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Meet Our Team',
+            style: TextStyle(
+                fontSize: r.h2,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface)),
+        SizedBox(height: r.spacingS),
+        Text(
+          'Passionate individuals dedicated to improving student living',
+          style: TextStyle(
+              fontSize: r.body,
+              color: theme.colorScheme.onSurface.withOpacity(0.6)),
+        ),
+        SizedBox(height: r.spacingXL),
+        Wrap(
+          spacing: r.spacingL,
+          runSpacing: r.spacingL,
+          children: team.map((m) {
+            return SizedBox(
+              width: r.isMobile ? (MediaQuery.sizeOf(context).width - r.pagePadding * 2 - r.spacingL) / 2 : 150,
+              child: Column(
+                children: [
+                  Container(
+                    width: avatarSize,
+                    height: avatarSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        m.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color:
+                              theme.colorScheme.primary.withOpacity(0.1),
+                          child: Icon(Icons.person,
+                              size: avatarSize * 0.4,
+                              color: theme.colorScheme.primary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: r.spacingM),
+                  Text(
+                    m.name,
+                    style: TextStyle(
+                        fontSize: r.h5,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: r.spacingXS),
+                  Text(
+                    m.role,
+                    style: TextStyle(
+                        fontSize: r.bodySmall,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             );
-          },
+          }).toList(),
         ),
       ],
     );
   }
 
-Widget _buildTeamSection(ThemeData theme) {
-  final team = [
-    {
-      'name': 'Kwabena Yeboah', 
-      'role': 'Founder & CEO', 
-      'image': 'assets/images/me.jpg'  // Asset path
-    },
-    {
-      'name': 'saaka Ahmed', 
-      'role': 'Tech Lead', 
-      'image': 'assets/images/top2.jpg'
-    },
-    {
-      'name': 'Emily Davis', 
-      'role': 'Student Relations', 
-      'image': 'assets/images/h2.jpg'
-    },
-    {
-      'name': 'Osei Frank', 
-      'role': 'Partnerships', 
-      'image': 'assets/images/vegas1.jpg'
-    },
-  ];
+  // ── Stats ─────────────────────────────────────────────────────────────────
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Meet Our Team',
-        style: TextStyle(
-          fontSize: 24.sp,
-          fontWeight: FontWeight.bold,
-          color:theme.colorScheme.onSurface,
-        ),
-      ),
-      const SizedBox(height: 10),
-      Text(
-        'Passionate individuals dedicated to improving student living',
-        style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
-      ),
-      const SizedBox(height: 40),
-      Wrap(
-        spacing: 40.w,
-        runSpacing: 40.h,
-        alignment: WrapAlignment.start,
-        children: team.map((member) {
-          return SizedBox(
-            width: 160.w,
-            child: Column(
-              children: [
-                // ASSET IMAGE
-                Container(
-                  width: 120.w,
-                  height: 120.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.blueColor.withOpacity(0.3),
-                      width: 2.w,
-                    ),
-                  ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      member['image']!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback if image fails to load
-                        return Container(
-                          color: AppColors.blueColor.withOpacity(0.1),
-                          child: Icon(
-                            Icons.person,
-                            size: 40.w,
-                            color: AppColors.blueColor,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  member['name']!,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color:theme.colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  member['role']!,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    ],
-  );
-}
-
-  Widget _buildStatsSection() {
+  Widget _buildStats(Responsive r, ThemeData theme) {
     final stats = [
-      {'value': '500+', 'label': 'Hostels Listed'},
-      {'value': '10,000+', 'label': 'Students Housed'},
-      {'value': '15+', 'label': 'Campuses Served'},
-      {'value': '98%', 'label': 'Satisfaction Rate'},
+      (value: '500+', label: 'Hostels Listed'),
+      (value: '10,000+', label: 'Students Housed'),
+      (value: '15+', label: 'Campuses Served'),
+      (value: '98%', label: 'Satisfaction Rate'),
     ];
 
     return Container(
-      padding: EdgeInsets.all(40.w),
+      padding: EdgeInsets.all(r.cardPadding * 1.5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
+          colors: [AppColors.blueColor, AppColors.blueColor.withOpacity(0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.blueColor, AppColors.blueColor.withOpacity(0.8)],
         ),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: stats.map((stat) {
-          return Column(
-            children: [
-              Text(
-                stat['value']!,
-                style: TextStyle(
-                  fontSize: 38.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                stat['label']!,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
+      child: r.isMobile
+          ? Wrap(
+              spacing: r.spacingL,
+              runSpacing: r.spacingL,
+              alignment: WrapAlignment.spaceAround,
+              children: stats.map((s) => _StatItem(s.value, s.label, r)).toList(),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children:
+                  stats.map((s) => _StatItem(s.value, s.label, r)).toList(),
+            ),
     );
   }
 
-  Widget _buildCTASection(BuildContext context, ThemeData theme) {
-    return Container(
-      padding: EdgeInsets.all(40.w),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.onSurface.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.grey[200]!),
+  // ── CTA ───────────────────────────────────────────────────────────────────
+
+  Widget _buildCTA(BuildContext context, Responsive r, ThemeData theme) {
+    final button = ElevatedButton(
+      onPressed: () {
+        final state = context.findAncestorStateOfType<AppBarScreenState>();
+        state?.onNavSelected(1);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.blueColor,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(
+            horizontal: r.spacingXL, vertical: r.spacingM),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
+      child:
+          Text('Browse Hostels', style: TextStyle(fontSize: r.body, fontWeight: FontWeight.w600)),
+    );
+
+    final textCol = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ready to Find Your Perfect Hostel?',
+          style: TextStyle(
+              fontSize: r.h3,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface),
+        ),
+        SizedBox(height: r.spacingM),
+        Text(
+          'Join thousands of students who have found their ideal accommodation '
+          'through HostelHub. Start your search today!',
+          style: TextStyle(
+              fontSize: r.body,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              height: 1.5),
+        ),
+      ],
+    );
+
+    return Container(
+      padding: EdgeInsets.all(r.cardPadding * 1.5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurface.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.2)),
+      ),
+      child: r.isMobile
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Ready to Find Your Perfect Hostel?',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'Join thousands of students who have found their ideal accommodation through HostelHub. Start your search today!',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.blueGrey[600],
-                    height: 1.5,
-                  ),
-                ),
+                textCol,
+                SizedBox(height: r.spacingL),
+                SizedBox(width: double.infinity, child: button),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: textCol),
+                SizedBox(width: r.spacingL),
+                button,
               ],
             ),
-          ),
-          const SizedBox(width: 40),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              
-              onPressed: () {
-                // Navigate to hostels screen
-                final appBarScreenState = context
-                    .findAncestorStateOfType<AppBarScreenState>();
-                appBarScreenState?.onNavSelected(1);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.blueColor,
-                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Text(
-                'Browse Hostels',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
+}
+
+class _StatItem extends StatelessWidget {
+  final String value;
+  final String label;
+  final Responsive r;
+  const _StatItem(this.value, this.label, this.r);
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Text(value,
+              style: TextStyle(
+                  fontSize: r.h1,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          const SizedBox(height: 6),
+          Text(label,
+              style: TextStyle(
+                  fontSize: r.body,
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w500)),
+        ],
+      );
 }

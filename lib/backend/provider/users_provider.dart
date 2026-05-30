@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
+import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 final usersProvider = StreamProvider<List<UserModel>>((ref) {
   final usersService = UsersService();
@@ -102,7 +103,7 @@ Future<Map<String, dynamic>> getUsersStats() async {
           : '0.0',
     };
   } catch (e) {
-    print('Error fetching users stats: $e');
+    AppLogger.error('Error fetching users stats', e);
     throw Exception('Failed to fetch users stats: $e');
   }
 }

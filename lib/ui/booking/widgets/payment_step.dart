@@ -1,4 +1,4 @@
-import 'dart:html' as html; // For web file access
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +12,6 @@ import 'package:my_hostel_app/ui/booking/widgets/booking_summary.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 
 class PaymentStep extends ConsumerStatefulWidget {
@@ -36,10 +35,10 @@ class PaymentStep extends ConsumerStatefulWidget {
 }
 
 class _PaymentStepState extends ConsumerState<PaymentStep> {
-  html.File? _paymentScreenshot;
+  XFile? _paymentScreenshot;
+  Uint8List? _previewBytes;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
-  String? _imageUrl; // For web, we'll use the file URL
 
   Future<void> _pickImage() async {
     try {
@@ -51,14 +50,11 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
       );
 
       if (image != null) {
-        // For web, we need to convert XFile to html.File and get URL
         final bytes = await image.readAsBytes();
-        final blob = html.Blob([bytes]);
-        final file = html.File([blob], image.name);
         
         setState(() {
-          _paymentScreenshot = file;
-          _imageUrl = html.Url.createObjectUrl(file);
+          _paymentScreenshot = image;
+          _previewBytes = bytes;
         });
       }
     } catch (e) {
@@ -80,14 +76,11 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
       );
 
       if (image != null) {
-        // For web, we need to convert XFile to html.File and get URL
         final bytes = await image.readAsBytes();
-        final blob = html.Blob([bytes]);
-        final file = html.File([blob], image.name);
         
         setState(() {
-          _paymentScreenshot = file;
-          _imageUrl = html.Url.createObjectUrl(file);
+          _paymentScreenshot = image;
+          _previewBytes = bytes;
         });
       }
     } catch (e) {
@@ -226,10 +219,6 @@ DateTime _parseCheckInDate(String dateString) {
 
   @override
   void dispose() {
-    // Clean up object URL to prevent memory leaks
-    if (_imageUrl != null) {
-      html.Url.revokeObjectUrl(_imageUrl!);
-    }
     super.dispose();
   }
 
@@ -330,7 +319,7 @@ DateTime _parseCheckInDate(String dateString) {
                 SizedBox(height: 20.h),
 
                 // Image Preview and Upload Buttons
-                if (_imageUrl != null) ...[
+                if (_previewBytes != null) ...[
                   Container(
                     height: 200.h,
                     width: 400.6.w,
@@ -338,13 +327,14 @@ DateTime _parseCheckInDate(String dateString) {
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: theme.shadowColor.withOpacity(0.08)),
                     ),
-                    child: EnhancedCachedImage(
-                      imageUrl: _imageUrl!,
-                      height: 200.h,
-                      width: 400.6.w,
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(12.r),
-                      showShimmer: false,
+                      child: Image.memory(
+                        _previewBytes!,
+                        fit: BoxFit.cover,
+                        height: 200.h,
+                        width: 400.6.w,
+                      ),
                     ),
                   ),
                   SizedBox(height: 16.h),
