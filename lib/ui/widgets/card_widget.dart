@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -39,10 +39,10 @@ class _CardWidgetState extends State<CardWidget> {
         height: 250.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: _isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface,
+          color: _isHovered ? theme.colorScheme.primary.withValues(alpha: 0.08) : theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: theme.shadowColor.withOpacity(_isHovered ? 0.12 : 0.06),
+              color: theme.shadowColor.withValues(alpha: _isHovered ? 0.12 : 0.06),
               spreadRadius: 3,
               blurRadius: 10,
               offset: const Offset(0, 5),
@@ -84,7 +84,7 @@ class _CardWidgetState extends State<CardWidget> {
             SmallText(
               text: widget.secondText,
               size: 11.sp,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ],
         ),

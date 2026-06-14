@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key, this.isAppBarVisible = false});
@@ -22,14 +20,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   String _language = 'English';
   String _currency = 'GHS - Ghanaian Cedi';
 
+  static const _languageItems = ['English', 'French', 'Spanish', 'Arabic'];
+  static const _currencyItems = [
+    'GHS - Ghanaian Cedi',
+    'USD - US Dollar',
+    'EUR - Euro',
+    'GBP - British Pound',
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: widget.isAppBarVisible
           ? AppBar(
               title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.grey[50],
-              foregroundColor: Colors.black,
+              backgroundColor: theme.colorScheme.surface,
+              foregroundColor: theme.colorScheme.onSurface,
             )
           : null,
       body: SingleChildScrollView(
@@ -37,124 +44,120 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             const IconAndTextWidget(
-              icon: Icons.arrow_back_ios,
-              text: 'Back to home',
-              iconColor: Colors.blueGrey,
-              isBackArrow: true,
-            ),
+            SizedBox(height: 8.h),
+            _buildHeader(theme),
             SizedBox(height: 24.h),
-            // HEADER
-            _buildHeader(),
-            SizedBox(height: 24.h),
-      
-            // ACCOUNT SETTINGS
+
             _buildSection(
+              theme: theme,
               title: 'Account Settings',
               icon: Icons.person_outline,
               children: [
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.edit_outlined,
                   title: 'Edit Profile',
                   subtitle: 'Update your personal information',
                   onTap: _editProfile,
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.security_outlined,
                   title: 'Privacy & Security',
                   subtitle: 'Manage your privacy settings',
                   onTap: _privacySettings,
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.language_outlined,
                   title: 'Language',
                   subtitle: _language,
-                  trailing: _buildDropdownButton(_language, _changeLanguage),
+                  trailing: _buildDropdownButton(
+                    theme: theme,
+                    currentValue: _language,
+                    items: _languageItems,
+                    onChanged: _changeLanguage,
+                  ),
                   onTap: () {},
                 ),
               ],
             ),
             SizedBox(height: 24.h),
-      
-            // NOTIFICATION SETTINGS
+
             _buildSection(
+              theme: theme,
               title: 'Notifications',
               icon: Icons.notifications_outlined,
               children: [
                 _buildToggleSettingItem(
+                  theme: theme,
                   icon: Icons.notifications_active_outlined,
                   title: 'Enable Notifications',
                   subtitle: 'Receive app notifications',
                   value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _notificationsEnabled = value;
-                    });
-                  },
+                  onChanged: (value) => setState(() => _notificationsEnabled = value),
                 ),
                 if (_notificationsEnabled) ...[
                   SizedBox(height: 12.h),
                   _buildToggleSettingItem(
+                    theme: theme,
                     icon: Icons.email_outlined,
                     title: 'Email Notifications',
                     subtitle: 'Receive notifications via email',
                     value: _emailNotifications,
-                    onChanged: (value) {
-                      setState(() {
-                        _emailNotifications = value;
-                      });
-                    },
+                    onChanged: (value) => setState(() => _emailNotifications = value),
                   ),
                   SizedBox(height: 12.h),
                   _buildToggleSettingItem(
+                    theme: theme,
                     icon: Icons.phone_android_outlined,
                     title: 'Push Notifications',
                     subtitle: 'Receive push notifications',
                     value: _pushNotifications,
-                    onChanged: (value) {
-                      setState(() {
-                        _pushNotifications = value;
-                      });
-                    },
+                    onChanged: (value) => setState(() => _pushNotifications = value),
                   ),
                 ],
               ],
             ),
             SizedBox(height: 24.h),
-      
-            // APPEARANCE SETTINGS
+
             _buildSection(
+              theme: theme,
               title: 'Appearance',
               icon: Icons.palette_outlined,
               children: [
                 _buildToggleSettingItem(
+                  theme: theme,
                   icon: Icons.dark_mode_outlined,
                   title: 'Dark Mode',
                   subtitle: 'Switch to dark theme',
                   value: _darkMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _darkMode = value;
-                    });
-                  },
+                  onChanged: (value) => setState(() => _darkMode = value),
                 ),
               ],
             ),
             SizedBox(height: 24.h),
-      
-            // PAYMENT & CURRENCY
+
             _buildSection(
+              theme: theme,
               title: 'Payment & Currency',
               icon: Icons.payments_outlined,
               children: [
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.currency_exchange_outlined,
                   title: 'Default Currency',
                   subtitle: _currency,
-                  trailing: _buildDropdownButton(_currency, _changeCurrency),
+                  trailing: _buildDropdownButton(
+                    theme: theme,
+                    currentValue: _currency,
+                    items: _currencyItems,
+                    onChanged: _changeCurrency,
+                  ),
                   onTap: () {},
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.credit_card_outlined,
                   title: 'Payment Methods',
                   subtitle: 'Manage your payment options',
@@ -163,31 +166,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ],
             ),
             SizedBox(height: 24.h),
-      
-            // SUPPORT & ABOUT
+
             _buildSection(
+              theme: theme,
               title: 'Support & About',
               icon: Icons.help_outline,
               children: [
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.help_outline,
                   title: 'Help & Support',
                   subtitle: 'Get help and contact support',
                   onTap: _helpSupport,
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.info_outline,
                   title: 'About App',
                   subtitle: 'Version 1.0.0',
                   onTap: _aboutApp,
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.description_outlined,
                   title: 'Terms & Conditions',
                   subtitle: 'App terms and conditions',
                   onTap: _termsConditions,
                 ),
                 _buildSettingItem(
+                  theme: theme,
                   icon: Icons.privacy_tip_outlined,
                   title: 'Privacy Policy',
                   subtitle: 'How we handle your data',
@@ -196,9 +203,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ],
             ),
             SizedBox(height: 32.h),
-      
-            // LOGOUT BUTTON
-            _buildLogoutButton(),
+
+            _buildLogoutButton(theme),
             SizedBox(height: 20.h),
           ],
         ),
@@ -206,7 +212,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildHeader() {
+  // ── Section builders ───────────────────────────────────────────────────────
+
+  Widget _buildHeader(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -215,7 +223,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 4.h),
@@ -223,7 +231,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           'Manage your app preferences and account settings',
           style: TextStyle(
             fontSize: 12.sp,
-            color: Colors.blueGrey,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -231,17 +239,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildSection({
+    required ThemeData theme,
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -250,12 +259,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SECTION HEADER
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey.shade100),
+                bottom: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.15),
+                ),
               ),
             ),
             child: Row(
@@ -263,14 +273,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: AppColors.blueColor.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 20.w,
-                    color: AppColors.blueColor,
-                  ),
+                  child: Icon(icon, size: 20.w, color: theme.colorScheme.primary),
                 ),
                 SizedBox(width: 12.w),
                 Text(
@@ -278,14 +284,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
           ),
-          
-          // SECTION CONTENT
           Padding(
             padding: EdgeInsets.all(16.w),
             child: Column(children: children),
@@ -296,6 +300,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildSettingItem({
+    required ThemeData theme,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -307,32 +312,34 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       leading: Container(
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.1),
+          color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8.r),
         ),
-        child: Icon(icon, size: 20.w, color: Colors.blueGrey),
+        child: Icon(icon, size: 20.w, color: theme.colorScheme.onSurfaceVariant),
       ),
       title: Text(
         title,
         style: TextStyle(
           fontSize: 14.sp,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: theme.colorScheme.onSurface,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
           fontSize: 12.sp,
-          color: Colors.blueGrey,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
-      trailing: trailing ?? Icon(Icons.chevron_right, size: 20.w, color: Colors.grey),
+      trailing: trailing ??
+          Icon(Icons.chevron_right, size: 20.w, color: theme.colorScheme.onSurfaceVariant),
       onTap: onTap,
     );
   }
 
   Widget _buildToggleSettingItem({
+    required ThemeData theme,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -344,10 +351,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 20.w, color: Colors.blueGrey),
+          child: Icon(icon, size: 20.w, color: theme.colorScheme.onSurfaceVariant),
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -359,7 +366,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 2.h),
@@ -367,7 +374,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: Colors.blueGrey,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -376,132 +383,107 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         Switch.adaptive(
           value: value,
           onChanged: onChanged,
-          activeColor: AppColors.blueColor,
+          activeColor: theme.colorScheme.primary,
         ),
       ],
     );
   }
 
-Widget _buildDropdownButton(
-  String currentValue,
-  Function(String) onChanged,
-) {
-  final bool isCurrency = currentValue.contains(' - ');  
-  // This is more reliable because all currency values contain “ - ”
-  // and no language contains it.
-
-  final List<String> items = isCurrency
-      ? _currencyItems
-      : _languageItems;
-
-  return DropdownButtonHideUnderline(
-    child: DropdownButton<String>(
-      value: currentValue,
-      items: items
-          .map((value) => DropdownMenuItem(
-                value: value,
-                child: Text(
-                  value,
-                  style: TextStyle(fontSize: 12.sp),
-                ),
-              ))
-          .toList(),
-      onChanged: (value) {
-        if (value != null) {
-          onChanged(value);
-        }
-      },
-      style: TextStyle(fontSize: 12.sp, color: Colors.black87),
-      icon: Icon(Icons.arrow_drop_down, size: 20.w, color: Colors.grey),
-    ),
-  );
-}
-
-final List<String> _languageItems = [
-  'English',
-  'French',
-  'Spanish',
-  'Arabic',
-];
-
-final List<String> _currencyItems = [
-  'GHS - Ghanaian Cedi',
-  'USD - US Dollar',
-  'EUR - Euro',
-  'GBP - British Pound',
-];
-
-  Widget _buildLogoutButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _confirmLogout,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.withOpacity(0.1),
-          foregroundColor: Colors.red,
-          elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-            side: BorderSide(color: Colors.red.withOpacity(0.3)),
-          ),
-        ),
-        child: Text(
-          'Log Out',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-          ),
+  Widget _buildDropdownButton({
+    required ThemeData theme,
+    required String currentValue,
+    required List<String> items,
+    required Function(String) onChanged,
+  }) {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: currentValue,
+        dropdownColor: theme.colorScheme.surface,
+        items: items
+            .map((value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ))
+            .toList(),
+        onChanged: (value) {
+          if (value != null) onChanged(value);
+        },
+        style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          size: 20.w,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );
   }
 
-  // Action methods
+  Widget _buildLogoutButton(ThemeData theme) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _confirmLogout,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.errorContainer,
+          foregroundColor: theme.colorScheme.error,
+          elevation: 0,
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+          ),
+        ),
+        child: Text(
+          'Log Out',
+          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  // ── Action methods ─────────────────────────────────────────────────────────
+
   void _changeLanguage(String language) {
-    setState(() {
-      _language = language;
-    });
+    setState(() => _language = language);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Language changed to $language')),
     );
   }
 
   void _changeCurrency(String currency) {
-    setState(() {
-      _currency = currency;
-    });
+    setState(() => _currency = currency);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Currency changed to $currency')),
     );
   }
 
-void _editProfile() {
-  final authState = ref.read(authProvider);
-  final currentUser = authState.value;
-  
-  if (currentUser != null) {
+  void _editProfile() {
+    final currentUser = ref.read(authProvider).value;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to load user data')),
+      );
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilePage(currentUser: currentUser),
+        builder: (ctx) => EditProfilePage(currentUser: currentUser),
       ),
     ).then((updatedUser) {
-      if (updatedUser != null && context.mounted) {
-        // The auth provider is already updated, so UI will refresh automatically
+      if (updatedUser != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
         );
-        
-        // No need to call setState() - Riverpod will handle the rebuild
       }
     });
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Unable to load user data')),
-    );
   }
-}
 
   void _privacySettings() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -522,23 +504,30 @@ void _editProfile() {
   }
 
   void _aboutApp() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About HostelHub'),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('About HostelHub',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Version: 1.0.0', style: TextStyle(fontSize: 14.sp)),
+            Text('Version: 1.0.0',
+                style: TextStyle(
+                    fontSize: 14.sp, color: theme.colorScheme.onSurface)),
             SizedBox(height: 8.h),
-            Text('HostelHub - Your trusted hostel booking platform', 
-                style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey)),
+            Text('HostelHub - Your trusted hostel booking platform',
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Close'),
           ),
         ],
@@ -559,24 +548,28 @@ void _editProfile() {
   }
 
   void _confirmLogout() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to log out?'),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Log Out',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text('Are you sure you want to log out?',
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(ctx);
               _logout();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
             ),
             child: const Text('Log Out'),
           ),
@@ -585,10 +578,14 @@ void _editProfile() {
     );
   }
 
-  void _logout() {
-    // Implement logout logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Logged out successfully')),
-    );
+  Future<void> _logout() async {
+    try {
+      await ref.read(authProvider.notifier).signOut();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: $e')),
+      );
+    }
   }
 }

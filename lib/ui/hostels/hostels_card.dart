@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
@@ -40,14 +40,14 @@ class _HostelCardState extends State<HostelCard> {
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: _isHovered ? theme.colorScheme.primary.withOpacity(0.4) : Colors.transparent,
+            color: _isHovered ? theme.colorScheme.primary.withValues(alpha: 0.4) : Colors.transparent,
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
               color: _isHovered
-                  ? theme.colorScheme.primary.withOpacity(0.12)
-                  : theme.shadowColor.withOpacity(0.08),
+                  ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                  : theme.shadowColor.withValues(alpha: 0.08),
               blurRadius: _isHovered ? 18 : 8,
               spreadRadius: _isHovered ? 4 : 2,
               offset: const Offset(2, 2),
@@ -128,7 +128,7 @@ class _HostelCardState extends State<HostelCard> {
                           SizedBox(width: 5.w),
                           SmallText(
                             text: "(${widget.hostel.reviewsCount})",
-                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                             size: 11.sp,
                           ),
                         ],
@@ -167,7 +167,7 @@ class _HostelCardState extends State<HostelCard> {
                           .take(3)
                           .map(
                             (amenity) => SmallContainerAndText(
-                                containerColor: theme.colorScheme.primary.withOpacity(0.06),
+                                containerColor: theme.colorScheme.primary.withValues(alpha: 0.06),
                               text: amenity,
                                 textColor: theme.colorScheme.onSurface,
                               textSize: 9.sp,
@@ -176,7 +176,7 @@ class _HostelCardState extends State<HostelCard> {
                       // Add "+more" if there are more than 3 amenities
                       if (widget.hostel.amenities.length > 3)
                         SmallContainerAndText(
-                          containerColor: theme.colorScheme.primary.withOpacity(0.06),
+                          containerColor: theme.colorScheme.primary.withValues(alpha: 0.06),
                           text: "+${widget.hostel.amenities.length - 3} more",
                           textColor: theme.colorScheme.onSurface,
                           textSize: 9.sp,

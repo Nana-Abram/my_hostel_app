@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
@@ -73,7 +73,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
         border: Border.all(color: theme.dividerColor, width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 8,
             spreadRadius: 2,
             offset: const Offset(2, 2),
@@ -246,7 +246,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(

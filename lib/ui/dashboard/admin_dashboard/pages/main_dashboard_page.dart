@@ -6,9 +6,6 @@ import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboar
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/recent_activity.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/stats_grid.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/main_dashboard_widget/welcome_header.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
-// import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_stat.dart';
-
 
 class MainDashboard extends ConsumerWidget {
   final Function(int) onIndexChanged;
@@ -17,49 +14,39 @@ class MainDashboard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final stats = ref.watch(usersStatsProvider);
-    
+    final theme = Theme.of(context);
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IconAndTextWidget(
-              icon: Icons.arrow_back_ios,
-              text: 'Back to home',
-              iconColor: Colors.blueGrey,
-              isBackArrow: true,
-            ),
-
-          SizedBox(height: 30.h),
+          SizedBox(height: 8.h),
           const WelcomeHeader(),
           SizedBox(height: 30.h),
-          
-             // USERS STATS
+
+          // USERS STATS
           Consumer(
             builder: (context, ref, child) {
               final statsAsync = ref.watch(usersStatsProvider);
               return statsAsync.when(
                 data: (stats) => StatsGrid(stats: stats),
-                loading: () => _buildStatsLoading(),
-                error: (error, stack) => _buildStatsError(error),
+                loading: () => _buildStatsLoading(theme),
+                error: (error, stack) => _buildStatsError(error, theme),
               );
             },
           ),
 
-
           SizedBox(height: 30.h),
-          _buildRecentActivity(),
+          _buildRecentActivity(theme),
           SizedBox(height: 30.h),
-          _buildQuickActions(),
+          _buildQuickActions(theme),
         ],
       ),
     );
   }
 
-
-  
-  Widget _buildStatsLoading() {
+  Widget _buildStatsLoading(ThemeData theme) {
     return Row(
       children: [
         for (int i = 0; i < 4; i++) ...[
@@ -67,11 +54,11 @@ class MainDashboard extends ConsumerWidget {
             child: Container(
               height: 80.h,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              child: Center(
+                child: CircularProgressIndicator(color: theme.colorScheme.primary),
               ),
             ),
           ),
@@ -81,22 +68,25 @@ class MainDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsError(Object error) {
+  Widget _buildStatsError(Object error, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.red[50],
+        color: theme.colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.red),
+        border: Border.all(color: theme.colorScheme.error),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red, size: 20.w),
+          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer, size: 20.w),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'Failed to load stats: $error',
-              style: TextStyle(color: Colors.red, fontSize: 12.sp),
+              style: TextStyle(
+                color: theme.colorScheme.onErrorContainer,
+                fontSize: 12.sp,
+              ),
             ),
           ),
         ],
@@ -104,74 +94,43 @@ class MainDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(ThemeData theme) {
     final activities = [
       ActivityItem(
-        user: 'Osei Frank',
-        action: 'Booked a room',
-        time: '2 min ago',
-        type: 'booking',
-        icon: Icons.book_online,
-        color: Colors.green,
-      ),
-      ActivityItem(
-        user: 'Godbless Ghansah',
-        action: 'Created new hostel',
-        time: '15 min ago',
-        type: 'hostel',
-        icon: Icons.business,
-        color: Colors.blue,
-      ),
-      ActivityItem(
-        user: 'Saaka Ahmed',
-        action: 'Updated profile',
-        time: '1 hour ago',
-        type: 'profile',
-        icon: Icons.person,
-        color: Colors.orange,
-      ),
-      ActivityItem(
-        user: 'Emily Davis',
-        action: 'Cancelled booking',
-        time: '2 hours ago',
-        type: 'cancellation',
-        icon: Icons.cancel,
-        color: Colors.red,
+        user: 'Recent Activity',
+        action: 'Live data coming soon',
+        time: '',
+        type: 'info',
+        icon: Icons.info_outline,
+        color: theme.colorScheme.primary,
       ),
     ];
 
     return RecentActivity(activities: activities);
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(ThemeData theme) {
     final actions = [
       QuickActionItem(
         title: 'Manage Users',
         subtitle: 'View and manage all users',
         icon: Icons.people,
-        color: Colors.blue,
+        color: theme.colorScheme.primary,
         onTap: () => onIndexChanged(1),
       ),
       QuickActionItem(
         title: 'Verify Hostels',
         subtitle: 'Approve new hostel listings',
         icon: Icons.verified,
-        color: Colors.green,
+        color: theme.colorScheme.secondary,
         onTap: () => onIndexChanged(2),
       ),
       QuickActionItem(
-        title: 'View Reports',
-        subtitle: 'Platform analytics & insights',
-        icon: Icons.analytics,
-        color: Colors.orange,
+        title: 'All Bookings',
+        subtitle: 'Monitor platform bookings',
+        icon: Icons.receipt_long,
+        color: theme.colorScheme.tertiary,
         onTap: () => onIndexChanged(3),
-      ),
-      QuickActionItem(
-        title: 'System Settings',
-        subtitle: 'Platform configuration',
-        icon: Icons.settings,
-        color: Colors.purple,
-        onTap: () => onIndexChanged(4),
       ),
     ];
 

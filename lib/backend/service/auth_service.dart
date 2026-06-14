@@ -7,13 +7,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Admin emails - store this in Firestore for better management
-  final List<String> _adminEmails = [
-    'admin@hostelhub.com',
-    'superadmin@hostelhub.com'
-  ];
+  // ── Auth state ─────────────────────────────────────────────────────────────
 
-  // Stream to track auth state changes
   Stream<UserModel?> get userStream {
     return _auth.authStateChanges().asyncMap((firebaseUser) async {
       if (firebaseUser == null) return null;
@@ -21,22 +16,26 @@ class AuthService {
     });
   }
 
-  // Get current user
   Future<UserModel?> getCurrentUser() async {
     final firebaseUser = _auth.currentUser;
     if (firebaseUser == null) return null;
     return await _getUserFromFirebaseUser(firebaseUser);
   }
 
-  // Helper method to get UserModel from Firebase User
+  // Role comes entirely from Firestore — never inferred from email.
+  // To bootstrap the very first admin, set role='admin' directly in the
+  // Firebase console on that user's /users/{uid} document.
   Future<UserModel> _getUserFromFirebaseUser(User firebaseUser) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final userDoc =
+          await _firestore.collection('users').doc(firebaseUser.uid).get();
+
       if (userDoc.exists) {
-        return UserModel.fromMap(userDoc.data()!, firebaseUser.uid);
+        final data = userDoc.data();
+        if (data == null) throw Exception('User document data is empty.');
+        return UserModel.fromMap(data, firebaseUser.uid);
       } else {
-        // Create new user document if it doesn't exist (for social logins)
+        // First-time social login — create the document
         final newUser = UserModel(
           id: firebaseUser.uid,
           email: firebaseUser.email!,
@@ -45,52 +44,51 @@ class AuthService {
           createdAt: DateTime.now(),
           lastLogin: DateTime.now(),
           isEmailVerified: firebaseUser.emailVerified,
-          role: _adminEmails.contains(firebaseUser.email) ? UserRole.admin : UserRole.student,
+          role: UserRole.student,
         );
-        
-        await _firestore.collection('users').doc(firebaseUser.uid).set(newUser.toMap());
+        await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set(newUser.toMap());
         return newUser;
       }
     } catch (e) {
-      throw 'Error fetching user data: ${e.toString()}';
+      throw Exception('Error fetching user data: ${e.toString()}');
     }
   }
 
-  // Email & Password Sign Up with Role Selection
+  // ── Sign up ────────────────────────────────────────────────────────────────
+
+  /// [pin] is required when [role] is admin or hostelOwner.
+  /// It is validated against the value stored in Firestore config/roleAccess
+  /// before the account is created, so a wrong PIN never produces an orphan
+  /// Firebase Auth record.
   Future<UserModel> signUpWithEmail({
     required String email,
     required String password,
     required String fullName,
     String? phone,
     UserRole role = UserRole.student,
+    String? pin,
   }) async {
     try {
-      // Validate email format
-      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+      final emailRegex =
+          RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
       if (!emailRegex.hasMatch(email)) {
         throw 'Please enter a valid email address';
       }
 
-      // Check if email already exists
-      // final signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-      // if (signInMethods.isNotEmpty) {
-      //   throw 'An account already exists with this email address';
-      // }
+      // Validate role PIN against Firestore before creating the account
+      if (role != UserRole.student) {
+        await _validateRolePin(role, pin);
+      }
 
-      // Create user in Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       final firebaseUser = userCredential.user!;
 
-      // Determine user role (admin emails get admin role, otherwise use selected role)
-      final UserRole userRole = _adminEmails.contains(email) 
-          ? UserRole.admin 
-          : role;
-
-      // Create user document in Firestore
       final userModel = UserModel(
         id: firebaseUser.uid,
         email: email,
@@ -98,24 +96,57 @@ class AuthService {
         phone: phone,
         createdAt: DateTime.now(),
         lastLogin: DateTime.now(),
-        role: userRole,
+        role: role,
         isEmailVerified: false,
       );
 
-      await _firestore.collection('users').doc(firebaseUser.uid).set(userModel.toMap());
-
-      // Send email verification
+      await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .set(userModel.toMap());
       await firebaseUser.sendEmailVerification();
 
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthError(e);
     } catch (e) {
-      throw e.toString();
+      // Re-throw user-facing string messages (e.g. from _validateRolePin)
+      // unchanged; wrap anything else so the type isn't lost.
+      if (e is String) rethrow;
+      throw Exception(e.toString());
     }
   }
 
-  // Email & Password Login
+  /// Fetches the role PIN config from Firestore and compares it with [pin].
+  /// Throws a user-friendly string on failure.
+  Future<void> _validateRolePin(UserRole role, String? pin) async {
+    if (pin == null || pin.isEmpty) {
+      throw 'A security PIN is required for the ${role.displayName} role.';
+    }
+    try {
+      final configDoc = await _firestore
+          .collection('config')
+          .doc('roleAccess')
+          .get();
+
+      if (!configDoc.exists || configDoc.data() == null) {
+        throw 'Role access is not configured. Contact the administrator.';
+      }
+
+      final pinField =
+          role == UserRole.admin ? 'adminPin' : 'ownerPin';
+      final expectedPin = configDoc.data()![pinField] as String?;
+
+      if (expectedPin == null || pin != expectedPin) {
+        throw 'Invalid security PIN for the ${role.displayName} role.';
+      }
+    } on FirebaseException catch (e) {
+      throw 'Could not verify PIN: ${e.message}';
+    }
+  }
+
+  // ── Login ──────────────────────────────────────────────────────────────────
+
   Future<UserModel> loginWithEmail({
     required String email,
     required String password,
@@ -125,45 +156,37 @@ class AuthService {
         email: email,
         password: password,
       );
-
       final firebaseUser = userCredential.user!;
 
-      // Update last login
       await _firestore.collection('users').doc(firebaseUser.uid).update({
         'lastLogin': DateTime.now().toIso8601String(),
       });
 
       final user = await _getUserFromFirebaseUser(firebaseUser);
-      
-      // Save FCM token for push notifications
       await NotificationService().saveFCMToken(firebaseUser.uid);
-      
       return user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthError(e);
     }
   }
 
-  // Google Sign In - Using Firebase Auth Provider (works on web)
+  // ── Google sign-in ─────────────────────────────────────────────────────────
+
   Future<UserModel> signInWithGoogle() async {
     try {
-      // Create Google Auth Provider
       final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      
-      // Add scopes
       googleProvider.addScope('email');
       googleProvider.addScope('profile');
-      
-      // Sign in with popup (for web)
-      final UserCredential userCredential = await _auth.signInWithPopup(googleProvider);
-      
+
+      final UserCredential userCredential =
+          await _auth.signInWithPopup(googleProvider);
       final firebaseUser = userCredential.user!;
 
-      // Check if user document exists, if not it will be created by _getUserFromFirebaseUser
-      final userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
       if (userDoc.exists) {
-        // Update last login for existing user
         await _firestore.collection('users').doc(firebaseUser.uid).update({
           'lastLogin': DateTime.now().toIso8601String(),
         });
@@ -177,14 +200,8 @@ class AuthService {
     }
   }
 
-  // Facebook Sign In (Optional - requires setup)
-  Future<UserModel> signInWithFacebook() async {
-    // Note: You'll need to set up Facebook login separately
-    // This is a placeholder for future implementation
-    throw 'Facebook login is not yet implemented';
-  }
+  // ── Password / account management ─────────────────────────────────────────
 
-  // Password Reset
   Future<void> resetPassword(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -193,7 +210,6 @@ class AuthService {
     }
   }
 
-  // Resend Email Verification
   Future<void> resendEmailVerification() async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -203,7 +219,6 @@ class AuthService {
     }
   }
 
-  // Update user profile
   Future<void> updateUserProfile({
     required String userId,
     required Map<String, dynamic> updates,
@@ -215,7 +230,6 @@ class AuthService {
     }
   }
 
-  // Change Password
   Future<void> changePassword(String newPassword) async {
     try {
       final user = _auth.currentUser;
@@ -229,15 +243,11 @@ class AuthService {
     }
   }
 
-  // Delete User Account
   Future<void> deleteAccount() async {
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        // Delete user data from Firestore
         await _firestore.collection('users').doc(user.uid).delete();
-        
-        // Delete user from Firebase Auth
         await user.delete();
       } else {
         throw 'No user is currently signed in';
@@ -247,35 +257,38 @@ class AuthService {
     }
   }
 
-  // Promote user to admin (for super admin use)
+  // ── Role management ────────────────────────────────────────────────────────
+
   Future<void> promoteToAdmin(String userId) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
-        'role': UserRole.admin.name,
-      });
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .update({'role': UserRole.admin.name});
     } catch (e) {
       throw 'Failed to promote user: ${e.toString()}';
     }
   }
 
-  // Demote admin to student
+  /// Demotes a user to student. Because role is read solely from Firestore
+  /// on every login, this change takes effect the next time they sign in.
   Future<void> demoteToStudent(String userId) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
-        'role': UserRole.student.name,
-      });
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .update({'role': UserRole.student.name});
     } catch (e) {
       throw 'Failed to demote user: ${e.toString()}';
     }
   }
 
-  // Check if user is admin
   Future<bool> isUserAdmin(String userId) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc =
+          await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
-        final userData = userDoc.data();
-        return userData?['role'] == UserRole.admin.name;
+        return userDoc.data()?['role'] == UserRole.admin.name;
       }
       return false;
     } catch (e) {
@@ -283,7 +296,6 @@ class AuthService {
     }
   }
 
-  // Get all users (admin only)
   Future<List<UserModel>> getAllUsers() async {
     try {
       final querySnapshot = await _firestore.collection('users').get();
@@ -295,7 +307,6 @@ class AuthService {
     }
   }
 
-  // Sign Out
   Future<void> signOut() async {
     try {
       await _auth.signOut();
@@ -304,12 +315,14 @@ class AuthService {
     }
   }
 
-  // Get user by ID
   Future<UserModel?> getUserById(String userId) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc =
+          await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
-        return UserModel.fromMap(userDoc.data()!, userId);
+        final data = userDoc.data();
+        if (data == null) return null;
+        return UserModel.fromMap(data, userId);
       }
       return null;
     } catch (e) {
@@ -317,41 +330,35 @@ class AuthService {
     }
   }
 
-  // Update admin emails list
-  void updateAdminEmails(List<String> newAdminEmails) {
-    // In production, you might want to store this in Firestore
-    _adminEmails.clear();
-    _adminEmails.addAll(newAdminEmails);
-  }
+  // ── Error handling ─────────────────────────────────────────────────────────
 
-  // Get current admin emails
-  List<String> get adminEmails => List.unmodifiable(_adminEmails);
-
-  // Error handling
   String _handleAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'invalid-email':
-        return 'Invalid email address format.';
+        return 'That doesn\'t look like a valid email address.';
       case 'user-disabled':
-        return 'This user account has been disabled.';
+        return 'This account has been disabled. Please contact support.';
       case 'user-not-found':
-        return 'No user found with this email address.';
       case 'wrong-password':
-        return 'Incorrect password. Please try again.';
+      case 'invalid-credential':
+      case 'INVALID_LOGIN_CREDENTIALS':
+        return 'Incorrect email or password. Please try again.';
       case 'email-already-in-use':
-        return 'An account already exists with this email address.';
+        return 'An account already exists with this email.';
       case 'weak-password':
-        return 'Password is too weak. Please use a stronger password.';
+        return 'Password is too weak. Try something longer or more complex.';
       case 'operation-not-allowed':
-        return 'Email/password accounts are not enabled.';
+        return 'Email/password sign-in is not enabled. Please contact support.';
       case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
+        return 'Too many failed attempts. Please wait a moment and try again.';
       case 'network-request-failed':
-        return 'Network error. Please check your internet connection.';
+        return 'No internet connection. Please check your network and try again.';
       case 'requires-recent-login':
-        return 'This operation requires recent authentication. Please log in again.';
+        return 'Please sign out and sign back in before doing this.';
+      case 'popup-closed-by-user':
+        return 'Sign-in was cancelled.';
       default:
-        return 'An error occurred: ${e.message}';
+        return 'Something went wrong. Please try again.';
     }
   }
 }

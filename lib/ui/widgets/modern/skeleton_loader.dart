@@ -1,3 +1,5 @@
+﻿import 'dart:math' show max;
+
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -61,26 +63,21 @@ class SkeletonCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.2),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image skeleton
+          // Image skeleton: total height minus padding (32) minus footer rows (56)
           SkeletonLoader(
             width: double.infinity,
-            height: height != null ? height! * 0.6 : 120,
+            height: max(0.0, (height ?? 200) - 88),
             borderRadius: BorderRadius.circular(8),
           ),
           const SizedBox(height: 12),
-          // Title skeleton
-          const SkeletonLoader(
-            width: double.infinity,
-            height: 20,
-          ),
+          const SkeletonLoader(width: double.infinity, height: 20),
           const SizedBox(height: 8),
-          // Subtitle skeleton
           SkeletonLoader(
             width: (width ?? 200) * 0.6,
             height: 16,
@@ -157,7 +154,7 @@ class SkeletonHostelCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.2),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -224,7 +221,7 @@ class SkeletonStatCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.2),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
@@ -24,8 +24,8 @@ class UserAvatar extends StatelessWidget {
         height: size.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: theme.colorScheme.primary.withOpacity(0.1),
-          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3), width: 2.w),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 2.w),
         ),
         child: Stack(
           children: [

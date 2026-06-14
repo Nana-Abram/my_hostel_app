@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
@@ -36,7 +36,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Authentication Error: $error'),
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
               ElevatedButton(
                 onPressed: () {
                   ref.invalidate(authProvider);
@@ -65,7 +65,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Error: $error'),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   ElevatedButton(
                     onPressed: () {
                       // ignore: unused_result
@@ -85,9 +85,8 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _onAddHostelPressed(),
-            backgroundColor: Colors.blue[700],
-            child: Icon(Icons.add),
             tooltip: 'Add New Hostel',
+            child: const Icon(Icons.add),
           ),
         );
       },
@@ -109,7 +108,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
               size: 80,
               color: Colors.grey[400],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Text(
               'Please Sign In',
               style: TextStyle(
@@ -118,21 +117,19 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                 color: Colors.grey[600],
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               'You need to be signed in to view your hostels',
               style: TextStyle(
                 color: Colors.grey[500],
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 24.h),
             ElevatedButton(
               onPressed: () {
                 context.go('/login');
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[700],
-              ),
+              style: ElevatedButton.styleFrom(),
               child: Text('Sign In'),
             ),
           ],
@@ -183,7 +180,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
 
   Widget _buildHostelsList(List<HostelModel> hostels) {
     return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 40.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       itemCount: hostels.length,
       itemBuilder: (context, index) {
         return _buildHostelCard(hostels[index]);
@@ -219,7 +216,7 @@ Widget _buildHostelCard(HostelModel hostel) {
                           ),
               ),
   
-              SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,39 +224,33 @@ Widget _buildHostelCard(HostelModel hostel) {
                     Text(
                       hostel.name,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      '${hostel.campus} • ${hostel.location}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 4.h),
                     Row(
                       children: [
-                        Icon(Icons.school, color: Colors.blue, size: 16),
-                        SizedBox(width: 4),
-                        Text(
-                          hostel.campus,
-                          style: TextStyle(fontSize: 12),
+                        Icon(Icons.school, color: Colors.blue, size: 14.sp),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(
+                            hostel.campus,
+                            style: TextStyle(fontSize: 12.sp),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Row(
                       children: [
-                        Icon(Icons.room, color: Colors.green, size: 16),
-                        SizedBox(width: 4),
+                        Icon(Icons.room, color: Colors.green, size: 14.sp),
+                        SizedBox(width: 4.w),
                         Expanded(
                           child: Text(
                             hostel.location,
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -270,69 +261,65 @@ Widget _buildHostelCard(HostelModel hostel) {
               ),
             ],
           ),
-          SizedBox(height: 12),
-          // Rating and Price Row
+          SizedBox(height: 12.h),
           Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 16),
-              SizedBox(width: 4),
+              Icon(Icons.star, color: Colors.amber, size: 16.sp),
+              SizedBox(width: 4.w),
               Text(
                 hostel.rating.toStringAsFixed(1),
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Text(
                 '(${hostel.reviewsCount.toInt()} reviews)',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
               ),
               const Spacer(),
-              Icon(Icons.attach_money, color: Colors.green, size: 16),
-              SizedBox(width: 4),
+              Icon(Icons.attach_money, color: Colors.green, size: 16.sp),
+              SizedBox(width: 4.w),
               Text(
-                'Starts at GHS ${hostel.startPrice.toInt()}/year',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'GHS ${hostel.startPrice.toInt()}/yr',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
               ),
             ],
           ),
-          SizedBox(height: 12),
-          // Rooms and Status
+          SizedBox(height: 12.h),
           Row(
             children: [
-              Icon(Icons.meeting_room, color: Colors.purple, size: 16),
-              SizedBox(width: 4),
+              Icon(Icons.meeting_room, color: Colors.purple, size: 16.sp),
+              SizedBox(width: 4.w),
               Text(
                 '${hostel.totalRooms.toInt()} Rooms',
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 12.sp),
               ),
-              SizedBox(width: 16),
-              Icon(Icons.apartment, color: Colors.orange, size: 16),
-              SizedBox(width: 4),
+              SizedBox(width: 16.w),
+              Icon(Icons.apartment, color: Colors.orange, size: 16.sp),
+              SizedBox(width: 4.w),
               Text(
                 '${hostel.amenities.length} Amenities',
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 12.sp),
               ),
               const Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(hostel.status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: _getStatusColor(hostel.status),
-                  ),
+                  color: _getStatusColor(hostel.status).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: _getStatusColor(hostel.status)),
                 ),
                 child: Text(
                   hostel.status.toUpperCase(),
                   style: TextStyle(
                     color: _getStatusColor(hostel.status),
                     fontWeight: FontWeight.bold,
-                    fontSize: 10,
+                    fontSize: 10.sp,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 12.h),
           // Action Buttons
           Row(
             children: [
@@ -346,7 +333,7 @@ Widget _buildHostelCard(HostelModel hostel) {
                   ),
                 ),
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Tooltip(
                   message: 'View Hostel Details',
@@ -357,7 +344,7 @@ Widget _buildHostelCard(HostelModel hostel) {
                   ),
                 ),
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Tooltip(
                   message: 'Delete Hostel',
@@ -402,48 +389,35 @@ void _onViewHostelPressed(HostelModel hostel) {
 }
 
 void _onDeleteHostelPressed(HostelModel hostel) {
+  final messenger = ScaffoldMessenger.of(context);
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Delete Hostel'),
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Delete Hostel'),
       content: Text('Are you sure you want to delete "${hostel.name}"?'),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel'),
         ),
-
-ElevatedButton(
-  onPressed: () async {
-    Navigator.pop(context); // Close the dialog first
-    
-    // Store context in a local variable before any async operations
-    final scaffoldContext = context;
-    
-    try {
-      final service = ref.read(hostelServiceProvider);
-      await service.deleteHostel(hostel.id);
-      
-      // Use the stored context to show SnackBar
-      if (scaffoldContext.mounted) {
-        ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-          SnackBar(content: Text('Hostel deleted successfully')),
-        );
-      }
-      
-    } catch (e) {
-      // Use the stored context to show error SnackBar
-      if (scaffoldContext.mounted) {
-        ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-          SnackBar(content: Text('Failed to delete hostel: $e')),
-        );
-      }
-    }
-  },
-  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-  child: Text('Delete'),
-),
-
+        ElevatedButton(
+          onPressed: () async {
+            Navigator.pop(dialogContext);
+            try {
+              final service = ref.read(hostelServiceProvider);
+              await service.deleteHostel(hostel.id);
+              messenger.showSnackBar(
+                const SnackBar(content: Text('Hostel deleted successfully')),
+              );
+            } catch (e) {
+              messenger.showSnackBar(
+                SnackBar(content: Text('Failed to delete hostel: $e')),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          child: const Text('Delete'),
+        ),
       ],
     ),
   );

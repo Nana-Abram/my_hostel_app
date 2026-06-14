@@ -1,18 +1,19 @@
-// ignore_for_file: unreachable_switch_default
+﻿// ignore_for_file: unreachable_switch_default
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
+import 'package:my_hostel_app/backend/provider/notification_provider.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/admin_dashboard.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/settings_page.dart';
 import 'package:my_hostel_app/ui/dashboard/edit_profile_page.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/hostel_owner.dart';
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/student_dashboard.dart';
+import 'package:my_hostel_app/ui/notifications/notification_center_screen.dart';
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -62,6 +63,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           // loader rather than scheduling a navigation inside build.
           return _buildLoadingScreen(theme);
         }
+        // Start Firestore real-time notification listener for this user.
+        ref.watch(notificationListenerProvider(user.id));
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           appBar: _buildAppBar(user, context, theme),
@@ -82,6 +85,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       elevation: 1,
       title: Row(
         children: [
+          Tooltip(
+            message: 'Back to home',
+            child: IconAndTextWidget(
+                icon: Icons.arrow_back_ios,
+                iconColor: theme.colorScheme.onSurfaceVariant,
+                isBackArrow: true,
+                
+              ),
+          ),
+          SizedBox(width: 12.w),
           Container(
             width: 32.w,
             height: 32.w,
@@ -116,7 +129,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 _getGreeting(),
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -124,17 +137,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: Badge(
-            label: const Text('3'),
-            child: Icon(
-              Icons.notifications_outlined,
-              size: 24.w,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          onPressed: () {
-            // TODO: navigate to notifications screen
+        Consumer(
+          builder: (context, ref, _) {
+            final countAsync =
+                ref.watch(unreadNotificationsCountProvider(user.id));
+            final count = countAsync.asData?.value ?? 0;
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: count > 0,
+                label: Text(count > 99 ? '99+' : '$count'),
+                child: Icon(
+                  Icons.notifications_outlined,
+                  size: 24.w,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      NotificationCenterScreen(userId: user.id),
+                ),
+              ),
+            );
           },
         ),
         Padding(
@@ -147,6 +172,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: user.profileImage != null
                   ? ClipOval(
                       child: ImageNetwork(
+                        key: ValueKey(user.profileImage),
                         image: user.profileImage!,
                         height: 36.w,
                         width: 36.w,
@@ -212,7 +238,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -224,7 +250,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: theme.colorScheme.surface,
         selectedItemColor: theme.colorScheme.primary,
-        unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.5),
+        unselectedItemColor: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         selectedLabelStyle:
             TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
         unselectedLabelStyle: TextStyle(fontSize: 11.sp),
@@ -251,6 +277,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             icon: Icon(Icons.business_outlined),
             activeIcon: Icon(Icons.business),
             label: 'Hostels',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long_outlined),
+            activeIcon: Icon(Icons.receipt_long),
+            label: 'Bookings',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
@@ -386,7 +417,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 theme: theme,
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: navigate to help screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Help & Support coming soon.'),
+                      backgroundColor: const Color(0xFF323232),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 },
               ),
               SizedBox(height: 16.h),
@@ -423,6 +463,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: user.profileImage != null
               ? ClipOval(
                   child: ImageNetwork(
+                    key: ValueKey(user.profileImage),
                     image: user.profileImage!,
                     height: 48.w,
                     width: 48.w,
@@ -465,7 +506,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 user.email,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               SizedBox(height: 4.h),
@@ -473,7 +514,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 padding:
                     EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: _getRoleColor(user.role, theme).withOpacity(0.12),
+                  color: _getRoleColor(user.role, theme).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
@@ -502,7 +543,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       leading: Icon(
         icon,
         size: 24.w,
-        color: theme.colorScheme.onSurface.withOpacity(0.6),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
       ),
       title: Text(
         title,
@@ -514,7 +555,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       trailing: Icon(
         Icons.chevron_right,
         size: 20.w,
-        color: theme.colorScheme.onSurface.withOpacity(0.4),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
@@ -547,7 +588,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         content: Text(
           'Are you sure you want to log out?',
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
@@ -605,7 +646,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               'Loading your dashboard...',
               style: TextStyle(
                 fontSize: 16.sp,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -643,7 +684,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               SizedBox(height: 30.h),

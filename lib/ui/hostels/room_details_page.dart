@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -45,9 +45,6 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
         ? widget.room.images 
         : [widget.room.image];
     
-    // Debug: print the number of images
-    debugPrint('Room ${widget.room.id} has ${images.length} image(s)');
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -61,11 +58,11 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
               icon: Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.9),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -118,7 +115,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                         ),
                       ),
@@ -143,7 +140,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                             child: Container(
                               padding: EdgeInsets.all(8.w),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -172,7 +169,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                             child: Container(
                               padding: EdgeInsets.all(8.w),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -202,7 +199,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                             decoration: BoxDecoration(
                               color: _currentImageIndex == index
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.5),
+                                  : Colors.white.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),
@@ -220,7 +217,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(16.r),
                         ),
                         child: Row(
@@ -260,7 +257,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                         borderRadius: BorderRadius.circular(20.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -311,7 +308,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                         borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
-                            color: theme.shadowColor.withOpacity(0.06),
+                            color: theme.shadowColor.withValues(alpha: 0.06),
                             blurRadius: 10,
                             offset: const Offset(0, 2),
                           ),
@@ -359,7 +356,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                           ? [
                                               BoxShadow(
                                                 color: theme.colorScheme.primary
-                                                    .withOpacity(0.3),
+                                                    .withValues(alpha: 0.3),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -394,7 +391,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                       borderRadius: BorderRadius.circular(20.r),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.shadowColor.withOpacity(0.08),
+                          color: theme.shadowColor.withValues(alpha: 0.08),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -464,7 +461,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       color: theme.colorScheme.onPrimaryContainer
-                                          .withOpacity(0.7),
+                                          .withValues(alpha: 0.7),
                                     ),
                                   ),
                                 ],
@@ -493,8 +490,10 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                               child: _buildInfoCard(
                                 context,
                                 icon: Icons.meeting_room,
-                                label: 'Available Rooms',
-                                value: '${widget.room.availableRooms} Rooms',
+                                label: 'Available Spaces',
+                                value: widget.room.totalSpaces > 0
+                                    ? '${widget.room.availableSpaces} of ${widget.room.totalSpaces}'
+                                    : '${widget.room.availableRooms} Rooms',
                               ),
                             ),
                           ],
@@ -557,7 +556,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                 color: theme.colorScheme.surface,
                                 borderRadius: BorderRadius.circular(12.r),
                                 border: Border.all(
-                                  color: theme.colorScheme.primary.withOpacity(0.3),
+                                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                               ),
@@ -612,7 +611,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.shadowColor.withOpacity(0.06),
+                          color: theme.shadowColor.withValues(alpha: 0.06),
                           blurRadius: 10,
                           offset: const Offset(0, 2),
                         ),
@@ -671,7 +670,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
           color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: theme.shadowColor.withOpacity(0.1),
+              color: theme.shadowColor.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -679,7 +678,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
         ),
         child: SafeArea(
           child: ElevatedButton(
-            onPressed: widget.room.available
+            onPressed: (widget.room.available && !widget.room.isFull)
                 ? () => _handleBookNow(context, ref)
                 : null,
             style: ElevatedButton.styleFrom(
@@ -696,12 +695,18 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  widget.room.available ? Icons.bookmark_add : Icons.block,
+                  (widget.room.available && !widget.room.isFull)
+                      ? Icons.bookmark_add
+                      : Icons.block,
                   size: 20.sp,
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  widget.room.available ? 'Book This Room' : 'Room Unavailable',
+                  widget.room.isFull
+                      ? 'Fully Booked'
+                      : widget.room.available
+                          ? 'Book This Room'
+                          : 'Room Unavailable',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -725,10 +730,10 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Column(

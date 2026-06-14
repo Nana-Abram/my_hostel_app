@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
@@ -36,8 +36,7 @@ class AvailableRooms extends ConsumerWidget {
       },
       feedbackType: HapticFeedbackType.light,
       child: Container(
-        width: isHostelOwner ? 0.9.sw : 0.5.sw,
-        height: isHostelOwner ? 300.h : 270.h,
+        width: double.infinity,
         margin: EdgeInsets.symmetric(vertical: 10.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
@@ -45,7 +44,7 @@ class AvailableRooms extends ConsumerWidget {
           color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: theme.shadowColor.withOpacity(0.08),
+              color: theme.shadowColor.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(2, 4),
             ),
@@ -55,30 +54,33 @@ class AvailableRooms extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// ROOM IMAGE
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.r),
-                bottomLeft: Radius.circular(16.r),
-              ),
-              child: Hero(
-                tag: 'room-${room.id}',
-                child: ImageNetwork(
-                  image: room.image,
-                  height: 355.h,
-                  width: isHostelOwner ? 440.w : 250.w,
-                  fitAndroidIos: BoxFit.cover,
-                  fitWeb: BoxFitWeb.cover,
-                  onTap: () {
-                    // Navigate to room details page
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => RoomDetailsPage(
-                          room: room,
-                          hostel: hostel,
+            SizedBox(
+              width: isHostelOwner ? 180.w : 150.w,
+              height: isHostelOwner ? 220.h : 200.h,
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.r),
+                  bottomLeft: Radius.circular(16.r),
+                ),
+                child: Hero(
+                  tag: 'room-${room.id}',
+                  child: ImageNetwork(
+                    image: room.image,
+                    height: isHostelOwner ? 220.h : 200.h,
+                    width: isHostelOwner ? 180.w : 150.w,
+                    fitAndroidIos: BoxFit.cover,
+                    fitWeb: BoxFitWeb.cover,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => RoomDetailsPage(
+                            room: room,
+                            hostel: hostel,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -86,10 +88,11 @@ class AvailableRooms extends ConsumerWidget {
             /// ROOM DETAILS
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     /// TITLE + PRICE
                     Row(
@@ -144,10 +147,10 @@ class AvailableRooms extends ConsumerWidget {
                             vertical: 6.h,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.05),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8.r),
                             border: Border.all(
-                              color: theme.colorScheme.primary.withOpacity(0.2),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
@@ -174,15 +177,23 @@ class AvailableRooms extends ConsumerWidget {
                     ),
                     SizedBox(height: 15.h),
 
-                    /// STATUS + BOOK BUTTON
+                    /// STATUS BADGE
                     SmallContainerAndText(
-                      containerColor: room.available
-                          ? theme.colorScheme.secondary.withOpacity(0.2)
-                          : theme.colorScheme.surfaceContainerHighest,
-                      text: room.available ? "Available" : "Unavailable",
-                      textColor: room.available
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.onSurface,
+                      containerColor: room.isFull
+                          ? theme.colorScheme.error.withValues(alpha: 0.15)
+                          : room.available
+                              ? theme.colorScheme.secondary.withValues(alpha: 0.2)
+                              : theme.colorScheme.surfaceContainerHighest,
+                      text: room.isFull
+                          ? 'Fully Occupied'
+                          : room.totalSpaces > 0
+                              ? '${room.availableSpaces} of ${room.totalSpaces} spaces'
+                              : (room.available ? 'Available' : 'Unavailable'),
+                      textColor: room.isFull
+                          ? theme.colorScheme.error
+                          : room.available
+                              ? theme.colorScheme.secondary
+                              : theme.colorScheme.onSurface,
                       textSize: 12.sp,
                     ),
                     SizedBox(height: 15.h),

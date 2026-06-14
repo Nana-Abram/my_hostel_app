@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:my_hostel_app/ui/core/responsive.dart';
 
 class ContactScreen extends StatelessWidget {
@@ -44,7 +44,7 @@ class ContactScreen extends StatelessWidget {
           'We\'re here to help you find your perfect student accommodation',
           style: TextStyle(
               fontSize: r.bodyLarge,
-              color: theme.colorScheme.onSurface.withOpacity(0.7)),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         SizedBox(height: r.spacingL),
         ClipRRect(
@@ -79,7 +79,7 @@ class ContactScreen extends StatelessWidget {
           'ready to assist you with any questions about hostels, bookings, or partnerships.',
           style: TextStyle(
               fontSize: r.body,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               height: 1.6),
         ),
         SizedBox(height: r.spacingXL),
@@ -127,9 +127,9 @@ class ContactScreen extends StatelessWidget {
     final rightCol = Container(
       padding: EdgeInsets.all(r.cardPadding),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +149,7 @@ class ContactScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(r.spacingM),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -165,7 +165,7 @@ class ContactScreen extends StatelessWidget {
                     'call our 24/7 support line.',
                     style: TextStyle(
                         fontSize: r.bodySmall,
-                        color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ),
               ],
@@ -282,7 +282,7 @@ class _ContactCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: theme.shadowColor.withOpacity(0.08),
+              color: theme.shadowColor.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2))
         ],
@@ -292,7 +292,7 @@ class _ContactCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(r.spacingM),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: r.isMobile ? 20 : 24,
@@ -312,7 +312,7 @@ class _ContactCard extends StatelessWidget {
                 Text(subtitle,
                     style: TextStyle(
                         fontSize: r.bodySmall,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                 SizedBox(height: 4),
                 Text(contact,
                     style: TextStyle(
@@ -323,7 +323,7 @@ class _ContactCard extends StatelessWidget {
             ),
           ),
           Icon(Icons.chevron_right,
-              color: theme.colorScheme.onSurface.withOpacity(0.4)),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
         ],
       ),
     );
@@ -346,7 +346,7 @@ class _OfficeHourRow extends StatelessWidget {
             Text(day,
                 style: TextStyle(
                     fontSize: r.body,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7))),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
             Text(hours,
                 style: TextStyle(
                     fontSize: r.body,
@@ -386,7 +386,7 @@ class _FAQCardState extends State<_FAQCard> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: theme.shadowColor.withOpacity(0.06),
+              color: theme.shadowColor.withValues(alpha: 0.06),
               blurRadius: 6,
               offset: const Offset(0, 2))
         ],
@@ -413,7 +413,7 @@ class _FAQCardState extends State<_FAQCard> {
                 widget.a,
                 style: TextStyle(
                     fontSize: r.body,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     height: 1.5),
               ),
             ),

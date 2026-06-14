@@ -8,12 +8,16 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-     final authState = ref.read(authProvider);
-  final currentUser = authState.value;
-    return Scaffold(
-    
-      body:
-        EditProfilePage(currentUser: currentUser!, isOwner: false,),
-    );
+    // ref.watch so the page rebuilds when the user's profile is updated
+    final currentUser = ref.watch(authProvider).value;
+
+    if (currentUser == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Return EditProfilePage directly — no wrapping Scaffold.
+    // DashboardScreen already supplies the outer AppBar, so isOwner: false
+    // suppresses the redundant inner AppBar while still showing all fields.
+    return EditProfilePage(currentUser: currentUser, isOwner: false);
   }
 }

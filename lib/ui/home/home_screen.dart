@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:my_hostel_app/ui/core/responsive.dart';
 import 'package:my_hostel_app/ui/home/foster_section.dart';
@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFF000000).withOpacity(0.6),
+                        const Color(0xFF000000).withValues(alpha: 0.6),
                         Colors.transparent,
                       ],
                       begin: Alignment.bottomCenter,
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 8,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: Colors.white.withOpacity(active ? 1.0 : 0.4),
+                  color: Colors.white.withValues(alpha: active ? 1.0 : 0.4),
                 ),
               );
             }).toList(),
@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: r.spacingS),
           SmallText(
             text: 'Book your perfect hostel in three simple steps',
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           SizedBox(height: r.spacingXL),
           r.isMobile

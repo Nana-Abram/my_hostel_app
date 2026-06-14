@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -26,6 +26,7 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
   bool _isInitialized = false;
+  bool _controllerCreated = false;
   String? _errorMessage;
 
   @override
@@ -34,17 +35,32 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
     _initializePlayer();
   }
 
+  String _friendlyVideoError(Object e) {
+    final s = e.toString();
+    if (s.contains('MEDIA_ERR_SRC_NOT_SUPPORTED') ||
+        s.contains('Format error') ||
+        s.contains('not supported')) {
+      return 'This video format is not supported by your browser.';
+    }
+    if (s.contains('object-not-found') || s.contains('MEDIA_ERR_NETWORK')) {
+      return 'Video file not found or has been removed.';
+    }
+    if (s.contains('network') || s.contains('Network')) {
+      return 'Network error — check your connection and try again.';
+    }
+    return 'Unable to load video.';
+  }
+
   Future<void> _initializePlayer() async {
     try {
-      // Determine if the URL is a network URL or asset
       if (widget.videoUrl.startsWith('http://') || widget.videoUrl.startsWith('https://')) {
         _videoPlayerController = VideoPlayerController.networkUrl(
           Uri.parse(widget.videoUrl),
         );
       } else {
-        // Assume it's an asset if not a network URL
         _videoPlayerController = VideoPlayerController.asset(widget.videoUrl);
       }
+      _controllerCreated = true;
 
       await _videoPlayerController.initialize();
 
@@ -105,11 +121,9 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
         });
       }
     } catch (e) {
-      debugPrint('VideoTourPlayer error: $e');
-      debugPrint('Video URL was: ${widget.videoUrl}');
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = _friendlyVideoError(e);
         });
       }
     }
@@ -117,18 +131,20 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
+    if (_controllerCreated) _videoPlayerController.dispose();
     _chewieController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_errorMessage != null) {
       return Container(
-        height: 160.h,
+        height: 200.h,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Center(
@@ -138,13 +154,13 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
               Icon(
                 Icons.videocam_off_outlined,
                 size: 36.w,
-                color: Colors.grey[600],
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 8.h),
               Text(
                 'Video unavailable',
                 style: TextStyle(
-                  color: Colors.grey[700],
+                  color: theme.colorScheme.onSurface,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -155,7 +171,7 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
                 child: Text(
                   _errorMessage!,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 10.sp,
                   ),
                   textAlign: TextAlign.center,
@@ -166,14 +182,26 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
               SizedBox(height: 8.h),
               TextButton.icon(
                 onPressed: () {
+                  if (_controllerCreated) _videoPlayerController.dispose();
                   setState(() {
                     _errorMessage = null;
                     _isInitialized = false;
+                    _controllerCreated = false;
                   });
                   _initializePlayer();
                 },
-                icon: Icon(Icons.refresh, size: 16.w),
-                label: Text('Retry', style: TextStyle(fontSize: 12.sp)),
+                icon: Icon(
+                  Icons.refresh,
+                  size: 16.w,
+                  color: theme.colorScheme.primary,
+                ),
+                label: Text(
+                  'Retry',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
               ),
             ],
           ),
@@ -183,7 +211,7 @@ class _VideoTourPlayerState extends State<VideoTourPlayer> {
 
     if (!_isInitialized || _chewieController == null) {
       return Container(
-        height: 160.h,
+        height: 200.h,
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(12.r),
@@ -226,13 +254,13 @@ class VideoTourCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      
+      width: double.infinity,
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -264,6 +292,7 @@ class VideoTourCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                
                 if (description != null) ...[
                   SizedBox(height: 6.h),
                   Text(
@@ -277,10 +306,18 @@ class VideoTourCard extends StatelessWidget {
               ],
             ),
           ),
-          VideoTourPlayer(
-            videoUrl: videoUrl,
-            autoPlay: false,
-            looping: false,
+          Divider(
+                  height: 10.h,
+                  thickness: 1,
+                  color: theme.colorScheme.onSurface.withOpacity(0.1),
+                ),
+          SizedBox(
+            width: double.infinity,
+            child: VideoTourPlayer(
+              videoUrl: videoUrl,
+              autoPlay: false,
+              looping: false,
+            ),
           ),
           SizedBox(height: 10.h),
         ],

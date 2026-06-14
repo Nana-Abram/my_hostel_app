@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
 
@@ -83,7 +83,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                 Text(
                   'Toggle "Skeletons" to see skeleton loaders',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               SizedBox(height: 32.h),
@@ -100,7 +100,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                 Text(
                   'Toggle "Loading" to see loading indicators',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               SizedBox(height: 32.h),
@@ -124,7 +124,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                 Text(
                   'Toggle "Empty" to see empty states',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               SizedBox(height: 32.h),
@@ -149,7 +149,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                 Text(
                   'Toggle "Error" to see error states',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               SizedBox(height: 32.h),
@@ -269,7 +269,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                                 'Tap me to feel the haptic feedback',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.6),
+                                      .withValues(alpha: 0.6),
                                 ),
                               ),
                             ],
@@ -278,7 +278,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                         Icon(
                           Icons.arrow_forward_ios,
                           size: 16.sp,
-                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                         ),
                       ],
                     ),
@@ -291,10 +291,10 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
+                  color: theme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
-                    color: theme.primaryColor.withOpacity(0.3),
+                    color: theme.primaryColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -320,7 +320,7 @@ class _ModernComponentsDemoState extends State<ModernComponentsDemo> {
                     Text(
                       'Pull down to refresh this screen. All components support dark mode automatically.',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.8),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                   ],

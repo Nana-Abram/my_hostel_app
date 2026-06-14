@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 
@@ -16,7 +16,7 @@ class WelcomeHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             AppColors.blueColor,
-            AppColors.blueColor.withOpacity(0.8),
+            AppColors.blueColor.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16.r),
@@ -47,14 +47,14 @@ class WelcomeHeader extends StatelessWidget {
                   'Here\'s what\'s happening with your platform today.',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 SizedBox(height: 16.h),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
@@ -73,7 +73,7 @@ class WelcomeHeader extends StatelessWidget {
             width: 80.w,
             height: 80.w,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(

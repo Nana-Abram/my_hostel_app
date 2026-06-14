@@ -1,6 +1,4 @@
-// ignore_for_file: unused_result
-
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
@@ -9,8 +7,6 @@ import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/Utility/user_
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_header.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_list.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/widgets/users_widgets/users_stat.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
-
 
 class UsersManagementPage extends ConsumerStatefulWidget {
   final Function(int) onIndexChanged;
@@ -18,12 +14,15 @@ class UsersManagementPage extends ConsumerStatefulWidget {
   const UsersManagementPage({super.key, required this.onIndexChanged});
 
   @override
-  ConsumerState<UsersManagementPage> createState() => _UsersManagementPageState();
+  ConsumerState<UsersManagementPage> createState() =>
+      _UsersManagementPageState();
 }
 
 class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   final UserActionsHandler _actionsHandler = UserActionsHandler();
-  final TextEditingController _searchController = TextEditingController();
+
+  String _selectedFilter = 'All';
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -31,61 +30,86 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     _actionsHandler.context = context;
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  // ── Filtering ─────────────────────────────────────────────────────────────
+
+  List<UserModel> _applyFilters(List<UserModel> users) {
+    var result = users;
+
+    // Role filter
+    if (_selectedFilter != 'All') {
+      result = result.where((u) {
+        switch (_selectedFilter) {
+          case 'Students':
+            return u.role == UserRole.student;
+          case 'Hostel Owners':
+            return u.role == UserRole.hostelOwner;
+          case 'Admins':
+            return u.role == UserRole.admin;
+          default:
+            return true;
+        }
+      }).toList();
+    }
+
+    // Search filter
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result
+          .where((u) =>
+              u.fullName.toLowerCase().contains(q) ||
+              u.email.toLowerCase().contains(q))
+          .toList();
+    }
+
+    return result;
   }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(30.w),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADER
+          SizedBox(height: 8.h),
+          // Page header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               IconAndTextWidget(
-              icon: Icons.arrow_back_ios,
-              text: 'Back to home',
-              iconColor: theme.colorScheme.onSurfaceVariant,
-              isBackArrow: true,
-            ),
-          SizedBox(height: 20.h),
               Text(
                 'Users Management',
                 style: TextStyle(
-                  fontSize: 20.sp,
+                  fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              _buildUsersFilter(),
+              _buildRoleFilter(theme),
             ],
           ),
           SizedBox(height: 20.h),
 
-          // USERS STATS
+          // STATS
           Consumer(
             builder: (context, ref, child) {
               final statsAsync = ref.watch(usersStatsProvider);
               return statsAsync.when(
                 data: (stats) => UsersStats(stats: stats),
-                loading: () => _buildStatsLoading(),
-                error: (error, stack) => _buildStatsError(error),
+                loading: () => _buildStatsLoading(theme),
+                error: (error, stack) => _buildStatsError(error, theme),
               );
             },
           ),
           SizedBox(height: 24.h),
 
-          // SEARCH AND ACTIONS
+          // SEARCH + BULK ACTIONS
           UsersHeader(
-            onBulkAction: (action) => _handleBulkAction(action, ref),
-            onSearch: (query) => _handleSearch(query, ref),
+            onBulkAction: _handleBulkAction,
+            onSearch: (query) => setState(() => _searchQuery = query),
           ),
           SizedBox(height: 16.h),
 
@@ -94,12 +118,17 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
             builder: (context, ref, child) {
               final usersAsync = ref.watch(usersProvider);
               return usersAsync.when(
-                data: (users) => UsersList(
-                  users: users,
-                  onUserAction: (action, user) => _handleUserAction(action, user, ref),
-                ),
-                loading: () => _buildUsersLoading(),
-                error: (error, stack) => _buildUsersError(error, ref),
+                data: (users) {
+                  final filtered = _applyFilters(users);
+                  if (filtered.isEmpty) return _buildEmptyState(theme);
+                  return UsersList(
+                    users: filtered,
+                    onUserAction: (action, user) =>
+                        _actionsHandler.handleUserAction(action, user, ref),
+                  );
+                },
+                loading: () => _buildUsersLoading(theme),
+                error: (error, stack) => _buildUsersError(error, theme),
               );
             },
           ),
@@ -108,30 +137,42 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     );
   }
 
-  Widget _buildUsersFilter() {
-    final theme = Theme.of(context);
+  // ── Filter dropdown ───────────────────────────────────────────────────────
+
+  Widget _buildRoleFilter(ThemeData theme) {
     return Container(
       height: 40.h,
       padding: EdgeInsets.symmetric(horizontal: 12.w),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: theme.dividerColor),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.4)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.filter_list, size: 18.w, color: theme.colorScheme.onSurfaceVariant),
+          Icon(Icons.filter_list, size: 18.w,
+              color: theme.colorScheme.onSurfaceVariant),
           SizedBox(width: 8.w),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: 'All',
+              value: _selectedFilter,
+              dropdownColor: theme.colorScheme.surface,
               items: ['All', 'Students', 'Hostel Owners', 'Admins']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: theme.colorScheme.onSurface,
+                            )),
+                      ))
                   .toList(),
               onChanged: (value) {
-                // TODO: implement filter behavior using provider/ref
+                if (value != null) setState(() => _selectedFilter = value);
               },
-              style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
+              style: TextStyle(
+                  fontSize: 13.sp, color: theme.colorScheme.onSurface),
             ),
           ),
         ],
@@ -139,8 +180,44 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     );
   }
 
-  Widget _buildStatsLoading() {
-    final theme = Theme.of(context);
+  // ── Empty state ───────────────────────────────────────────────────────────
+
+  Widget _buildEmptyState(ThemeData theme) {
+    final isFiltered = _selectedFilter != 'All' || _searchQuery.isNotEmpty;
+    return Container(
+      padding: EdgeInsets.all(40.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, size: 56.w,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+          SizedBox(height: 16.h),
+          Text(
+            isFiltered ? 'No users match your filter' : 'No users yet',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          if (isFiltered) ...[
+            SizedBox(height: 8.h),
+            TextButton(
+              onPressed: () => setState(() {
+                _selectedFilter = 'All';
+                _searchQuery = '';
+              }),
+              child: const Text('Clear filters'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ── Loading / Error helpers ───────────────────────────────────────────────
+
+  Widget _buildStatsLoading(ThemeData theme) {
     return Row(
       children: [
         for (int i = 0; i < 4; i++) ...[
@@ -151,8 +228,9 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              child: Center(
+                child: CircularProgressIndicator(
+                    color: theme.colorScheme.primary),
               ),
             ),
           ),
@@ -162,23 +240,24 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     );
   }
 
-  Widget _buildStatsError(Object error) {
-    final theme = Theme.of(context);
+  Widget _buildStatsError(Object error, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: theme.colorScheme.error.withOpacity(0.1),
+        color: theme.colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: theme.colorScheme.error),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20.w),
+          Icon(Icons.error_outline,
+              color: theme.colorScheme.onErrorContainer, size: 20.w),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'Failed to load stats: $error',
-              style: TextStyle(color: theme.colorScheme.error, fontSize: 12.sp),
+              style: TextStyle(
+                  color: theme.colorScheme.onErrorContainer, fontSize: 12.sp),
             ),
           ),
         ],
@@ -186,8 +265,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     );
   }
 
-  Widget _buildUsersLoading() {
-    final theme = Theme.of(context);
+  Widget _buildUsersLoading(ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(40.w),
       decoration: BoxDecoration(
@@ -196,22 +274,20 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            CircularProgressIndicator(color: theme.colorScheme.primary),
             SizedBox(height: 16.h),
-            Text(
-              'Loading users...',
-              style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurfaceVariant),
-            ),
+            Text('Loading users...',
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUsersError(Object error, WidgetRef ref) {
-    final theme = Theme.of(context);
+  Widget _buildUsersError(Object error, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -220,23 +296,22 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
       ),
       child: Column(
         children: [
-          Icon(Icons.error_outline, size: 48.w, color: theme.colorScheme.error),
+          Icon(Icons.error_outline,
+              size: 48.w, color: theme.colorScheme.error),
           SizedBox(height: 16.h),
-          Text(
-            'Failed to load users',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-          ),
+          Text('Failed to load users',
+              style: TextStyle(
+                  fontSize: 16.sp, fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface)),
           SizedBox(height: 8.h),
-          Text(
-            error.toString(),
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurfaceVariant),
-          ),
+          Text(error.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 12.sp,
+                  color: theme.colorScheme.onSurfaceVariant)),
           SizedBox(height: 16.h),
           ElevatedButton(
-            onPressed: () {
-              ref.refresh(usersProvider);
-            },
+            onPressed: () => ref.invalidate(usersProvider),
             child: const Text('Try Again'),
           ),
         ],
@@ -244,33 +319,24 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
     );
   }
 
-  void _handleBulkAction(String action, WidgetRef ref) {
+  // ── Bulk actions ──────────────────────────────────────────────────────────
+
+  void _handleBulkAction(String action) {
     switch (action) {
       case 'refresh':
-        ref.refresh(usersProvider);
-        ref.refresh(usersStatsProvider);
+        ref.invalidate(usersProvider);
+        ref.invalidate(usersStatsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data refreshed')),
         );
-        break;
       case 'export':
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Export feature coming soon')),
         );
-        break;
       case 'verify':
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Bulk verify feature coming soon')),
         );
-        break;
     }
-  }
-
-  void _handleSearch(String query, WidgetRef ref) {
-    // TODO: Implement search functionality
-  }
-
-  void _handleUserAction(String action, UserModel user, WidgetRef ref) {
-    _actionsHandler.handleUserAction(action, user, ref);
   }
 }

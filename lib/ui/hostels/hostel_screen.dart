@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/filter_model.dart';
@@ -8,6 +8,7 @@ import 'package:my_hostel_app/backend/provider/search_history_provider.dart';
 import 'package:my_hostel_app/backend/provider/saved_searches_provider.dart';
 import 'package:my_hostel_app/ui/hostels/filter_section.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_grid.dart';
+import 'package:my_hostel_app/ui/hostels/hostels_map_view.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
@@ -23,6 +24,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _showSearchSuggestions = false;
+  bool _isMapView = false;
 
   @override
   void dispose() {
@@ -80,7 +82,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                           border: Border.all(color: theme.dividerColor),
                           boxShadow: [
                             BoxShadow(
-                              color: theme.shadowColor.withOpacity(0.05),
+                              color: theme.shadowColor.withValues(alpha: 0.05),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -102,7 +104,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                                   hintText: "Search hostels by name, location, campus...",
                                   hintStyle: TextStyle(
                                     fontSize: 14.sp,
-                                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                                   ),
                                   border: InputBorder.none,
                                 ),
@@ -159,6 +161,27 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                   ),
                   onPressed: () => _showSavedSearchesDialog(theme),
                   tooltip: "Saved Searches",
+                ),
+
+                SizedBox(width: 8.w),
+
+                /// MAP / LIST TOGGLE
+                Container(
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: theme.dividerColor),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _viewToggleButton(theme, Icons.grid_view, !_isMapView,
+                          () => setState(() => _isMapView = false), 'List'),
+                      _viewToggleButton(theme, Icons.map_outlined, _isMapView,
+                          () => setState(() => _isMapView = true), 'Map'),
+                    ],
+                  ),
                 ),
 
                 SizedBox(width: 8.w),
@@ -249,7 +272,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
               children: [
                 SmallText(
                   text: "Found ${filteredHostels.length} ${filteredHostels.length == 1 ? 'hostel' : 'hostels'}",
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   size: 14.sp,
                 ),
                 if (filter.hasActiveFilters) ...[
@@ -287,36 +310,66 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
         
             /// --- MAIN SECTION ---
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// FILTER SIDEBAR (LEFT)
-                  const FilterSection(),
-              
-                  SizedBox(width: 40.w),
-              
-                  /// HOSTEL GRID WITH PULL-TO-REFRESH
-                  Expanded(
-                    child: PullToRefreshWrapper(
-                      onRefresh: () async {
-                        // Refresh hostels data
-                        ref.invalidate(hostelsStreamProvider);
-                        // Wait a bit for the data to reload
-                        await Future.delayed(const Duration(milliseconds: 500));
-                      },
-                      child: const SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            HostelGrid(),
-                          ],
+              child: _isMapView
+                  ? const HostelsMapView()
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// FILTER SIDEBAR (LEFT)
+                        const FilterSection(),
+
+                        SizedBox(width: 40.w),
+
+                        /// HOSTEL GRID WITH PULL-TO-REFRESH
+                        Expanded(
+                          child: PullToRefreshWrapper(
+                            onRefresh: () async {
+                              ref.invalidate(hostelsStreamProvider);
+                              await Future.delayed(const Duration(milliseconds: 500));
+                            },
+                            child: const SingleChildScrollView(
+                              child: Column(
+                                children: [HostelGrid()],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _viewToggleButton(
+    ThemeData theme,
+    IconData icon,
+    bool selected,
+    VoidCallback onTap,
+    String tooltip,
+  ) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
+          decoration: BoxDecoration(
+            color: selected
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          child: Icon(
+            icon,
+            size: 22.w,
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -417,7 +470,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                       Icon(
                         Icons.bookmark_border,
                         size: 64.w,
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                       ),
                       SizedBox(height: 16.h),
                       Text(
@@ -432,7 +485,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                         "Apply filters and save them for quick access",
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),

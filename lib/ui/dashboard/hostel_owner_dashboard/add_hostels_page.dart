@@ -33,14 +33,21 @@ class _AddHostelPageState extends ConsumerState<AddHostelPage> {
   final ownerNameCtrl = TextEditingController();
   final totalRoomsCtrl = TextEditingController();
   final videoTourUrlCtrl = TextEditingController();
+  final latCtrl = TextEditingController();
+  final lngCtrl = TextEditingController();
 
   
 
   // --- DATA HOLDERS ---
   List<String> amenities = [];
-  List<String> images = []; // Firebase Storage URLs (final saved)
+  List<String> images = [];
   bool isUploading = false;
   bool isUploadingVideo = false;
+  bool _isLoading = false;
+
+  // Tracks the hostel that was just created and is awaiting its first room.
+  String? _pendingHostelId;
+  String? _pendingHostelName;
 
   // Pick Video → Upload → Save URL into controller
   Future<void> pickAndUploadVideo() async {
@@ -167,7 +174,6 @@ Future<void> pickAndUploadImage() async {
     });
   }
 
- // Update your _submit method to include ownerId
 Future<void> _submit() async {
   if (!_formKey.currentState!.validate()) return;
 
@@ -178,61 +184,86 @@ Future<void> _submit() async {
     return;
   }
 
-// In your _submit method:
-final currentUser = FirebaseAuth.instance.currentUser;
-if (currentUser == null) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Please sign in to add a hostel")),
-  );
-  return;
-}
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please sign in to add a hostel")),
+    );
+    return;
+  }
 
-
-  // You'll need to get the current user's ID - this depends on your auth setup
-  // For now, I'll use a placeholder. You'll need to replace this with actual user ID
-  final currentUserId = currentUser.uid;
-
-  final hostel = HostelModel(
-    id: "",
-    name: nameCtrl.text.trim(),
-    campus: campusCtrl.text.trim(),
-    description: descriptionCtrl.text.trim(),
-    ownerName: ownerNameCtrl.text.trim(),
-    totalRooms: double.parse(totalRoomsCtrl.text),
-    amenities: amenities,
-    images: images,
-    startPrice: double.parse(startPriceCtrl.text),
-    rating: ratingCtrl.text.isEmpty ? 0.0 : double.parse(ratingCtrl.text), // Changed from 4.0 to 0.0
-    reviewsCount: reviewCountCtrl.text.isEmpty ? 0.0 : double.parse(reviewCountCtrl.text), // Changed from 4.0 to 0.0
-    location: locationCtrl.text.trim(),
-    status: "Pending",
-    ownerId: currentUserId, // ADD THIS LINE
-    videoTourUrl: videoTourUrlCtrl.text.trim().isEmpty ? null : videoTourUrlCtrl.text.trim(),
-  );
+  setState(() => _isLoading = true);
 
   try {
+    final hostelName = nameCtrl.text.trim();
+    final hostel = HostelModel(
+      id: "",
+      name: hostelName,
+      campus: campusCtrl.text.trim(),
+      description: descriptionCtrl.text.trim(),
+      ownerName: ownerNameCtrl.text.trim(),
+      totalRooms: double.parse(totalRoomsCtrl.text.trim()),
+      amenities: amenities,
+      images: images,
+      startPrice: double.parse(startPriceCtrl.text.trim()),
+      rating: ratingCtrl.text.trim().isEmpty ? 0.0 : double.parse(ratingCtrl.text.trim()),
+      reviewsCount: reviewCountCtrl.text.trim().isEmpty ? 0.0 : double.parse(reviewCountCtrl.text.trim()),
+      location: locationCtrl.text.trim(),
+      status: "Pending",
+      ownerId: currentUser.uid,
+      videoTourUrl: videoTourUrlCtrl.text.trim().isEmpty ? null : videoTourUrlCtrl.text.trim(),
+      latitude: latCtrl.text.trim().isEmpty ? null : double.tryParse(latCtrl.text.trim()),
+      longitude: lngCtrl.text.trim().isEmpty ? null : double.tryParse(lngCtrl.text.trim()),
+    );
+
     final service = ref.read(hostelServiceProvider);
-    await service.addHostel(hostel);
+    final newHostelId = await service.addHostel(hostel);
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Hostel added successfully")),
-      );
-    }
+    if (!mounted) return;
 
-    // Clear form
+    // Reset hostel form immediately — hostel is saved.
     _formKey.currentState!.reset();
-    amenities.clear();
-    images.clear();
     setState(() {
+      amenities.clear();
+      images.clear();
+      _pendingHostelId = newHostelId;
+      _pendingHostelName = hostelName;
     });
+    latCtrl.clear();
+    lngCtrl.clear();
+    videoTourUrlCtrl.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Hostel "$hostelName" created! Now add at least one room →'),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to add hostel: $e")),
       );
     }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
   }
+}
+
+void _onRoomSaved() {
+  if (!mounted) return;
+  final hostelName = _pendingHostelName ?? 'your hostel';
+  setState(() {
+    _pendingHostelId = null;
+    _pendingHostelName = null;
+  });
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Room added! "$hostelName" is now ready for bookings.'),
+      backgroundColor: Colors.green[700],
+      duration: const Duration(seconds: 4),
+    ),
+  );
 }
 
   @override
@@ -248,6 +279,8 @@ if (currentUser == null) {
     ownerNameCtrl.dispose();
     totalRoomsCtrl.dispose();
     videoTourUrlCtrl.dispose();
+    latCtrl.dispose();
+    lngCtrl.dispose();
     super.dispose();
   }
 
@@ -302,11 +335,12 @@ if (currentUser == null) {
                         _input("Hostel Name", nameCtrl),
                         _input("Campus", campusCtrl),
                         _input("Location", locationCtrl),
+                        _coordinatesInput(),
                         _input("Starting Price (GHS)", startPriceCtrl,
                             keyboard: TextInputType.number),
-                        _input("Rating (Optional)", ratingCtrl,
+                        _input("Rating", ratingCtrl,
                             keyboard: TextInputType.number),
-                        _input("Reviw Count (Optional)", reviewCountCtrl,
+                        _input("Review Count", reviewCountCtrl,
                             keyboard: TextInputType.number),
                         _input("Owner Name", ownerNameCtrl),
                         _input("Total Rooms", totalRoomsCtrl,
@@ -367,20 +401,52 @@ if (currentUser == null) {
                     ],
                             
                         SizedBox(height: 40.h),
-                            
-                        InkWell(
-                          onTap:_submit ,
-                          child: ElvButtonWidget(
-                            text: "Submit Hostel",
-                            isPrimary: true,
+
+                        // Banner shown while waiting for the owner to add a room
+                        if (_pendingHostelId != null) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(14.w),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(color: Colors.orange.shade300),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info_outline, color: Colors.orange[800], size: 20.sp),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: Text(
+                                    'Hostel saved! Add at least one room on the right before guests can book it.',
+                                    style: TextStyle(fontSize: 12.sp, color: Colors.orange[900]),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 16.h),
+                        ] else ...[
+                          _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : InkWell(
+                                  onTap: _submit,
+                                  child: ElvButtonWidget(
+                                    text: "Submit Hostel",
+                                    isPrimary: true,
+                                  ),
+                                ),
+                        ],
                       ],
                     ),
                   ),
                 ),
               ),
-              AdminAddRoomPage(),
+              AdminAddRoomPage(
+                lockedHostelId: _pendingHostelId,
+                lockedHostelName: _pendingHostelName,
+                onRoomSaved: _onRoomSaved,
+              ),
             ],
           ),
     );
@@ -410,6 +476,59 @@ if (currentUser == null) {
           )
         ],
       ),
+    );
+  }
+
+  Widget _coordinatesInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("GPS Coordinates (Optional — for map view)"),
+        SizedBox(height: 6.h),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: latCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: "Latitude",
+                  hintText: "e.g. 5.6037",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r)),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return null;
+                  if (double.tryParse(v) == null) return "Invalid number";
+                  return null;
+                },
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: TextFormField(
+                controller: lngCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: "Longitude",
+                  hintText: "e.g. -0.1870",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r)),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return null;
+                  if (double.tryParse(v) == null) return "Invalid number";
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          "Find coordinates at maps.google.com — right-click the location and copy the numbers shown.",
+          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+        ),
+        SizedBox(height: 20.h),
+      ],
     );
   }
 

@@ -9,6 +9,7 @@ import 'package:my_hostel_app/ui/auth/signup.dart';
 import 'package:my_hostel_app/ui/booking/booking_screen.dart';
 import 'package:my_hostel_app/ui/dashboard/dashboard.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/profile_page.dart';
+import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/bookings_page.dart';
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/my_booking_screen.dart';
 import 'package:my_hostel_app/ui/dashboard/student_dashboard/student_dashboard.dart';
 import 'package:my_hostel_app/ui/hostels/hostel_details_page.dart';
@@ -147,6 +148,12 @@ class AppRouter {
         ),
 
         GoRoute(
+          path: '/owner-bookings',
+          name: 'owner-bookings',
+          builder: (context, state) => const OwnerBookingsPage(),
+        ),
+
+        GoRoute(
           path: '/booking/:hostelId/:roomId',
           name: 'booking',
           builder: (context, state) {
@@ -164,23 +171,22 @@ class AppRouter {
     // ── Wire up FCM notification taps → router navigation ──────────────────
     NotificationService().notificationTapStream.listen((data) {
       final type = data['type'] as String?;
+      final action = data['action'] as String?;
       final id = data['id'] as String?;
+
+      // Owner notifications carry action='new' (new booking request) or
+      // action='cancelled' (booking cancelled by student).
+      // All other booking/payment actions are sent to students.
+      final isOwnerNotification =
+          action == 'new' || action == 'cancelled';
 
       switch (type) {
         case 'booking':
-          if (id != null) {
-            router.go('/my-bookings');
-          } else {
-            router.go('/my-bookings');
-          }
-          break;
         case 'payment':
-          router.go('/my-bookings');
+          router.go(isOwnerNotification ? '/owner-bookings' : '/my-bookings');
           break;
         case 'hostel':
-          if (id != null) {
-            router.go('/hostel-details/$id');
-          }
+          if (id != null) router.go('/hostel-details/$id');
           break;
         case 'message':
           router.go('/dashboard');

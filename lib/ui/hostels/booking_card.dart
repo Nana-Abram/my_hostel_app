@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
@@ -60,9 +60,9 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              theme.colorScheme.primary.withOpacity(0.08),
+              theme.colorScheme.primary.withValues(alpha: 0.08),
               theme.colorScheme.surface,
-              theme.colorScheme.primary.withOpacity(0.08),
+              theme.colorScheme.primary.withValues(alpha: 0.08),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -71,23 +71,23 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
           borderRadius: BorderRadius.circular(24.r),
           border: 
           Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.15),
+              color: theme.colorScheme.primary.withValues(alpha: 0.15),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 5,
               offset: const Offset(0, 2),
             ),
             if (_isHovered)
               BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.primary.withValues(alpha: 0.3),
                 blurRadius: 25,
                 offset: const Offset(0, 12),
               ),
@@ -109,8 +109,8 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          theme.colorScheme.primary.withOpacity(_glow.value * 0.3),
-                          theme.colorScheme.primary.withOpacity(0.0),
+                          theme.colorScheme.primary.withValues(alpha: _glow.value * 0.3),
+                          theme.colorScheme.primary.withValues(alpha: 0.0),
                         ],
                       ),
                     ),
@@ -132,7 +132,7 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
                         gradient: LinearGradient(
                           colors: [
                             theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.7),
+                            theme.colorScheme.primary.withValues(alpha: 0.7),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12.r),
@@ -184,7 +184,7 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.shadowColor.withOpacity(0.08),
+                        color: theme.shadowColor.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -242,12 +242,12 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
                               gradient: LinearGradient(
                                 colors: [
                                   theme.colorScheme.primary,
-                                  theme.colorScheme.primary.withOpacity(0.7),
+                                  theme.colorScheme.primary.withValues(alpha: 0.7),
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(0.4),
+                                  color: theme.colorScheme.primary.withValues(alpha: 0.4),
                                   blurRadius: 15,
                                   offset: const Offset(0, 5),
                                 ),

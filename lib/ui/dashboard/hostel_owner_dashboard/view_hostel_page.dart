@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/view_rooms.dart';
@@ -13,37 +13,18 @@ class ViewHostelPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hostel Details'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
+        title: const Text('Hostel Details'),
       ),
-         floatingActionButton: SizedBox(
-          height: 40.h,
-          width: 130.w,
-           child: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ViewRooms(hostel: hostel),
-                  ),
-                );
-              },
-              backgroundColor: Colors.blue[700],
-           
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.visibility_outlined, size: 18.sp, color: Colors.white),
-                  SizedBox(width: 5.w),
-                  Text(
-                    'View Rooms',
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500,color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-         ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ViewRooms(hostel: hostel)),
+          );
+        },
+        icon: Icon(Icons.visibility_outlined, size: 18.sp),
+        label: Text('View Rooms', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500)),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.w),
         child: Column(
@@ -104,7 +85,7 @@ class ViewHostelPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: _getStatusColor(hostel.status).withOpacity(0.1),
+                color: _getStatusColor(hostel.status).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _getStatusColor(hostel.status)),
               ),
@@ -126,7 +107,7 @@ class ViewHostelPage extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey[300]!),
               ),
@@ -149,71 +130,6 @@ class ViewHostelPage extends StatelessWidget {
     );
   }
 
-  // Widget _buildImageCarousel() {
-  //   if (hostel.images.isEmpty) {
-  //     return Container(
-  //       height: 200.h,
-  //       width: double.infinity,
-  //       decoration: BoxDecoration(
-  //         color: Colors.grey[200],
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           Icon(Icons.photo_library, size: 50, color: Colors.grey[400]),
-  //           SizedBox(height: 8.h),
-  //           Text('No Images Available', style: TextStyle(color: Colors.grey[500])),
-  //         ],
-  //       ),
-  //     );
-  //   }
-
-  //   return Column(
-  //     children: [
-  //       Container(
-  //         height: 250.h,
-  //         width: double.infinity,
-  //         decoration: BoxDecoration(
-  //           borderRadius: BorderRadius.circular(12),
-  //           image: DecorationImage(
-  //             image: NetworkImage(hostel.images.first),
-  //             fit: BoxFit.cover,
-  //           ),
-  //         ),
-  //       ),
-  //       SizedBox(height: 10.h),
-  //       if (hostel.images.length > 1)
-  //         SizedBox(
-  //           height: 80.h,
-  //           child: ListView.builder(
-  //             scrollDirection: Axis.horizontal,
-  //             itemCount: hostel.images.length,
-  //             itemBuilder: (context, index) {
-  //               return Container(
-  //                 width: 80.w,
-  //                 height: 80.h,
-  //                 margin: EdgeInsets.only(right: 8.w),
-  //                 decoration: BoxDecoration(
-  //                   borderRadius: BorderRadius.circular(8),
-  //                   image: DecorationImage(
-  //                     image: NetworkImage(hostel.images[index]),
-  //                     fit: BoxFit.cover,
-  //                   ),
-  //                   border: Border.all(
-  //                     color: index == 0 ? Colors.blue : Colors.grey[300]!,
-  //                     width: index == 0 ? 2 : 1,
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ),
-  //     ],
-  //   );
-  // }
-
-
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -222,7 +138,6 @@ class ViewHostelPage extends StatelessWidget {
         style: TextStyle(
           fontSize: 18.sp,
           fontWeight: FontWeight.bold,
-          color: Colors.blue[700],
         ),
       ),
     );
@@ -261,9 +176,9 @@ class ViewHostelPage extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

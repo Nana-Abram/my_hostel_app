@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,11 +7,12 @@ import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/auth_service.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   final UserModel currentUser;
+  /// When true the page is opened as a standalone route (e.g. from the
+  /// dashboard header) and renders its own AppBar. When false it is embedded
+  /// inside a tab whose parent already supplies an AppBar.
   final bool isOwner;
 
   const EditProfilePage({
@@ -26,11 +27,11 @@ class EditProfilePage extends ConsumerStatefulWidget {
 
 class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _fullNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _bioController;
-  late TextEditingController _locationController;
+  late final TextEditingController _fullNameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _bioController;
+  late final TextEditingController _locationController;
 
   PlatformFile? _selectedImage;
   bool _isLoading = false;
@@ -39,17 +40,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   @override
   void initState() {
     super.initState();
-    _fullNameController = TextEditingController(
-      text: widget.currentUser.fullName,
-    );
+    _fullNameController = TextEditingController(text: widget.currentUser.fullName);
     _emailController = TextEditingController(text: widget.currentUser.email);
-    _phoneController = TextEditingController(
-      text: widget.currentUser.phone ?? '',
-    );
+    _phoneController = TextEditingController(text: widget.currentUser.phone ?? '');
     _bioController = TextEditingController(text: widget.currentUser.bio ?? '');
-    _locationController = TextEditingController(
-      text: widget.currentUser.location ?? '',
-    );
+    _locationController = TextEditingController(text: widget.currentUser.location ?? '');
+
+    // Rebuild when bio length changes so the character counter stays current
+    _bioController.addListener(() => setState(() {}));
   }
 
   @override
@@ -62,65 +60,54 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     super.dispose();
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    final isOwner = widget.isOwner;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: isOwner ? _buildAppBar() : null,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: widget.isOwner ? _buildAppBar(theme) : null,
       body: _isLoading
-          ? _buildLoadingState()
+          ? _buildLoadingState(theme)
           : SingleChildScrollView(
               padding: EdgeInsets.all(20.w),
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    const IconAndTextWidget(
-                      icon: Icons.arrow_back_ios,
-                      text: 'Back to home',
-                      iconColor: Colors.blueGrey,
-                      isBackArrow: true,
-                    ),
-                    SizedBox(height: 30.h),
-                    // PROFILE PICTURE SECTION
-                    _buildProfilePictureSection(),
+                    SizedBox(height: 8.h),
+                    _buildProfilePictureSection(theme),
                     SizedBox(height: 32.h),
-
-                    // PERSONAL INFORMATION
                     _buildSection(
+                      theme: theme,
                       title: 'Personal Information',
                       icon: Icons.person_outline,
                       children: [
                         _buildTextField(
+                          theme: theme,
                           controller: _fullNameController,
                           label: 'Full Name',
                           hintText: 'Enter your full name',
                           icon: Icons.person,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your full name';
-                            }
-                            if (value.length < 2) {
-                              return 'Name must be at least 2 characters';
-                            }
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Please enter your full name';
+                            if (v.length < 2) return 'Name must be at least 2 characters';
                             return null;
                           },
                         ),
                         SizedBox(height: 16.h),
                         _buildTextField(
+                          theme: theme,
                           controller: _emailController,
                           label: 'Email Address',
                           hintText: 'Enter your email address',
                           icon: Icons.email,
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email address';
-                            }
-                            if (!RegExp(
-                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                            ).hasMatch(value)) {
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Please enter your email address';
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
                               return 'Please enter a valid email address';
                             }
                             return null;
@@ -128,16 +115,15 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                         ),
                         SizedBox(height: 16.h),
                         _buildTextField(
+                          theme: theme,
                           controller: _phoneController,
                           label: 'Phone Number',
                           hintText: 'Enter your phone number',
                           icon: Icons.phone,
                           keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value != null && value.isNotEmpty) {
-                              if (!RegExp(
-                                r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',
-                              ).hasMatch(value)) {
+                          validator: (v) {
+                            if (v != null && v.isNotEmpty) {
+                              if (!RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$').hasMatch(v)) {
                                 return 'Please enter a valid phone number';
                               }
                             }
@@ -147,34 +133,30 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       ],
                     ),
                     SizedBox(height: 24.h),
-
-                    // ADDITIONAL INFORMATION
                     _buildSection(
+                      theme: theme,
                       title: 'Additional Information',
                       icon: Icons.info_outline,
                       children: [
                         _buildTextField(
+                          theme: theme,
                           controller: _locationController,
                           label: 'Location',
                           hintText: 'Enter your location',
                           icon: Icons.location_on,
-                          validator: (value) {
-                            if (value != null &&
-                                value.isNotEmpty &&
-                                value.length < 3) {
+                          validator: (v) {
+                            if (v != null && v.isNotEmpty && v.length < 3) {
                               return 'Location must be at least 3 characters';
                             }
                             return null;
                           },
                         ),
                         SizedBox(height: 16.h),
-                        _buildBioField(),
+                        _buildBioField(theme),
                       ],
                     ),
                     SizedBox(height: 32.h),
-
-                    // SAVE BUTTONS
-                    _buildSaveButtons(),
+                    _buildSaveButtons(theme),
                     SizedBox(height: 20.h),
                   ],
                 ),
@@ -183,12 +165,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  AppBar _buildAppBar() {
+  // ── AppBar ────────────────────────────────────────────────────────────────
+
+  AppBar _buildAppBar(ThemeData theme) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       elevation: 1,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black87),
+        icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -196,13 +180,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         style: TextStyle(
           fontSize: 18.sp,
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: theme.colorScheme.onSurface,
         ),
       ),
       actions: [
         if (!_isLoading)
           IconButton(
-            icon: Icon(Icons.save, color: AppColors.blueColor),
+            icon: Icon(Icons.save, color: theme.colorScheme.primary),
             onPressed: _saveProfile,
             tooltip: 'Save Changes',
           ),
@@ -210,30 +194,46 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  Widget _buildProfilePictureSection() {
+  // ── Profile picture ───────────────────────────────────────────────────────
+
+  Widget _buildProfilePictureSection(ThemeData theme) {
+    final double avatarSize = 120.w;
+
     return Column(
       children: [
         Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
           children: [
-            CircleAvatar(
-              radius: 60.w,
-              backgroundColor: Colors.grey[200],
-              child: ClipOval(child: _buildProfileImage()),
+            // Circle avatar with properly constrained image
+            Container(
+              width: avatarSize,
+              height: avatarSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.surfaceVariant,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: _buildProfileImage(theme, avatarSize),
             ),
+            // Upload overlay
             if (_isUploadingImage)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              Container(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.onPrimary,
                     ),
                   ),
                 ),
               ),
+            // Camera button anchored to bottom-right of the circle
             Positioned(
               bottom: 0,
               right: 0,
@@ -241,12 +241,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 width: 36.w,
                 height: 36.w,
                 decoration: BoxDecoration(
-                  color: AppColors.blueColor,
+                  color: theme.colorScheme.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.w),
+                  border: Border.all(color: theme.colorScheme.surface, width: 2.w),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.camera_alt, size: 16.w, color: Colors.white),
+                  icon: Icon(Icons.camera_alt, size: 16.w, color: theme.colorScheme.onPrimary),
                   onPressed: _isUploadingImage ? null : _showImagePicker,
                   padding: EdgeInsets.zero,
                 ),
@@ -257,7 +257,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         SizedBox(height: 12.h),
         Text(
           'Tap to change photo',
-          style: TextStyle(fontSize: 12.sp, color: Colors.blueGrey),
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
         ),
         if (_selectedImage != null) ...[
           SizedBox(height: 8.h),
@@ -265,7 +268,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             'New image selected',
             style: TextStyle(
               fontSize: 12.sp,
-              color: AppColors.blueColor,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -274,61 +277,62 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  Widget _buildProfileImage() {
-    // Show selected image if available
-    if (_selectedImage != null) {
-      // For web, we can use the bytes directly
-      if (_selectedImage!.bytes != null) {
-        return Image.memory(_selectedImage!.bytes!, fit: BoxFit.cover);
-      }
-    }
-
-    // Show current profile image from Firebase
-    if (widget.currentUser.profileImage != null &&
-        widget.currentUser.profileImage!.isNotEmpty) {
-      return SizedBox(
-        width: 120.w,
-        height: 120.w,
-        child: ImageNetwork(
-          image: widget.currentUser.profileImage!,
-          height: 120.w,
-          width: 120.w,
-          onError: _buildPlaceholderAvatar(),
-          fitAndroidIos: BoxFit.cover,
-          fitWeb: BoxFitWeb.cover,
-        ),
+  Widget _buildProfileImage(ThemeData theme, double size) {
+    if (_selectedImage?.bytes != null) {
+      return Image.memory(
+        _selectedImage!.bytes!,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
       );
     }
 
-    // Show placeholder
-    return _buildPlaceholderAvatar();
+    final imageUrl = widget.currentUser.profileImage;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return ImageNetwork(
+        key: ValueKey(imageUrl),
+        image: imageUrl,
+        height: size,
+        width: size,
+        fitAndroidIos: BoxFit.cover,
+        fitWeb: BoxFitWeb.cover,
+        onError: _buildPlaceholderAvatar(theme, size),
+      );
+    }
+
+    return _buildPlaceholderAvatar(theme, size);
   }
 
-  Widget _buildPlaceholderAvatar() {
+  Widget _buildPlaceholderAvatar(ThemeData theme, double size) {
     return Container(
-      color: AppColors.blueColor.withOpacity(0.1),
+      width: size,
+      height: size,
+      color: theme.colorScheme.primary.withValues(alpha: 0.08),
       child: Center(
         child: Icon(
           Icons.person,
           size: 40.w,
-          color: AppColors.blueColor.withOpacity(0.5),
+          color: theme.colorScheme.primary.withValues(alpha: 0.5),
         ),
       ),
     );
   }
 
+  // ── Section card ──────────────────────────────────────────────────────────
+
   Widget _buildSection({
+    required ThemeData theme,
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.shadowColor.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -337,21 +341,22 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SECTION HEADER
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(
+                bottom: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+              ),
             ),
             child: Row(
               children: [
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: AppColors.blueColor.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(icon, size: 20.w, color: AppColors.blueColor),
+                  child: Icon(icon, size: 20.w, color: theme.colorScheme.primary),
                 ),
                 SizedBox(width: 12.w),
                 Text(
@@ -359,14 +364,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
           ),
-
-          // SECTION CONTENT
           Padding(
             padding: EdgeInsets.all(16.w),
             child: Column(children: children),
@@ -376,7 +379,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
+  // ── Text field ────────────────────────────────────────────────────────────
+
   Widget _buildTextField({
+    required ThemeData theme,
     required TextEditingController controller,
     required String label,
     required String hintText,
@@ -393,29 +399,30 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 8.h),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.4)),
           ),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,
-            style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+            style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
-              prefixIcon: Icon(icon, size: 20.w, color: Colors.blueGrey),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12.w,
-                vertical: 14.h,
+              hintStyle: TextStyle(
+                fontSize: 14.sp,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
+              prefixIcon: Icon(icon, size: 20.w,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
             ),
             validator: validator,
           ),
@@ -424,7 +431,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  Widget _buildBioField() {
+  // ── Bio field ─────────────────────────────────────────────────────────────
+
+  Widget _buildBioField(ThemeData theme) {
+    final charCount = _bioController.text.length;
+    final isOverLimit = charCount > 500;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -433,28 +445,35 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 8.h),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(
+              color: isOverLimit
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.outline.withValues(alpha: 0.4),
+            ),
           ),
           child: TextFormField(
             controller: _bioController,
             maxLines: 4,
-            style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+            style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: 'Tell us a little about yourself...',
-              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              hintStyle: TextStyle(
+                fontSize: 14.sp,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
               alignLabelWithHint: true,
               border: InputBorder.none,
               contentPadding: EdgeInsets.all(12.w),
             ),
-            validator: (value) {
-              if (value != null && value.isNotEmpty && value.length > 500) {
+            validator: (v) {
+              if (v != null && v.isNotEmpty && v.length > 500) {
                 return 'Bio must be less than 500 characters';
               }
               return null;
@@ -462,20 +481,26 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           ),
         ),
         SizedBox(height: 4.h),
-        Text(
-          '${_bioController.text.length}/500 characters',
-          style: TextStyle(
-            fontSize: 11.sp,
-            color: _bioController.text.length > 500
-                ? Colors.red
-                : Colors.blueGrey,
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            '$charCount/500',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: isOverLimit
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              fontWeight: isOverLimit ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSaveButtons() {
+  // ── Save buttons ──────────────────────────────────────────────────────────
+
+  Widget _buildSaveButtons(ThemeData theme) {
     return Row(
       children: [
         Expanded(
@@ -483,17 +508,17 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             onPressed: _isLoading ? null : () => Navigator.pop(context),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.h),
+              side: BorderSide(color: theme.colorScheme.outline),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              side: BorderSide(color: Colors.grey.shade300),
             ),
             child: Text(
               'Cancel',
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -503,8 +528,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           child: ElevatedButton(
             onPressed: _isLoading ? null : _saveProfile,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.blueColor,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               padding: EdgeInsets.symmetric(vertical: 16.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
@@ -514,9 +539,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ? SizedBox(
                     width: 20.w,
                     height: 20.w,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.onPrimary,
+                      ),
                     ),
                   )
                 : Text(
@@ -532,198 +559,186 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  Widget _buildLoadingState() {
+  // ── Loading state ─────────────────────────────────────────────────────────
+
+  Widget _buildLoadingState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: AppColors.blueColor),
+          CircularProgressIndicator(color: theme.colorScheme.primary),
           SizedBox(height: 16.h),
           Text(
             'Updating profile...',
-            style: TextStyle(fontSize: 16.sp, color: Colors.blueGrey),
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // File Picker Method for Web - Fixed
+  // ── Image picker ──────────────────────────────────────────────────────────
+
   Future<void> _showImagePicker() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowMultiple: false,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
+      if (result == null || result.files.isEmpty) return;
 
-        // Validate file size (optional - limit to 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Image size should be less than 5MB')),
-            );
-          }
-          return;
-        }
+      final file = result.files.first;
 
-        // Validate file type
-        if (![
-          'jpg',
-          'jpeg',
-          'png',
-          'gif',
-          'webp',
-        ].contains(file.extension?.toLowerCase())) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Please select a valid image file (JPG, PNG, GIF, WEBP)',
-                ),
-              ),
-            );
-          }
-          return;
-        }
-
-        setState(() {
-          _selectedImage = file;
-        });
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Image selected: ${file.name}')));
-        }
+      if (file.size > 5 * 1024 * 1024) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image size should be less than 5MB')),
+        );
+        return;
       }
+
+      final ext = file.extension?.toLowerCase();
+      if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a valid image file (JPG, PNG, GIF, WEBP)'),
+          ),
+        );
+        return;
+      }
+
+      setState(() => _selectedImage = file);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image selected: ${file.name}')),
+      );
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: $e')),
+      );
     }
   }
 
-  // Upload image to Firebase Storage
-  Future<String?> _uploadImage() async {
-    if (_selectedImage == null) return null;
+  // ── Image upload ──────────────────────────────────────────────────────────
 
-    setState(() {
-      _isUploadingImage = true;
-    });
+  Future<String?> _uploadImage() async {
+    if (_selectedImage?.bytes == null) return null;
+
+    setState(() => _isUploadingImage = true);
 
     try {
-      final storage = FirebaseStorage.instance;
       final fileName =
           'profile_${widget.currentUser.id}_${DateTime.now().millisecondsSinceEpoch}';
-      final reference = storage.ref().child('profile_pictures/$fileName');
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures/$fileName');
 
-      // For web, we can upload the bytes directly
-      if (_selectedImage!.bytes != null) {
-        final task = await reference.putData(
-          _selectedImage!.bytes!,
-          SettableMetadata(contentType: 'image/jpeg'),
-        );
+      final task = await ref.putData(
+        _selectedImage!.bytes!,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
 
-        final downloadUrl = await task.ref.getDownloadURL();
-        return downloadUrl;
-      }
-
-      return null;
+      return await task.ref.getDownloadURL();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
+      if (!mounted) return null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload image: $e')),
+      );
       return null;
     } finally {
-      setState(() {
-        _isUploadingImage = false;
-      });
+      if (mounted) setState(() => _isUploadingImage = false);
     }
   }
 
-  // Save Profile Method with Auto-Refresh
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  // ── Delete old profile image from Storage ────────────────────────────────
 
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _deleteOldProfileImage(String oldUrl) async {
+    // Only attempt deletion for Firebase Storage URLs — skip external URLs
+    // (e.g. Google/Facebook profile photos) that refFromURL cannot resolve.
+    if (!oldUrl.contains('firebasestorage.googleapis.com')) return;
+    try {
+      await FirebaseStorage.instance.refFromURL(oldUrl).delete();
+    } catch (e) {
+      debugPrint('⚠️ Could not delete old profile image: $e');
+      // Non-fatal — don't block the profile update if deletion fails
+    }
+  }
+
+  // ── Save profile ──────────────────────────────────────────────────────────
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
 
     try {
-      String? newProfileImageUrl;
+      final oldImageUrl = widget.currentUser.profileImage;
+      final newProfileImageUrl =
+          _selectedImage != null ? await _uploadImage() : null;
 
-      // Upload new image if selected
-      if (_selectedImage != null) {
-        newProfileImageUrl = await _uploadImage();
+      // Delete old Storage file after new one is confirmed uploaded
+      if (newProfileImageUrl != null &&
+          oldImageUrl != null &&
+          oldImageUrl.isNotEmpty) {
+        await _deleteOldProfileImage(oldImageUrl);
       }
 
-      // Update user data in Firebase
-      final usersService = AuthService();
-      await usersService.updateUserProfile(
+      await AuthService().updateUserProfile(
         userId: widget.currentUser.id,
         updates: {
           'fullName': _fullNameController.text,
           'email': _emailController.text,
           if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
           if (_bioController.text.isNotEmpty) 'bio': _bioController.text,
-          if (_locationController.text.isNotEmpty)
-            'location': _locationController.text,
+          if (_locationController.text.isNotEmpty) 'location': _locationController.text,
           if (newProfileImageUrl != null) 'profileImage': newProfileImageUrl,
-          'updatedAt': DateTime.now(),
+          'updatedAt': DateTime.now().toIso8601String(),
         },
       );
 
-      // AUTO-REFRESH: Update the auth provider immediately
       final updatedUser = widget.currentUser.copyWith(
         fullName: _fullNameController.text,
         email: _emailController.text,
         phone: _phoneController.text.isEmpty ? null : _phoneController.text,
         bio: _bioController.text.isEmpty ? null : _bioController.text,
-        location: _locationController.text.isEmpty
-            ? null
-            : _locationController.text,
+        location: _locationController.text.isEmpty ? null : _locationController.text,
         profileImage: newProfileImageUrl ?? widget.currentUser.profileImage,
       );
 
-      // Method 1: Update the entire user object
       ref.read(authProvider.notifier).updateUser(updatedUser);
 
-      // Method 2: Or update specific fields
-      // ref.read(authProvider.notifier).updateUserFields({
-      //   'fullName': _fullNameController.text,
-      //   'email': _emailController.text,
-      //   'phoneNumber': _phoneController.text.isEmpty ? null : _phoneController.text,
-      //   'bio': _bioController.text.isEmpty ? null : _bioController.text,
-      //   'location': _locationController.text.isEmpty ? null : _locationController.text,
-      //   'profileImage': newProfileImageUrl ?? widget.currentUser.profileImage,
-      // });
+      // Clear the local file selection so the widget switches to the new
+      // network URL immediately — without this it keeps showing Image.memory
+      // and other parts of the app see the stale old URL until restart.
+      setState(() => _selectedImage = null);
 
-      // Method 3: Force refresh from Firebase (if you want latest data)
-      // await ref.read(authProvider.notifier).refreshUser();
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
-        );
-
-        Navigator.pop(context, updatedUser);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+      // isOwner: false means the page is embedded in a tab — nothing to pop.
+      // When true (standalone route), defer the pop to the next frame so
+      // Riverpod's rebuild from updateUser() completes before navigation locks the navigator.
+      if (widget.isOwner) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) Navigator.pop(context, updatedUser);
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile: $e')),
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

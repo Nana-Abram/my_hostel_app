@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_hostel_app/backend/service/notification_repository.dart';
 import 'package:my_hostel_app/ui/core/app_logger.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -52,6 +53,9 @@ class NotificationService {
   // Stream that the router listens to for navigation on tap
   final StreamController<Map<String, dynamic>> _notificationTapController =
       StreamController<Map<String, dynamic>>.broadcast();
+
+  final NotificationRepository _repository = NotificationRepository();
+  StreamSubscription<QuerySnapshot>? _firestoreListenerSub;
 
   String? _fcmToken;
   String? get fcmToken => _fcmToken;
@@ -315,10 +319,53 @@ class NotificationService {
     }
   }
 
-  // ── Send notification (queued via Firestore → Cloud Function) ─────────────
+  // ── Firestore real-time listener ─────────────────────────────────────────
 
-  /// Stores a notification document in Firestore.
-  /// A Cloud Function (or your backend) should pick this up and call FCM.
+  /// Start watching the current user's notification subcollection.
+  /// Any document added AFTER this call triggers a local notification banner.
+  void startListeningForUser(String userId) {
+    _firestoreListenerSub?.cancel();
+
+    // Only surface notifications that arrive after the session starts.
+    final sessionStart = Timestamp.now();
+
+    _firestoreListenerSub = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('createdAt', isGreaterThan: sessionStart)
+        .snapshots()
+        .listen((snapshot) {
+      for (final change in snapshot.docChanges) {
+        if (change.type == DocumentChangeType.added) {
+          final d = change.doc.data();
+          if (d == null) continue;
+          showNotification(
+            id: change.doc.id.hashCode,
+            title: d['title'] as String? ?? '',
+            body: d['body'] as String? ?? '',
+            type: d['type'] as String? ?? 'general',
+            data: Map<String, dynamic>.from(d['data'] ?? {}),
+          );
+        }
+      }
+    }, onError: (e) {
+      AppLogger.error('[Notif] Firestore listener error', e);
+    });
+
+    AppLogger.info('[Notif] Listening for notifications for $userId');
+  }
+
+  void stopListening() {
+    _firestoreListenerSub?.cancel();
+    _firestoreListenerSub = null;
+    AppLogger.info('[Notif] Stopped notification listener');
+  }
+
+  // ── Send notification ─────────────────────────────────────────────────────
+
+  /// Persists a notification to the target user's Firestore subcollection.
+  /// The target user's device listener picks it up and shows a local banner.
   Future<void> sendNotificationToUser({
     required String userId,
     required String title,
@@ -326,25 +373,16 @@ class NotificationService {
     Map<String, dynamic>? data,
   }) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      final token = userDoc.data()?['fcmToken'] as String?;
-
-      if (token != null) {
-        await _firestore.collection('notifications').add({
-          'userId': userId,
-          'fcmToken': token,
-          'title': title,
-          'body': body,
-          'data': data ?? {},
-          'status': 'pending',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-        AppLogger.info('[FCM] Notification queued for $userId');
-      } else {
-        AppLogger.warn('[FCM] No FCM token for user $userId');
-      }
+      await _repository.saveNotification(
+        userId,
+        title: title,
+        body: body,
+        type: data?['type'] as String? ?? 'general',
+        data: data,
+      );
+      AppLogger.info('[Notif] Saved notification for $userId: $title');
     } catch (e) {
-      AppLogger.error('[FCM] Error queuing notification', e);
+      AppLogger.error('[Notif] Error saving notification', e);
     }
   }
 
@@ -419,6 +457,7 @@ class NotificationService {
   }
 
   void dispose() {
+    _firestoreListenerSub?.cancel();
     _notificationTapController.close();
   }
 }

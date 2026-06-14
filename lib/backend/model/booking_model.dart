@@ -1,4 +1,3 @@
-// models/booking_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingModel {
@@ -13,9 +12,10 @@ class BookingModel {
   final String roomId;
   final String roomType;
   final DateTime checkInDate;
-  final String confirmationImage;
+  final String? confirmationImage;
+  final String? paymentReference;
   final double totalPrice;
-  final String status; // pending, confirmed, checked-in, cancelled
+  final String status;
   final DateTime createdAt;
   final String? specialRequests;
 
@@ -31,7 +31,8 @@ class BookingModel {
     required this.roomId,
     required this.roomType,
     required this.checkInDate,
-    required this.confirmationImage,
+    this.confirmationImage,
+    this.paymentReference,
     required this.totalPrice,
     required this.status,
     required this.createdAt,
@@ -52,6 +53,7 @@ class BookingModel {
       roomType: data['roomType'],
       checkInDate: (data['checkInDate'] as Timestamp).toDate(),
       confirmationImage: data['confirmationImage'],
+      paymentReference: data['paymentReference'],
       totalPrice: (data['totalPrice'] as num).toDouble(),
       status: data['status'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
@@ -71,17 +73,17 @@ class BookingModel {
       'roomId': roomId,
       'roomType': roomType,
       'checkInDate': Timestamp.fromDate(checkInDate),
-      'confirmationImage': confirmationImage,
+      if (confirmationImage != null) 'confirmationImage': confirmationImage,
+      if (paymentReference != null) 'paymentReference': paymentReference,
       'totalPrice': totalPrice,
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
-      'specialRequests': specialRequests,
+      if (specialRequests != null) 'specialRequests': specialRequests,
     };
   }
 
-  // Helper methods
   bool get isPending => status == 'pending';
   bool get isConfirmed => status == 'confirmed';
   bool get isCancelled => status == 'cancelled';
-
+  bool get isPaid => paymentReference != null;
 }

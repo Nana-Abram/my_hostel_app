@@ -6,11 +6,7 @@ final analyticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 });
 
 class AnalyticsService {
-  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   Future<Map<String, dynamic>> getAnalyticsData() async {
-    // Implement your analytics data fetching logic
-    // This is a mock implementation
     return {
       'totalRevenue': 45820,
       'newUsers': 1247,

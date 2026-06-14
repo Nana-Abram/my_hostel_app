@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
-import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/booking_card.dart';
-
+import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class OwnerBookingsPage extends ConsumerStatefulWidget {
   const OwnerBookingsPage({super.key});
@@ -17,122 +16,117 @@ class OwnerBookingsPage extends ConsumerStatefulWidget {
 }
 
 class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
-  String _selectedFilter = 'all'; // all, pending, confirmed, cancelled
-  String _selectedSort = 'newest'; // newest, oldest, checkin
+  String _selectedFilter = 'all';
+  String _selectedSort = 'newest';
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).value;
-    
+    final theme = Theme.of(context);
+
     if (user == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          // _buildHeader(user),
-          
-          // Filter and Sort Row
-          _buildFilterSortRow(),
-          
-          // Bookings List
-          Expanded(
-            child: _buildBookingsList(user),
+          _buildHeader(theme),
+          _buildFilterSortRow(theme),
+          Expanded(child: _buildBookingsList(user, theme)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      color: theme.colorScheme.surface,
+      child: Row(
+        children: [
+          // Tooltip(
+          //   message: 'Back',
+          //   child: IconAndTextWidget(
+          //       icon: Icons.arrow_back_ios,
+          //       iconColor: theme.colorScheme.onSurfaceVariant,
+          //       isBackArrow: true,
+                
+          //     ),
+          // ),
+          SizedBox(width: 12.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bookings',
+                style: TextStyle(
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                'Manage bookings for your hostels',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  // Widget _buildHeader(UserModel user) {
-  //   return Container(
-  //     padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-  //     color: Colors.white,
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           'Bookings',
-  //           style: TextStyle(
-  //             fontSize: 28.sp,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black87,
-  //           ),
-  //         ),
-  //         SizedBox(height: 4.h),
-  //         Text(
-  //           'Manage bookings for your hostels',
-  //           style: TextStyle(
-  //             fontSize: 14.sp,
-  //             color: Colors.blueGrey,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget _buildFilterSortRow() {
+  Widget _buildFilterSortRow(ThemeData theme) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-      color: Colors.white,
+      color: theme.colorScheme.surface,
       child: Row(
         children: [
-          // Filter Dropdown
           Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedFilter,
-                  isExpanded: true,
-                  icon: Icon(Icons.filter_list, size: 20.w),
-                  items: [
-                    _buildDropdownItem('all', 'All Bookings'),
-                    _buildDropdownItem('pending', 'Pending'),
-                    _buildDropdownItem('confirmed', 'Confirmed'),
-                    _buildDropdownItem('cancelled', 'Cancelled'),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _selectedFilter = value!);
-                  },
-                ),
+            child: _buildDropdownContainer(
+              theme: theme,
+              child: DropdownButton<String>(
+                value: _selectedFilter,
+                isExpanded: true,
+                icon: Icon(Icons.filter_list, size: 20.w, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                dropdownColor: theme.colorScheme.surface,
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14.sp),
+                items: [
+                  _buildDropdownItem('all', 'All Bookings', theme),
+                  _buildDropdownItem('pending', 'Pending', theme),
+                  _buildDropdownItem('confirmed', 'Confirmed', theme),
+                  _buildDropdownItem('checked-in', 'Checked In', theme),
+                  _buildDropdownItem('cancelled', 'Cancelled', theme),
+                ],
+                onChanged: (value) => setState(() => _selectedFilter = value!),
               ),
             ),
           ),
-          
           SizedBox(width: 12.w),
-          
-          // Sort Dropdown
-          Container(
+          SizedBox(
             width: 140.w,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: DropdownButtonHideUnderline(
+            child: _buildDropdownContainer(
+              theme: theme,
               child: DropdownButton<String>(
                 value: _selectedSort,
                 isExpanded: true,
-                icon: Icon(Icons.sort, size: 20.w),
+                icon: Icon(Icons.sort, size: 20.w, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                dropdownColor: theme.colorScheme.surface,
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14.sp),
                 items: [
-                  _buildDropdownItem('newest', 'Newest First'),
-                  _buildDropdownItem('oldest', 'Oldest First'),
-                  _buildDropdownItem('checkin', 'Check-in Date'),
+                  _buildDropdownItem('newest', 'Newest First', theme),
+                  _buildDropdownItem('oldest', 'Oldest First', theme),
+                  _buildDropdownItem('checkin', 'Check-in Date', theme),
                 ],
-                onChanged: (value) {
-                  setState(() => _selectedSort = value!);
-                },
+                onChanged: (value) => setState(() => _selectedSort = value!),
               ),
             ),
           ),
@@ -141,77 +135,77 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
     );
   }
 
-  DropdownMenuItem<String> _buildDropdownItem(String value, String text) {
+  Widget _buildDropdownContainer({required ThemeData theme, required Widget child}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+      ),
+      child: DropdownButtonHideUnderline(child: child),
+    );
+  }
+
+  DropdownMenuItem<String> _buildDropdownItem(String value, String text, ThemeData theme) {
     return DropdownMenuItem(
       value: value,
       child: Text(
         text,
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
       ),
     );
   }
 
-  Widget _buildBookingsList(UserModel user) {
+  Widget _buildBookingsList(UserModel user, ThemeData theme) {
     final bookingService = BookingService();
-    
+
     return StreamBuilder<List<BookingModel>>(
       stream: bookingService.getBookingsByOwner(user.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: AppColors.blueColor));
+          return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
         }
-        
+
         if (snapshot.hasError) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64.w, color: Colors.red),
+                Icon(Icons.error_outline, size: 64.w, color: theme.colorScheme.error),
                 SizedBox(height: 16.h),
                 Text(
                   'Error loading bookings',
-                  style: TextStyle(fontSize: 16.sp, color: Colors.red),
+                  style: TextStyle(fontSize: 16.sp, color: theme.colorScheme.error),
                 ),
               ],
             ),
           );
         }
-        
+
         final allBookings = snapshot.data ?? [];
-        
-        // Apply filters
-        List<BookingModel> filteredBookings = allBookings;
-        
-        if (_selectedFilter != 'all') {
-          filteredBookings = allBookings
-              .where((booking) => booking.status == _selectedFilter)
-              .toList();
-        }
-        
-        // Apply sorting
+
+        List<BookingModel> filteredBookings = _selectedFilter == 'all'
+            ? allBookings
+            : allBookings.where((b) => b.status == _selectedFilter).toList();
+
         filteredBookings = _sortBookings(filteredBookings, _selectedSort);
-        
+
         if (filteredBookings.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState(theme);
         }
-        
+
         return RefreshIndicator(
-          onRefresh: () async {
-            // Refresh logic if needed
-          },
+          onRefresh: () async => setState(() {}),
+          color: theme.colorScheme.primary,
           child: ListView.separated(
             padding: EdgeInsets.all(20.w),
             itemCount: filteredBookings.length,
-            separatorBuilder: (context, index) => SizedBox(height: 16.h),
-            itemBuilder: (context, index) {
-              return BookingCard(
-                booking: filteredBookings[index],
-                onStatusUpdated: () {
-                  // Refresh the list if needed
-                  setState(() {});
-                },
-              );
-            },
+            separatorBuilder: (_, __) => SizedBox(height: 16.h),
+            itemBuilder: (_, index) => BookingCard(
+              booking: filteredBookings[index],
+              onStatusUpdated: () => setState(() {}),
+            ),
           ),
         );
       },
@@ -219,24 +213,19 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
   }
 
   List<BookingModel> _sortBookings(List<BookingModel> bookings, String sortBy) {
-    List<BookingModel> sorted = List.from(bookings);
-    
+    final sorted = List<BookingModel>.from(bookings);
     switch (sortBy) {
       case 'newest':
         sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
       case 'oldest':
         sorted.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-        break;
       case 'checkin':
         sorted.sort((a, b) => a.checkInDate.compareTo(b.checkInDate));
-        break;
     }
-    
     return sorted;
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +233,7 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
           Icon(
             Icons.calendar_today_outlined,
             size: 80.w,
-            color: Colors.grey[400],
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           SizedBox(height: 20.h),
           Text(
@@ -252,17 +241,17 @@ class _OwnerBookingsPageState extends ConsumerState<OwnerBookingsPage> {
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           SizedBox(height: 12.h),
           Text(
             _selectedFilter == 'all'
-                ? 'You don\'t have any bookings yet'
+                ? "You don't have any bookings yet"
                 : 'No $_selectedFilter bookings',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.grey[500],
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             textAlign: TextAlign.center,
           ),

@@ -9,12 +9,10 @@ import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/backend/service/image_upload_service.dart';
-import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-
 
 class EditRoomPage extends ConsumerStatefulWidget {
   final RoomModel room;
-  
+
   const EditRoomPage({super.key, required this.room});
 
   @override
@@ -31,7 +29,6 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
   late double price;
 
   List<Uint8List> imageBytesList = [];
-  List<String> uploadedImageUrls = [];
   List<String> existingImageUrls = [];
   bool useExistingImages = true;
   String? videoUrl;
@@ -55,13 +52,12 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     "Wardrobe",
     "Kitchen",
     "Study Area",
-    'Free mattress',
+    "Free mattress",
   ];
 
   @override
   void initState() {
     super.initState();
-    // Initialize form with existing room data
     selectedHostel = widget.room.hostelId;
     selectedType = widget.room.type;
     selectedGender = widget.room.gender;
@@ -74,7 +70,16 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     videoUrl = widget.room.videoUrl;
   }
 
-  /// Pick and upload room video
+  // ── Video helpers ──────────────────────────────────────────────────────────
+
+  String _videoDisplayName(String url) {
+    try {
+      return Uri.decodeComponent(Uri.parse(url).pathSegments.last);
+    } catch (_) {
+      return url;
+    }
+  }
+
   Future<void> pickAndUploadVideo() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -83,8 +88,8 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
         allowMultiple: false,
         withData: true,
       );
-
       if (result == null || result.files.isEmpty) return;
+
       final file = result.files.first;
       if (file.bytes == null) {
         if (context.mounted) {
@@ -97,14 +102,12 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
 
       setState(() => isUploadingVideo = true);
 
-      // Delete old video if replacing
       if (videoUrl != null && videoUrl!.contains('firebasestorage')) {
-        try {
-          await ImageUploadService().deleteImage(videoUrl!);
-        } catch (_) {}
+        ImageUploadService().deleteImage(videoUrl!).catchError((_) {});
       }
 
-      final url = await ImageUploadService().uploadRoomVideo(file.bytes!, file.name);
+      final url =
+          await ImageUploadService().uploadRoomVideo(file.bytes!, file.name);
       setState(() => videoUrl = url);
 
       if (context.mounted) {
@@ -131,7 +134,7 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     setState(() => videoUrl = null);
   }
 
-  void _showVideoUrlDialog() {
+  void _showVideoUrlDialog(ThemeData theme) {
     final urlCtrl = TextEditingController(text: videoUrl ?? '');
     showDialog(
       context: context,
@@ -141,16 +144,27 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
           controller: urlCtrl,
           keyboardType: TextInputType.url,
           decoration: InputDecoration(
-            hintText: "https://...",
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            hintText: "https://…",
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             prefixIcon: const Icon(Icons.link),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
             onPressed: () {
-              setState(() => videoUrl = urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim());
+              setState(() {
+                final v = urlCtrl.text.trim();
+                videoUrl = v.isEmpty ? null : v;
+              });
               Navigator.pop(ctx);
             },
             child: const Text("Save"),
@@ -160,60 +174,60 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     );
   }
 
-  /// Pick room images from computer (Web supported)
+  // ── Image helpers ──────────────────────────────────────────────────────────
+
   Future<void> pickImages() async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       type: FileType.image,
       allowMultiple: true,
     );
-
     if (result != null) {
       setState(() {
-        for (var file in result.files) {
-          if (file.bytes != null) {
-            imageBytesList.add(file.bytes!);
-          }
+        for (final file in result.files) {
+          if (file.bytes != null) imageBytesList.add(file.bytes!);
         }
         useExistingImages = false;
       });
     }
   }
 
-  /// Upload images to Firebase Storage
   Future<List<String>> uploadImages() async {
-    if (imageBytesList.isEmpty) return useExistingImages ? existingImageUrls : [];
-    
-    List<String> urls = [];
-    
+    if (imageBytesList.isEmpty) {
+      return useExistingImages ? existingImageUrls : [];
+    }
+    final urls = <String>[];
     for (int i = 0; i < imageBytesList.length; i++) {
       final id = "${DateTime.now().millisecondsSinceEpoch}_$i";
-      final ref = FirebaseStorage.instance.ref("room_images/$id.jpg");
-
-      await ref.putData(imageBytesList[i], SettableMetadata(contentType: "image/jpeg"));
-      final url = await ref.getDownloadURL();
-      urls.add(url);
+      final ref =
+          FirebaseStorage.instance.ref("room_images/$id.jpg");
+      await ref.putData(
+          imageBytesList[i], SettableMetadata(contentType: "image/jpeg"));
+      urls.add(await ref.getDownloadURL());
     }
-    
     return urls;
   }
 
-  /// Update room in Firestore
+  // ── Save ───────────────────────────────────────────────────────────────────
+
   Future<void> updateRoom() async {
-    if (selectedHostel == null || selectedType == null || selectedGender == null) {
+    if (selectedHostel == null ||
+        selectedType == null ||
+        selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all required fields"))
+        const SnackBar(content: Text("Please fill all required fields")),
       );
       return;
     }
 
-    // Upload new images if selected, otherwise use existing
-    final imageUrls = useExistingImages ? existingImageUrls : await uploadImages();
+    final imageUrls =
+        useExistingImages ? existingImageUrls : await uploadImages();
 
     if (imageUrls.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please select at least one image"))
+          const SnackBar(
+              content: Text("Please select at least one image")),
         );
       }
       return;
@@ -235,40 +249,39 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     );
 
     try {
-      final service = ref.read(roomServiceProvider);
-      await service.updateRoom(widget.room.id, updatedRoom);
-
+      await ref.read(roomServiceProvider).updateRoom(widget.room.id, updatedRoom);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Room updated successfully"))
+          const SnackBar(content: Text("Room updated successfully")),
         );
-
-        Navigator.pop(context); // Go back to previous page
+        Navigator.pop(context);
       }
-      
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to update room: $e"))
+          SnackBar(content: Text("Failed to update room: $e")),
         );
       }
     }
   }
 
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hostelsAsync = ref.watch(hostelsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Room'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
+        title: const Text('Edit Room'),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
         actions: [
           Tooltip(
             message: "Save Changes",
             child: IconButton(
-              icon: Icon(Icons.save),
+              icon: const Icon(Icons.save),
               onPressed: updateRoom,
             ),
           ),
@@ -281,361 +294,36 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
             margin: EdgeInsets.all(20.w),
             padding: EdgeInsets.all(30.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(14.r),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+              boxShadow: [
+                BoxShadow(
+                  color: theme.shadowColor.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SmallText(
-                  text: "Edit Room",
-                  size: 20.sp,
-                  color: Colors.black,
+                Text(
+                  "Edit Room",
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 SizedBox(height: 20.h),
-                
                 hostelsAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => const Text("Error loading hostels"),
-                  data: (hostels) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// Hostel selector
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          hint: const Text("Select Hostel"),
-                          value: selectedHostel,
-                          items: hostels
-                              .map(
-                                (h) => DropdownMenuItem(
-                                  value: h.id,
-                                  child: Text(h.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedHostel = v),
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Room Type selector
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          hint: const Text("Room Type"),
-                          value: selectedType,
-                          items: types
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedType = v),
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Gender selector
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          hint: const Text("Gender"),
-                          value: selectedGender,
-                          items: gender
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedGender = v),
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Availability selector
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          hint: const Text("Availability"),
-                          value: selectedAvailability,
-                          items: availability
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedAvailability = v),
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Capacity
-                        Row(
-                          children: [
-                            Text("Capacity: ", style: TextStyle(fontSize: 14.sp)),
-                            SizedBox(width: 10.w),
-                            DropdownButton<int>(
-                              value: capacity,
-                              items: [1, 2, 3, 4]
-                                  .map(
-                                    (c) => DropdownMenuItem(
-                                      value: c,
-                                      child: Text("$c students"),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (v) => setState(() => capacity = v!),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Price
-                        Row(
-                          children: [
-                            Text("Price (GHS): ", style: TextStyle(fontSize: 14.sp)),
-                            SizedBox(width: 10.w),
-                            SizedBox(
-                              width: 120.w,
-                              child: TextFormField(
-                                initialValue: price.toStringAsFixed(2),
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                ),
-                                onChanged: (v) =>
-                                    setState(() => price = double.tryParse(v) ?? price),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Available Rooms
-                        Row(
-                          children: [
-                            Text("Available Rooms: ", style: TextStyle(fontSize: 14.sp)),
-                            SizedBox(width: 10.w),
-                            SizedBox(
-                              width: 120.w,
-                              child: TextFormField(
-                                initialValue: availableRooms.toString(),
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                ),
-                                onChanged: (v) =>
-                                    setState(() => availableRooms = int.tryParse(v) ?? availableRooms),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Features
-                        Text("Features:", style: TextStyle(fontSize: 14.sp)),
-                        SizedBox(height: 10.h),
-                        Wrap(
-                          spacing: 8.w,
-                          runSpacing: 8.h,
-                          children: featuresList.map((f) {
-                            final selected = selectedFeatures.contains(f);
-                            return FilterChip(
-                              label: Text(f),
-                              selected: selected,
-                              onSelected: (v) {
-                                setState(() {
-                                  v
-                                      ? selectedFeatures.add(f)
-                                      : selectedFeatures.remove(f);
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 20.h),
-                      
-                        /// Image Section
-                        Text("Room Images:", style: TextStyle(fontSize: 14.sp)),
-                        SizedBox(height: 10.h),
-                        
-                        // Current/Existing Images
-                        if (useExistingImages && existingImageUrls.isNotEmpty)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text("Current Images:", style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
-                                  SizedBox(width: 10.w),
-                                  Text("${existingImageUrls.length} image(s)", 
-                                    style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
-                                ],
-                              ),
-                              SizedBox(height: 10.h),
-                              SizedBox(
-                                height: 200.h,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: existingImageUrls.length,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      margin: EdgeInsets.only(right: 10.w),
-                                      width: 200.w,
-                                      child: Stack(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(12.r),
-                                            child: ImageNetwork(
-                                              image: existingImageUrls[index],
-                                              height: 200.h,
-                                              width: 200.w,
-                                              fitAndroidIos: BoxFit.cover,
-                                              fitWeb: BoxFitWeb.cover,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 5,
-                                            right: 5,
-                                            child: IconButton(
-                                              icon: const Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                              ),
-                                              style: IconButton.styleFrom(
-                                                backgroundColor: Colors.black54,
-                                              ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  existingImageUrls.removeAt(index);
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              Row(
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: pickImages,
-                                    icon: const Icon(Icons.add_photo_alternate),
-                                    label: const Text("Add More Images"),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        useExistingImages = false;
-                                        existingImageUrls.clear();
-                                      });
-                                    },
-                                    child: Text("Replace All Images", style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        
-                        // New Image Picker
-                        if (!useExistingImages || existingImageUrls.isEmpty)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: pickImages,
-                                    icon: const Icon(Icons.add_photo_alternate),
-                                    label: const Text("Choose New Images"),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Text("${imageBytesList.length} image(s) selected"),
-                                ],
-                              ),
-                              if (imageBytesList.isNotEmpty)
-                                Container(
-                                  margin: EdgeInsets.only(top: 20.h),
-                                  height: 200.h,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: imageBytesList.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.only(right: 10.w),
-                                        width: 200.w,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12.r),
-                                          image: DecorationImage(
-                                            image: MemoryImage(imageBytesList[index]),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                              top: 5,
-                                              right: 5,
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                  Icons.close,
-                                                  color: Colors.white,
-                                                ),
-                                                style: IconButton.styleFrom(
-                                                  backgroundColor: Colors.black54,
-                                                ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    imageBytesList.removeAt(index);
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                      
-                        SizedBox(height: 30.h),
-
-                        /// Video Tour Section
-                        _buildVideoSection(),
-                      
-                        SizedBox(height: 30.h),
-                      
-                        /// Update Button
-                        ElevatedButton(
-                          onPressed: updateRoom,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[700],
-                            foregroundColor: Colors.white,
-                            minimumSize: Size(double.infinity, 50.h),
-                          ),
-                          child: Text("Update Room", style: TextStyle(fontSize: 16.sp)),
-                        ),
-                      ],
-                    );
-                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => Text(
+                    "Error loading hostels",
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                  data: (hostels) => _buildForm(theme, hostels),
                 ),
               ],
             ),
@@ -645,80 +333,429 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     );
   }
 
-  Widget _buildVideoSection() {
+  Widget _buildForm(ThemeData theme, List<dynamic> hostels) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _dropdown(
+          theme,
+          hint: "Select Hostel",
+          value: selectedHostel,
+          items: hostels.map((h) => DropdownMenuItem(
+                value: h.id as String,
+                child: Text(h.name as String),
+              )).toList(),
+          onChanged: (v) => setState(() => selectedHostel = v),
+        ),
+
+        _dropdown(
+          theme,
+          hint: "Room Type",
+          value: selectedType,
+          items: types
+              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+              .toList(),
+          onChanged: (v) => setState(() => selectedType = v),
+        ),
+
+        _dropdown(
+          theme,
+          hint: "Gender",
+          value: selectedGender,
+          items: gender
+              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+              .toList(),
+          onChanged: (v) => setState(() => selectedGender = v),
+        ),
+
+        _dropdown(
+          theme,
+          hint: "Availability",
+          value: selectedAvailability,
+          items: availability
+              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+              .toList(),
+          onChanged: (v) => setState(() => selectedAvailability = v),
+        ),
+
+        // Capacity
+        _labelRow(
+          theme,
+          label: "Capacity",
+          child: DropdownButton<int>(
+            value: capacity,
+            items: [1, 2, 3, 4]
+                .map((c) => DropdownMenuItem(
+                      value: c,
+                      child: Text("$c students"),
+                    ))
+                .toList(),
+            onChanged: (v) => setState(() => capacity = v!),
+          ),
+        ),
+        SizedBox(height: 20.h),
+
+        // Price
+        _labelRow(
+          theme,
+          label: "Price (GHS)",
+          child: SizedBox(
+            width: 120.w,
+            child: TextFormField(
+              initialValue: price.toStringAsFixed(2),
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r)),
+              ),
+              onChanged: (v) =>
+                  setState(() => price = double.tryParse(v) ?? price),
+            ),
+          ),
+        ),
+        SizedBox(height: 20.h),
+
+        // Available Rooms
+        _labelRow(
+          theme,
+          label: "Available Rooms",
+          child: SizedBox(
+            width: 120.w,
+            child: TextFormField(
+              initialValue: availableRooms.toString(),
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r)),
+              ),
+              onChanged: (v) => setState(
+                  () => availableRooms = int.tryParse(v) ?? availableRooms),
+            ),
+          ),
+        ),
+        SizedBox(height: 20.h),
+
+        // Features
+        Text("Features:",
+            style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface)),
+        SizedBox(height: 10.h),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: featuresList.map((f) {
+            final selected = selectedFeatures.contains(f);
+            return FilterChip(
+              label: Text(f),
+              selected: selected,
+              onSelected: (v) => setState(() =>
+                  v ? selectedFeatures.add(f) : selectedFeatures.remove(f)),
+            );
+          }).toList(),
+        ),
+        SizedBox(height: 20.h),
+
+        // Images
+        Text("Room Images:",
+            style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface)),
+        SizedBox(height: 10.h),
+
+        if (useExistingImages && existingImageUrls.isNotEmpty)
+          _existingImagesSection(theme)
+        else
+          _newImagesSection(theme),
+
+        SizedBox(height: 30.h),
+
+        // Video
+        _buildVideoSection(theme),
+
+        SizedBox(height: 30.h),
+
+        ElevatedButton(
+          onPressed: updateRoom,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            minimumSize: Size(double.infinity, 50.h),
+          ),
+          child: Text("Update Room", style: TextStyle(fontSize: 16.sp)),
+        ),
+      ],
+    );
+  }
+
+  // ── Image sections ─────────────────────────────────────────────────────────
+
+  Widget _existingImagesSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text("Current Images:",
+                style: TextStyle(
+                    fontSize: 12.sp,
+                    color: theme.colorScheme.onSurfaceVariant)),
+            SizedBox(width: 10.w),
+            Text("${existingImageUrls.length} image(s)",
+                style: TextStyle(
+                    fontSize: 12.sp,
+                    color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ),
+        SizedBox(height: 10.h),
+        SizedBox(
+          height: 200.h,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: existingImageUrls.length,
+            itemBuilder: (context, index) => Container(
+              margin: EdgeInsets.only(right: 10.w),
+              width: 200.w,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: ImageNetwork(
+                      image: existingImageUrls[index],
+                      height: 200.h,
+                      width: 200.w,
+                      fitAndroidIos: BoxFit.cover,
+                      fitWeb: BoxFitWeb.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      style: IconButton.styleFrom(
+                          backgroundColor: Colors.black54),
+                      onPressed: () => setState(
+                          () => existingImageUrls.removeAt(index)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10.h),
+        Row(
+          children: [
+            TextButton.icon(
+              onPressed: pickImages,
+              icon: const Icon(Icons.add_photo_alternate),
+              label: const Text("Add More Images"),
+            ),
+            SizedBox(width: 10.w),
+            TextButton(
+              onPressed: () => setState(() {
+                useExistingImages = false;
+                existingImageUrls.clear();
+              }),
+              child: Text("Replace All Images",
+                  style: TextStyle(color: theme.colorScheme.error)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _newImagesSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            TextButton.icon(
+              onPressed: pickImages,
+              icon: const Icon(Icons.add_photo_alternate),
+              label: const Text("Choose New Images"),
+            ),
+            SizedBox(width: 10.w),
+            Text("${imageBytesList.length} image(s) selected",
+                style: TextStyle(
+                    fontSize: 12.sp,
+                    color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ),
+        if (imageBytesList.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 20.h),
+            height: 200.h,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: imageBytesList.length,
+              itemBuilder: (context, index) => Container(
+                margin: EdgeInsets.only(right: 10.w),
+                width: 200.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.r),
+                  image: DecorationImage(
+                    image: MemoryImage(imageBytesList[index]),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: IconButton(
+                        icon:
+                            const Icon(Icons.close, color: Colors.white),
+                        style: IconButton.styleFrom(
+                            backgroundColor: Colors.black54),
+                        onPressed: () =>
+                            setState(() => imageBytesList.removeAt(index)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ── Video section ──────────────────────────────────────────────────────────
+
+  Widget _buildVideoSection(ThemeData theme) {
     final hasVideo = videoUrl != null && videoUrl!.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Video Tour (Optional)",
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+        Text(
+          "Video Tour",
+          style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface),
+        ),
         SizedBox(height: 10.h),
-        if (hasVideo) ...[
+
+        if (isUploadingVideo) ...[
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(12.w),
+            padding:
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.green.shade300),
             ),
             child: Row(
               children: [
-                Icon(Icons.videocam, color: Colors.green[700], size: 28.sp),
-                SizedBox(width: 10.w),
+                SizedBox(
+                  width: 18.w,
+                  height: 18.h,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary),
+                ),
+                SizedBox(width: 12.w),
+                Text("Uploading video…",
+                    style: TextStyle(
+                        fontSize: 13.sp,
+                        color: theme.colorScheme.onSurfaceVariant)),
+              ],
+            ),
+          ),
+        ] else if (hasVideo) ...[
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer
+                  .withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.35)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(9.w),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Icon(Icons.videocam_rounded,
+                      color: theme.colorScheme.primary, size: 22.sp),
+                ),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Video attached",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13.sp,
-                              color: Colors.green[700])),
-                      SizedBox(height: 4.h),
-                      Text(videoUrl!,
-                          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        "Video tour attached",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.sp,
+                            color: theme.colorScheme.onSurface),
+                      ),
+                      SizedBox(height: 3.h),
+                      Text(
+                        _videoDisplayName(videoUrl!),
+                        style: TextStyle(
+                            fontSize: 10.sp,
+                            color: theme.colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close, color: Colors.red, size: 20.sp),
-                  tooltip: 'Remove video',
-                  onPressed: _removeVideo,
+                SizedBox(width: 4.w),
+                Tooltip(
+                  message: 'Replace video',
+                  child: IconButton(
+                    icon: Icon(Icons.swap_horiz_rounded,
+                        size: 20.sp, color: theme.colorScheme.primary),
+                    onPressed: pickAndUploadVideo,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Remove video',
+                  child: IconButton(
+                    icon: Icon(Icons.delete_outline_rounded,
+                        size: 20.sp, color: theme.colorScheme.error),
+                    onPressed: _removeVideo,
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 12.h),
-        ],
-        if (isUploadingVideo)
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
-            child: Row(
-              children: [
-                SizedBox(
-                    width: 22.w,
-                    height: 22.h,
-                    child: const CircularProgressIndicator(strokeWidth: 2)),
-                SizedBox(width: 12.w),
-                Text("Uploading video...", style: TextStyle(fontSize: 12.sp)),
-              ],
-            ),
-          )
-        else
+          SizedBox(height: 6.h),
+          TextButton.icon(
+            onPressed: () => _showVideoUrlDialog(theme),
+            icon: Icon(Icons.link, size: 15.sp),
+            label: Text("Replace with URL",
+                style: TextStyle(fontSize: 11.sp)),
+          ),
+        ] else ...[
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: pickAndUploadVideo,
-                  icon: Icon(Icons.video_library, size: 18.sp),
-                  label: Text("Pick Video", style: TextStyle(fontSize: 12.sp)),
+                  icon: Icon(Icons.video_library_outlined, size: 18.sp),
+                  label: Text("Pick Video",
+                      style: TextStyle(fontSize: 12.sp)),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12.h),
-                    side: BorderSide(color: Colors.blue.shade300),
+                    side: BorderSide(
+                        color: theme.colorScheme.primary
+                            .withValues(alpha: 0.6)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r)),
                   ),
@@ -727,12 +764,15 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
               SizedBox(width: 10.w),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _showVideoUrlDialog,
+                  onPressed: () => _showVideoUrlDialog(theme),
                   icon: Icon(Icons.link, size: 18.sp),
-                  label: Text("Paste URL", style: TextStyle(fontSize: 12.sp)),
+                  label: Text("Paste URL",
+                      style: TextStyle(fontSize: 12.sp)),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12.h),
-                    side: BorderSide(color: Colors.orange.shade300),
+                    side: BorderSide(
+                        color: theme.colorScheme.secondary
+                            .withValues(alpha: 0.6)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r)),
                   ),
@@ -740,7 +780,51 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
               ),
             ],
           ),
+        ],
+
         SizedBox(height: 10.h),
+      ],
+    );
+  }
+
+  // ── Shared widgets ─────────────────────────────────────────────────────────
+
+  Widget _dropdown<T>(
+    ThemeData theme, {
+    required String hint,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Column(
+      children: [
+        DropdownButtonFormField<T>(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.r)),
+          ),
+          hint: Text(hint),
+          value: value,
+          items: items,
+          onChanged: onChanged,
+        ),
+        SizedBox(height: 20.h),
+      ],
+    );
+  }
+
+  Widget _labelRow(
+    ThemeData theme, {
+    required String label,
+    required Widget child,
+  }) {
+    return Row(
+      children: [
+        Text("$label: ",
+            style: TextStyle(
+                fontSize: 14.sp, color: theme.colorScheme.onSurface)),
+        SizedBox(width: 10.w),
+        child,
       ],
     );
   }

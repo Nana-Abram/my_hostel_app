@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Custom bottom sheet with modern design
@@ -115,7 +115,7 @@ class ModernBottomSheet {
                             option.subtitle!,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -184,7 +184,7 @@ class ModernBottomSheet {
                 decoration: BoxDecoration(
                   color: (confirmColor ?? 
                     (isDangerous ? theme.colorScheme.error : theme.primaryColor))
-                    .withOpacity(0.1),
+                    .withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -212,7 +212,7 @@ class ModernBottomSheet {
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

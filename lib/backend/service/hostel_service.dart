@@ -30,13 +30,16 @@ Stream<HostelModel?> getHostelByIdStream(String id) {
       .collection('hostels')
       .doc(id)
       .snapshots()
-      .map((doc) => doc.exists ? HostelModel.fromMap(doc.data()!, doc.id) : null);
+      .map((doc) => (doc.exists && doc.data() != null)
+          ? HostelModel.fromMap(doc.data()!, doc.id)
+          : null);
 }
 
-// add hostel
-  Future<void> addHostel(HostelModel hostel) async {
+// add hostel — returns the new document ID
+  Future<String> addHostel(HostelModel hostel) async {
     try {
-      await _firestore.collection('hostels').add(hostel.toMap());
+      final docRef = await _firestore.collection('hostels').add(hostel.toMap());
+      return docRef.id;
     } catch (e) {
       throw Exception('Failed to add hostel: $e');
     }
@@ -73,7 +76,9 @@ Stream<HostelModel?> getHostelByIdStream(String id) {
         return await _firestore.collection('hostels').doc(id).get();
       });
 
-      return doc.exists ? HostelModel.fromMap(doc.data()!, doc.id) : null;
+      return (doc.exists && doc.data() != null)
+          ? HostelModel.fromMap(doc.data()!, doc.id)
+          : null;
     } catch (e) {
       throw Exception('Failed to fetch hostel: $e');
     }

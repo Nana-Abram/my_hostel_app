@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -169,21 +169,21 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
                     borderRadius: BorderRadius.circular(24.r),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.shadowColor.withOpacity(0.2),
+                        color: theme.shadowColor.withValues(alpha: 0.2),
                         blurRadius: currentElevation,
                         spreadRadius: widget.isCenter ? 4 : 2,
                         offset: Offset(0, currentElevation / 2),
                       ),
                       if (widget.isCenter)
                         BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(0.25),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.25),
                           blurRadius: 30,
                           spreadRadius: 2,
                           offset: const Offset(0, 12),
                         ),
                       if (_isHovered)
                         BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
                           blurRadius: 35,
                           spreadRadius: 0,
                           offset: const Offset(0, 15),
@@ -212,7 +212,7 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  theme.colorScheme.primary.withOpacity(
+                                  theme.colorScheme.primary.withValues(alpha: 
                                     widget.isCenter ? 0.35 : 0.25,
                                   ),
                                 ],
@@ -228,7 +228,7 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
                             borderRadius: BorderRadius.circular(24.r),
                             border: Border.all(
                               color: widget.isCenter || _isHovered
-                                  ? theme.colorScheme.primary.withOpacity(0.9)
+                                  ? theme.colorScheme.primary.withValues(alpha: 0.9)
                                   : Colors.transparent,
                               width: widget.isCenter ? 4 : 3,
                             ),
@@ -250,7 +250,7 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
                                 borderRadius: BorderRadius.circular(20.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: theme.colorScheme.primary.withOpacity(0.4),
+                                    color: theme.colorScheme.primary.withValues(alpha: 0.4),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),

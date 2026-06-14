@@ -14,7 +14,7 @@ class IconAndTextWidget extends StatelessWidget {
   const IconAndTextWidget({
     super.key,
     required this.icon,
-    required this.text,
+    this.text = '',
     required this.iconColor,
     this.iconSize = 20,
     this.textSize = 16,

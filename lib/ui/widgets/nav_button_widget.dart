@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:my_hostel_app/ui/core/dimensions.dart';
 
 class NavButtonWidget extends StatefulWidget {
@@ -25,7 +25,7 @@ class _NavButtonWidgetState extends State<NavButtonWidget> {
     final theme = Theme.of(context);
     final color = widget.isActive
         ? theme.colorScheme.primary
-        : (_isHovered ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.7));
+        : (_isHovered ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.7));
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),

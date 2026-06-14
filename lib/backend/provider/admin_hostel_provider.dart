@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/core/app_logger.dart';
 
-// Use HostelModel instead of Map
 final hostelsProvider = StreamProvider<List<HostelModel>>((ref) {
   final hostelsService = HostelsService();
   return hostelsService.getHostelsStream();
@@ -17,11 +16,9 @@ final hostelsStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 class HostelsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Return Stream of HostelModel objects
   Stream<List<HostelModel>> getHostelsStream() {
     return _firestore
         .collection('hostels')
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
       AppLogger.info('Admin hostels snapshot count: ${snapshot.docs.length}');
@@ -42,19 +39,11 @@ class HostelsService {
       int pendingHostels = hostels.where((hostel) => hostel.status.toLowerCase() == 'pending').length;
       int suspendedHostels = hostels.where((hostel) => hostel.status.toLowerCase() == 'suspended').length;
 
-      // // Calculate average occupancy
-      // double totalOccupancy = 0;
-      // for (final hostel in hostels) {
-      //   totalOccupancy += hostel.occupancyRate;
-      // }
-      // double averageOccupancy = totalHostels > 0 ? totalOccupancy / totalHostels : 0;
-
       return {
         'totalHostels': totalHostels,
         'verifiedHostels': verifiedHostels,
         'pendingHostels': pendingHostels,
         'suspendedHostels': suspendedHostels,
-        // 'averageOccupancy': averageOccupancy,
       };
     } catch (e) {
       throw 'Failed to fetch hostels stats: $e';

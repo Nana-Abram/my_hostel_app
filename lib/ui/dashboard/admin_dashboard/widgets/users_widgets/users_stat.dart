@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UsersStats extends StatelessWidget {
@@ -28,7 +28,7 @@ class UsersStats extends StatelessWidget {
             title: 'Students',
             value: '${stats['students'] ?? 0}',
             icon: Icons.school_outlined,
-            color: const Color(0xFF4CAF50),
+            color: theme.colorScheme.secondary,
             change: '+8%',
           ),
         ),
@@ -39,7 +39,7 @@ class UsersStats extends StatelessWidget {
             title: 'Hostel Owners',
             value: '${stats['hostelOwners'] ?? 0}',
             icon: Icons.business_outlined,
-            color: const Color(0xFFFF9800),
+            color: theme.colorScheme.tertiary,
             change: '+15%',
           ),
         ),
@@ -50,7 +50,7 @@ class UsersStats extends StatelessWidget {
             title: 'Admins',
             value: '${stats['admins'] ?? 0}',
             icon: Icons.admin_panel_settings_outlined,
-            color: Colors.purple,
+            color: theme.colorScheme.error,
             change: '+0%',
           ),
         ),
@@ -75,7 +75,7 @@ class UsersStats extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -86,7 +86,7 @@ class UsersStats extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(icon, size: 20.w, color: color),
@@ -118,14 +118,14 @@ class UsersStats extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: isPositive ? const Color(0xFF4CAF50).withOpacity(0.1) : theme.colorScheme.error.withOpacity(0.1),
+              color: isPositive ? theme.colorScheme.secondary.withValues(alpha: 0.12) : theme.colorScheme.error.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Text(
               change,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: isPositive ? const Color(0xFF4CAF50) : theme.colorScheme.error,
+                color: isPositive ? theme.colorScheme.secondary : theme.colorScheme.error,
                 fontWeight: FontWeight.w600,
               ),
             ),

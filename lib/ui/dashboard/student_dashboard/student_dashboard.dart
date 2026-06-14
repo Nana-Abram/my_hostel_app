@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -67,7 +67,7 @@ class StudentDashboard extends ConsumerWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -79,16 +79,7 @@ class StudentDashboard extends ConsumerWidget {
           Container(
             child: Row(
               children: [
-                Tooltip(
-                  message: 'Back to home',
-                  child: IconAndTextWidget(
-                    icon: Icons.arrow_back_ios,
-                    text: '',
-                    iconColor: theme.colorScheme.onSurfaceVariant,
-                    isBackArrow: true,
-                  ),
-                ),
-                SizedBox(width: 10.w),
+                
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -200,7 +191,7 @@ class StudentDashboard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: theme.shadowColor.withOpacity(0.1),
+                color: theme.shadowColor.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(2, 4),
               ),
@@ -212,7 +203,7 @@ class StudentDashboard extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 24.sp),
@@ -241,7 +232,7 @@ class StudentDashboard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(2, 4),
           ),
@@ -302,7 +293,7 @@ class StudentDashboard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(2, 4),
           ),
@@ -352,7 +343,7 @@ class StudentDashboard extends ConsumerWidget {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: theme.dividerColor),
       ),
@@ -390,7 +381,7 @@ class StudentDashboard extends ConsumerWidget {
                         vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(booking.status).withOpacity(0.1),
+                        color: _getStatusColor(booking.status).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: Text(
@@ -457,7 +448,7 @@ class StudentDashboard extends ConsumerWidget {
           padding: EdgeInsets.symmetric(vertical: 40.h),
           child: Column(
             children: [
-              Icon(icon, size: 60.sp, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5)),
+              Icon(icon, size: 60.sp, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
               SizedBox(height: 16.h),
               Text(
                 title,
@@ -470,7 +461,7 @@ class StudentDashboard extends ConsumerWidget {
               SizedBox(height: 8.h),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7)),
+                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
               ),
               SizedBox(height: 20.h),
               ElevatedButton(

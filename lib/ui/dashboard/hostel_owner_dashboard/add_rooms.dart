@@ -12,7 +12,19 @@ import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 import '../../../backend/model/room_model.dart';
 
 class AdminAddRoomPage extends ConsumerStatefulWidget {
-  const AdminAddRoomPage({super.key});
+  const AdminAddRoomPage({
+    super.key,
+    this.lockedHostelId,
+    this.lockedHostelName,
+    this.onRoomSaved,
+  });
+
+  /// When set, the hostel dropdown is hidden and this hostel is pre-selected.
+  final String? lockedHostelId;
+  final String? lockedHostelName;
+
+  /// Called after a room is successfully saved to Firestore.
+  final VoidCallback? onRoomSaved;
 
   @override
   ConsumerState<AdminAddRoomPage> createState() => _AdminAddRoomPageState();
@@ -26,6 +38,34 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
   int capacity = 1;
   int availableRooms = 0;
   double price = 3000;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.lockedHostelId != null) {
+      selectedHostel = widget.lockedHostelId;
+    }
+  }
+
+  @override
+  void didUpdateWidget(AdminAddRoomPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.lockedHostelId != oldWidget.lockedHostelId) {
+      setState(() {
+        selectedHostel = widget.lockedHostelId;
+        selectedType = null;
+        selectedGender = null;
+        selectedAvailability = null;
+        capacity = 1;
+        availableRooms = 0;
+        price = 3000;
+        imageBytesList.clear();
+        uploadedImageUrls.clear();
+        selectedFeatures.clear();
+        videoUrl = null;
+      });
+    }
+  }
 
   List<Uint8List> imageBytesList = [];
   List<String> uploadedImageUrls = [];
@@ -219,10 +259,11 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
       await service.addRoom(room);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Room added successfully")),
+        );
       }
+      widget.onRoomSaved?.call();
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -233,7 +274,8 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
     }
 
     setState(() {
-      selectedHostel = null;
+      // Keep the locked hostel selected; only clear it when unlocked.
+      if (widget.lockedHostelId == null) selectedHostel = null;
       selectedType = null;
       selectedGender = null;
       imageBytesList.clear();
@@ -267,6 +309,37 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                         color: Colors.black,
                       ),
                       SizedBox(height: 20.h),
+
+                      // ── Locked-hostel banner ──────────────────────────────
+                      if (widget.lockedHostelId != null) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(color: Colors.green.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.green[700], size: 18.sp),
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: Text(
+                                  'Adding room to: ${widget.lockedHostelName ?? 'New hostel'}',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green[800],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                      ],
+
               hostelsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => const Text("Error loading hostels"),
@@ -275,22 +348,23 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ///  Hostel selector
-                        DropdownButtonFormField(
-      
-                          hint: const Text("Select Hostel"),
-                          value: selectedHostel,
-                          items: hostels
-                              .map(
-                                (h) => DropdownMenuItem(
-                                  value: h.id,
-                                  child: Text(h.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedHostel = v),
-                        ),
-                        SizedBox(height: 20.h),
+                        // Hostel dropdown — hidden when a hostel is locked in
+                        if (widget.lockedHostelId == null) ...[
+                          DropdownButtonFormField(
+                            hint: const Text("Select Hostel"),
+                            value: selectedHostel,
+                            items: hostels
+                                .map(
+                                  (h) => DropdownMenuItem(
+                                    value: h.id,
+                                    child: Text(h.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() => selectedHostel = v),
+                          ),
+                          SizedBox(height: 20.h),
+                        ],
                       
                         ///  Room Type selector
                         DropdownButtonFormField(

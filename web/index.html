@@ -33,6 +33,10 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- Google Maps JS API must load synchronously before Flutter bootstrap -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI2Xn1ZRqOiYnMQJwHUlp0MgMsZKFp8Y"></script>
+  <!-- Paystack inline.js must load synchronously before Flutter bootstrap -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

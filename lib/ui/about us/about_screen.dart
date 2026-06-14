@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:my_hostel_app/ui/app_bar/app_bar_screen.dart';
 import 'package:my_hostel_app/ui/core/app_colors.dart';
 import 'package:my_hostel_app/ui/core/responsive.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-import 'package:path/path.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -55,7 +54,7 @@ class AboutScreen extends StatelessWidget {
           'Your Gateway to Comfortable Student Living',
           style: TextStyle(
             fontSize: r.bodyLarge,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         SizedBox(height: r.spacingL),
@@ -92,7 +91,7 @@ class AboutScreen extends StatelessWidget {
           'near their educational institutions.',
           style: TextStyle(
             fontSize: r.body,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             height: 1.6,
           ),
         ),
@@ -102,7 +101,7 @@ class AboutScreen extends StatelessWidget {
           'seamless marketplace that prioritises safety, convenience, and community.',
           style: TextStyle(
             fontSize: r.body,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             height: 1.6,
           ),
         ),
@@ -112,10 +111,10 @@ class AboutScreen extends StatelessWidget {
     final infoCard = Container(
       padding: EdgeInsets.all(r.cardPadding),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.08),
+        color: theme.colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
         border:
-            Border.all(color: theme.colorScheme.primary.withOpacity(0.25)),
+            Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
@@ -133,7 +132,7 @@ class AboutScreen extends StatelessWidget {
           SmallText(
             text: 'Find your perfect home away from home with verified listings '
                 'and transparent pricing.',
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ],
       ),
@@ -185,7 +184,7 @@ class AboutScreen extends StatelessWidget {
           'We\'re revolutionising student accommodation with technology and trust',
           style: TextStyle(
               fontSize: r.body,
-              color: theme.colorScheme.onSurface.withOpacity(0.7)),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         SizedBox(height: r.spacingXL),
         LayoutBuilder(builder: (context, constraints) {
@@ -208,7 +207,7 @@ class AboutScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.shadowColor.withOpacity(0.08),
+                        color: theme.shadowColor.withValues(alpha: 0.08),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -221,7 +220,7 @@ class AboutScreen extends StatelessWidget {
                         padding: EdgeInsets.all(r.spacingS),
                         decoration: BoxDecoration(
                           color:
-                              theme.colorScheme.primary.withOpacity(0.1),
+                              theme.colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(f.icon,
@@ -242,7 +241,7 @@ class AboutScreen extends StatelessWidget {
                         style: TextStyle(
                             fontSize: r.bodySmall,
                             color: theme.colorScheme.onSurface
-                                .withOpacity(0.7),
+                                .withValues(alpha: 0.7),
                             height: 1.4),
                       ),
                     ],
@@ -281,7 +280,7 @@ class AboutScreen extends StatelessWidget {
           'Passionate individuals dedicated to improving student living',
           style: TextStyle(
               fontSize: r.body,
-              color: theme.colorScheme.onSurface.withOpacity(0.6)),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
         ),
         SizedBox(height: r.spacingXL),
         Wrap(
@@ -298,7 +297,7 @@ class AboutScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -308,7 +307,7 @@ class AboutScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color:
-                              theme.colorScheme.primary.withOpacity(0.1),
+                              theme.colorScheme.primary.withValues(alpha: 0.1),
                           child: Icon(Icons.person,
                               size: avatarSize * 0.4,
                               color: theme.colorScheme.primary),
@@ -330,7 +329,7 @@ class AboutScreen extends StatelessWidget {
                     m.role,
                     style: TextStyle(
                         fontSize: r.bodySmall,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -356,7 +355,7 @@ class AboutScreen extends StatelessWidget {
       padding: EdgeInsets.all(r.cardPadding * 1.5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.blueColor, AppColors.blueColor.withOpacity(0.8)],
+          colors: [AppColors.blueColor, AppColors.blueColor.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -412,7 +411,7 @@ class AboutScreen extends StatelessWidget {
           'through HostelHub. Start your search today!',
           style: TextStyle(
               fontSize: r.body,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               height: 1.5),
         ),
       ],
@@ -421,10 +420,10 @@ class AboutScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(r.cardPadding * 1.5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.onSurface.withOpacity(0.04),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.2)),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: r.isMobile
           ? Column(
@@ -464,7 +463,7 @@ class _StatItem extends StatelessWidget {
           Text(label,
               style: TextStyle(
                   fontSize: r.body,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w500)),
         ],
       );

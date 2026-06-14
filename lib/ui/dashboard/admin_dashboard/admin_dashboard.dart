@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/bookings_page.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/hostels_page.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/main_dashboard_page.dart';
 import 'package:my_hostel_app/ui/dashboard/admin_dashboard/pages/settings_page.dart';
@@ -28,9 +29,11 @@ class AdminDashboardState extends State<AdminDashboard> {
       case 1:
         return UsersManagementPage(onIndexChanged: widget.onIndexChanged);
       case 2:
-        return HostelsManagementPage();
+        return const HostelsManagementPage();
       case 3:
-        return SettingsPage();
+        return const BookingsManagementPage();
+      case 4:
+        return const SettingsPage();
       default:
         return MainDashboard(onIndexChanged: widget.onIndexChanged);
     }

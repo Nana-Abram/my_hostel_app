@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
@@ -29,7 +29,7 @@ class BookingSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.08),
+            color: theme.shadowColor.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(2, 4),
           ),
@@ -47,7 +47,7 @@ class BookingSummaryCard extends StatelessWidget {
                 topLeft: Radius.circular(20.r),
                 topRight: Radius.circular(20.r),
               ),
-              color: theme.colorScheme.onSurface.withOpacity(0.05),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             ),
             child: roomImage.isNotEmpty
                 ? ClipRRect(
@@ -67,7 +67,7 @@ class BookingSummaryCard extends StatelessWidget {
                     child: Icon(
                       Icons.hotel,
                       size: 60.sp,
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
                   ),
           ),

@@ -148,6 +148,15 @@ Future<Map<String, dynamic>> getUsersStats() async {
     }
   }
 
+  // Update user fields
+  Future<void> updateUser(String userId, Map<String, dynamic> fields) async {
+    try {
+      await _firestore.collection('users').doc(userId).update(fields);
+    } catch (e) {
+      throw 'Failed to update user: $e';
+    }
+  }
+
   // Delete user
   Future<void> deleteUser(String userId) async {
     try {

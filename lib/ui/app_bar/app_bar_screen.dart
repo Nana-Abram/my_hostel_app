@@ -1,4 +1,4 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
+﻿import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -210,7 +210,7 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
                   isActive ? item.activeIcon : item.icon,
                   color: isActive
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withOpacity(0.7),
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 title: Text(
                   item.label,
@@ -224,7 +224,7 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
                 ),
                 selected: isActive,
                 selectedTileColor:
-                    theme.colorScheme.primary.withOpacity(0.08),
+                    theme.colorScheme.primary.withValues(alpha: 0.08),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
                 onTap: () => onNavSelected(i),
@@ -275,16 +275,18 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
                         user.role.displayName,
                         style: TextStyle(
                             color:
-                                theme.colorScheme.onSurface.withOpacity(0.6)),
+                                theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                       ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.dashboard,
-                            color: theme.colorScheme.primary),
-                        tooltip: 'Dashboard',
-                        onPressed: () {
-                          Navigator.pop(context);
-                          GoRouter.of(context).goNamed('dashboard');
-                        },
+                      trailing: Tooltip(
+                        message: 'Dashboard',
+                        child: IconButton(
+                          icon: Icon(Icons.dashboard,
+                              color: theme.colorScheme.primary),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            GoRouter.of(context).goNamed('dashboard');
+                          },
+                        ),
                       ),
                     ),
             ),
@@ -372,7 +374,7 @@ class AppBarScreenState extends ConsumerState<AppBarScreen> {
             style: TextStyle(color: theme.colorScheme.onSurface)),
         content: Text('Are you sure you want to logout?',
             style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.7))),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -518,15 +520,18 @@ class _DesktopRightSection extends StatelessWidget {
           ),
         ] else ...[
           // Dashboard shortcut
-          GestureDetector(
-            onTap: onNavDashboard,
-            child: IconAndTextWidget(
-              icon: Icons.dashboard,
-              text: 'Dashboard',
-              iconColor: theme.colorScheme.primary,
-              iconSize: 20,
-              textSize: r.bodySmall,
-              textColor: theme.colorScheme.primary,
+          Tooltip(
+            message: 'Dashboard',
+            child: GestureDetector(
+              onTap: onNavDashboard,
+              child: IconAndTextWidget(
+                icon: Icons.dashboard,
+                text: 'Dashboard',
+                iconColor: theme.colorScheme.primary,
+                iconSize: 20,
+                textSize: r.bodySmall,
+                textColor: theme.colorScheme.primary,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -540,14 +545,14 @@ class _DesktopRightSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: r.bodySmall,
                   fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
               Text(
                 user!.fullName,
                 style: TextStyle(
                   fontSize: r.caption,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -557,7 +562,7 @@ class _DesktopRightSection extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.secondaryContainer,
+                    color: const Color.fromARGB(255, 9, 115, 201),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +13,7 @@ import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/modern/modern_widgets.dart';
+import 'package:my_hostel_app/ui/widgets/hostel_map_widget.dart';
 
 class HostelDetailsPage extends ConsumerWidget {
   const HostelDetailsPage({super.key, required this.hostelId});
@@ -207,7 +208,7 @@ class HostelDetailsPage extends ConsumerWidget {
           error: (error, stackTrace) => Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: theme.colorScheme.error.withOpacity(0.1),
+              color: theme.colorScheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Column(
@@ -253,7 +254,7 @@ class HostelDetailsPage extends ConsumerWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 5.r,
             offset: const Offset(0, 2),
           ),
@@ -299,7 +300,7 @@ class HostelDetailsPage extends ConsumerWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 8.r,
             offset: const Offset(2, 2),
           ),
@@ -325,10 +326,10 @@ class HostelDetailsPage extends ConsumerWidget {
                   vertical: 8.h,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.05),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: theme.colorScheme.primary.withOpacity(0.2),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
@@ -385,40 +386,13 @@ class HostelDetailsPage extends ConsumerWidget {
   }
 
   Widget _buildLocationMap(HostelModel hostel, ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      height: 300.h,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        color: theme.colorScheme.primary.withOpacity(0.7),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.15),
-            blurRadius: 8.r,
-            offset: const Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.location_on_outlined,
-            size: 50.sp,
-            color: theme.colorScheme.onPrimary,
-          ),
-          SizedBox(height: 15.h),
-          BigText(
-            text: "Location on map",
-            color: theme.colorScheme.onPrimary,
-          ),
-          SizedBox(height: 10.h),
-          SmallText(
-            text: hostel.campus,
-            color: theme.colorScheme.onPrimary,
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SmallText(text: "Location", color: theme.colorScheme.onSurface, size: 16.sp),
+        SizedBox(height: 16.h),
+        HostelMapWidget(hostel: hostel),
+      ],
     );
   }
 }
@@ -439,7 +413,7 @@ class RowIconAndText extends StatelessWidget {
           height: 40.h,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.r),
-            color: theme.colorScheme.primary.withOpacity(0.15),
+            color: theme.colorScheme.primary.withValues(alpha: 0.15),
           ),
           child: Icon(icon, size: 22.sp, color: theme.colorScheme.primary),
         ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
@@ -30,7 +30,7 @@ class UserListItem extends StatelessWidget {
           // AVATAR
       CircleAvatar(
   radius: 20.w,
-  backgroundColor: _getRoleColor(user.role).withOpacity(0.1),
+  backgroundColor: _getRoleColor(user.role).withValues(alpha: 0.1),
   child: user.profileImage != null
       ? ClipOval(
           child: ImageNetwork(
@@ -40,7 +40,7 @@ class UserListItem extends StatelessWidget {
             fitAndroidIos: BoxFit.cover,
             fitWeb: BoxFitWeb.cover,
             backgroundColor: Colors.transparent,
-            onLoading: const CircularProgressIndicator(color: Colors.indigoAccent),
+            onLoading: CircularProgressIndicator(color: theme.colorScheme.primary),
             onError: Icon(Icons.error, color: theme.colorScheme.error),
           ),
         )
@@ -90,7 +90,7 @@ class UserListItem extends StatelessWidget {
                   'Joined ${_formatDate(user.createdAt)}',
                   style: TextStyle(
                     fontSize: 11.sp,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -103,7 +103,7 @@ class UserListItem extends StatelessWidget {
               margin: EdgeInsets.only(right: 60.w),
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: _getRoleColor(user.role).withOpacity(0.1),
+                color: _getRoleColor(user.role).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
@@ -126,7 +126,7 @@ class UserListItem extends StatelessWidget {
                   width: 8.w,
                   height: 8.w,
                   decoration: BoxDecoration(
-                    color: user.isEmailVerified ? const Color(0xFF4CAF50) : theme.colorScheme.onSurfaceVariant,
+                    color: user.isEmailVerified ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -135,7 +135,7 @@ class UserListItem extends StatelessWidget {
                   user.isEmailVerified ? 'Verified' : 'Unverified',
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: user.isEmailVerified ? const Color(0xFF4CAF50) : theme.colorScheme.onSurfaceVariant,
+                    color: user.isEmailVerified ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -184,7 +184,7 @@ class UserListItem extends StatelessWidget {
                     value: 'verify',
                     child: Row(
                       children: [
-                        Icon(Icons.verified, size: 16.w, color: const Color(0xFF4CAF50)),
+                        Icon(Icons.verified, size: 16.w, color: theme.colorScheme.secondary),
                         SizedBox(width: 8.w),
                         const Text('Verify'),
                       ],
@@ -194,7 +194,7 @@ class UserListItem extends StatelessWidget {
                   value: 'message',
                   child: Row(
                     children: [
-                      Icon(Icons.message, size: 16.w, color: const Color(0xFFFF9800)),
+                      Icon(Icons.message, size: 16.w, color: theme.colorScheme.tertiary),
                       SizedBox(width: 8.w),
                       const Text('Send Message'),
                     ],
@@ -205,7 +205,7 @@ class UserListItem extends StatelessWidget {
                     value: 'promote',
                     child: Row(
                       children: [
-                        Icon(Icons.star, size: 16.w, color: const Color(0xFFFF9800)),
+                        Icon(Icons.star, size: 16.w, color: theme.colorScheme.tertiary),
                         SizedBox(width: 8.w),
                         const Text('Promote to Admin'),
                       ],

@@ -1,18 +1,20 @@
-import 'dart:typed_data';
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/booking_provider.dart';
 import 'package:my_hostel_app/backend/provider/g_provider.dart';
+import 'package:my_hostel_app/backend/service/paystack_service.dart';
+import 'package:my_hostel_app/backend/service/paystack_web.dart' as paystack_web;
 import 'package:my_hostel_app/ui/booking/widgets/booking_summary.dart';
+import 'package:my_hostel_app/ui/booking/widgets/paystack_webview_screen.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
 import 'package:my_hostel_app/ui/widgets/elv_button_widget.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
-import 'package:my_hostel_app/backend/model/booking_model.dart';
 
 class PaymentStep extends ConsumerStatefulWidget {
   final HostelModel hostel;
@@ -35,200 +37,128 @@ class PaymentStep extends ConsumerStatefulWidget {
 }
 
 class _PaymentStepState extends ConsumerState<PaymentStep> {
-  XFile? _paymentScreenshot;
-  Uint8List? _previewBytes;
-  final ImagePicker _picker = ImagePicker();
-  bool _isUploading = false;
+  bool _isProcessing = false;
+  final _paystackService = PaystackService();
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 80,
+  DateTime _parseCheckInDate(String dateString) {
+    final parts = dateString.split('/');
+    if (parts.length == 3) {
+      return DateTime(
+        int.parse(parts[2]),
+        int.parse(parts[1]),
+        int.parse(parts[0]),
       );
+    }
+    return DateTime.now();
+  }
 
-      if (image != null) {
-        final bytes = await image.readAsBytes();
-        
-        setState(() {
-          _paymentScreenshot = image;
-          _previewBytes = bytes;
-        });
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
+  Future<void> _pay() async {
+    setState(() => _isProcessing = true);
+
+    // Await the FutureProvider's actual resolved value, not a loading snapshot
+    final currentUser = await ref.read(guaranteedUserProvider.future);
+
+    if (!mounted) return;
+
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: const Text('Please log in to complete booking'),
+            action: SnackBarAction(
+              label: 'Login',
+              onPressed: () {
+                final url = '/booking/${widget.hostel.id}/${widget.room.id}';
+                context.push('/login?redirect=${Uri.encodeComponent(url)}');
+              },
+            ),
+          ),
+        );
+      setState(() => _isProcessing = false);
+      return;
+    }
+
+    try {
+      final reference = _paystackService.generateReference();
+      String? result;
+
+      if (kIsWeb) {
+        // Web: open Paystack's inline popup via dart:html + window.postMessage
+        result = await paystack_web.processPaystackWebPayment(
+          publicKey: PaystackService.publicKey,
+          email: widget.formData['email']!,
+          amountInPesewas: (widget.room.price * 100).toInt(),
+          reference: reference,
+          customerName: widget.formData['fullName']!,
+        );
+      } else {
+        // Mobile: show Paystack inline in a WebView screen
+        final html = _paystackService.buildPaymentHtml(
+          amountInGHS: widget.room.price,
+          email: widget.formData['email']!,
+          customerName: widget.formData['fullName']!,
+          reference: reference,
+        );
+        result = await Navigator.of(context).push<String?>(
+          MaterialPageRoute(
+            builder: (_) => PaystackWebViewScreen(html: html),
+            fullscreenDialog: true,
+          ),
         );
       }
-    }
-  }
 
-  Future<void> _takePhoto() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 80,
+      if (!mounted) return;
+      if (result == null) return; // user cancelled
+
+      final booking = BookingModel(
+        id: 'temp_${DateTime.now().microsecondsSinceEpoch}',
+        hostelId: widget.hostel.id,
+        hostelName: widget.hostel.name,
+        userId: currentUser.id,
+        ownerId: widget.hostel.ownerId,
+        userName: widget.formData['fullName']!,
+        userEmail: widget.formData['email']!,
+        userPhone: widget.formData['phone']!,
+        roomId: widget.room.id,
+        roomType: widget.room.type,
+        checkInDate: _parseCheckInDate(widget.formData['checkInDate']!),
+        totalPrice: widget.room.price,
+        status: 'confirmed',
+        createdAt: DateTime.now(),
+        specialRequests: widget.formData['specialRequests'],
       );
 
-      if (image != null) {
-        final bytes = await image.readAsBytes();
-        
-        setState(() {
-          _paymentScreenshot = image;
-          _previewBytes = bytes;
-        });
-      }
+      await ref.read(bookingCreationProvider.notifier).createBookingWithPaystack(
+        booking: booking,
+        paymentReference: result,
+      );
+
+      if (mounted) widget.onNextStep();
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take photo: $e')),
-        );
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: Text('Failed to complete booking: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
       }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
     }
-  }
-
-
-Future<void> _submitPayment() async {
-  if (_paymentScreenshot == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please upload payment screenshot')),
-    );
-    return;
-  }
-
-  // Use the guaranteed user provider
-  final userAsync = ref.watch(guaranteedUserProvider);
-  
-  if (userAsync.isLoading) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Loading user information...')),
-    );
-    return;
-  }
-
-  final currentUser = userAsync.value;
-  
-  if (currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Please log in to complete booking'),
-        action: SnackBarAction(
-          label: 'Login',
-          onPressed: () {
-            final bookingUrl = '/booking/${widget.hostel.id}/${widget.room.id}';
-            final encodedUrl = Uri.encodeComponent(bookingUrl);
-            context.push('/login?redirect=$encodedUrl');
-          },
-        ),
-      ),
-    );
-    return;
-  }
-
-  setState(() => _isUploading = true);
-
-  try {
-    // Parse check-in date from form data
-    final checkInDate = _parseCheckInDate(widget.formData['checkInDate']!);
-    
-    // Generate a temporary ID (Firestore will generate the real one)
-    final temporaryId = 'temp_${DateTime.now().microsecondsSinceEpoch}';
-    
-
-    // Create booking model with "pending" status
-    final booking = BookingModel(
-      id: temporaryId,
-      hostelId: widget.hostel.id,
-      hostelName: widget.hostel.name,
-      userId: currentUser.id,
-      ownerId: widget.hostel.ownerId,
-      userName: widget.formData['fullName']!,
-      userEmail: widget.formData['email']!,
-      userPhone: widget.formData['phone']!,
-      roomId: widget.room.id,
-      roomType: widget.room.type,
-      checkInDate: checkInDate,
-      confirmationImage: '', // Will be set after upload
-      totalPrice: widget.room.price,
-      status: 'pending',
-      createdAt: DateTime.now(),
-      specialRequests: widget.formData['specialRequests'],
-    );
-
-    // Create booking using the provider
-    final bookingCreation = ref.read(bookingCreationProvider.notifier);
-    await bookingCreation.createBookingWithPayment(
-      booking: booking,
-      paymentScreenshot: _paymentScreenshot!,
-    );
-
-    // Show success message
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Booking submitted successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Move to confirmation step
-      widget.onNextStep();
-    }
-    
-  } catch (e) {
-    
-    String errorMessage = 'Failed to submit booking';
-    if (e.toString().contains('permission-denied')) {
-      errorMessage = 'Firestore permission denied. Check your security rules.';
-    } else if (e.toString().contains('storage')) {
-      errorMessage = 'Failed to upload payment screenshot.';
-    }
-    
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  } finally {
-    setState(() => _isUploading = false);
-  }
-}
-
-
-DateTime _parseCheckInDate(String dateString) {
-  // Parse date from "dd/MM/yyyy" format
-  final parts = dateString.split('/');
-  if (parts.length == 3) {
-    return DateTime(
-      int.parse(parts[2]), // year
-      int.parse(parts[1]), // month
-      int.parse(parts[0]), // day
-    );
-  }
-  // Fallback to current date if parsing fails
-  return DateTime.now();
-}
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final amount = widget.room.price;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Payment Instructions Section
         Expanded(
           flex: 2,
           child: Container(
@@ -238,7 +168,7 @@ DateTime _parseCheckInDate(String dateString) {
               borderRadius: BorderRadius.circular(20.r),
               boxShadow: [
                 BoxShadow(
-                  color: theme.shadowColor.withOpacity(0.08),
+                  color: theme.shadowColor.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(2, 4),
                 ),
@@ -247,209 +177,114 @@ DateTime _parseCheckInDate(String dateString) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BigText(text: "Payment Instructions", color:theme.colorScheme.onSurface, size: 18.sp),
-                SizedBox(height: 10.h),
+                BigText(
+                  text: 'Complete Payment',
+                  color: theme.colorScheme.onSurface,
+                  size: 18.sp,
+                ),
+                SizedBox(height: 6.h),
                 SmallText(
-                  text: "Please make payment and upload screenshot for verification",
-                  color: Colors.blueGrey,
+                  text: 'Your payment is securely processed by Paystack',
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 SizedBox(height: 30.h),
 
-                // Payment Details Card
+                // Order summary
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(24.w),
+                  padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BigText(
-                        text: "Make Payment via Mobile Money",
-                        color: Colors.blue.shade900,
-                        size: 16.sp,
+                      SmallText(
+                        text: 'Order Summary',
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 11.sp,
                       ),
-                      SizedBox(height: 16.h),
-                      _buildPaymentDetail("Provider", "MTN Mobile Money"),
-                      _buildPaymentDetail("Phone Number", "055 123 4567"),
-                      _buildPaymentDetail("Account Name", "HostelHub Ghana"),
-                      _buildPaymentDetail("Reference", "Your Name + Room Booking"),
-                      _buildPaymentDetail(
-                        "Amount", 
-                        "GHS ${widget.room.price.toStringAsFixed(2)}",
-                        isBold: true,
-                      ),
-                      SizedBox(height: 16.h),
-                      Container(
-                        padding: EdgeInsets.all(12.w),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.orange.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info, color: Colors.orange, size: 16.sp),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: SmallText(
-                                text: "Use your name as reference for easy verification",
-                                color: Colors.orange.shade800,
-                                size: 10.sp,
-                              ),
-                            ),
-                          ],
-                        ),
+                      SizedBox(height: 12.h),
+                      _summaryRow(theme, 'Hostel', widget.hostel.name),
+                      _summaryRow(theme, 'Room', widget.room.type),
+                      _summaryRow(theme, 'Check-in', widget.formData['checkInDate'] ?? '—'),
+                      _summaryRow(theme, 'Student', widget.formData['fullName'] ?? '—'),
+                      Divider(height: 24.h, color: theme.dividerColor),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          BigText(
+                            text: 'Total',
+                            color: theme.colorScheme.onSurface,
+                            size: 14.sp,
+                          ),
+                          BigText(
+                            text: 'GHS ${amount.toStringAsFixed(2)}',
+                            color: theme.colorScheme.primary,
+                            size: 16.sp,
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 30.h),
+                SizedBox(height: 24.h),
 
-                // Screenshot Upload Section
-                BigText(text: "Upload Payment Proof", color: theme.colorScheme.onSurface, size: 16.sp),
-                SizedBox(height: 16.h),
-                SmallText(
-                  text: "Upload a clear screenshot of your payment confirmation",
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-                SizedBox(height: 20.h),
-
-                // Image Preview and Upload Buttons
-                if (_previewBytes != null) ...[
-                  Container(
-                    height: 200.h,
-                    width: 400.6.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: theme.shadowColor.withOpacity(0.08)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12.r),
-                      child: Image.memory(
-                        _previewBytes!,
-                        fit: BoxFit.cover,
-                        height: 200.h,
-                        width: 400.6.w,
-                      ),
+                // Payment features
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
                     ),
                   ),
-                  SizedBox(height: 16.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: _takePhoto,
-                        icon: Icon(Icons.camera_alt, size: 16.sp),
-                        label: Text('Take Photo', style: TextStyle(fontSize: 12.sp)),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      ElevatedButton.icon(
-                        onPressed: _pickImage,
-                        icon: Icon(Icons.photo_library, size: 16.sp),
-                        label: Text('Choose from Gallery', style: TextStyle(fontSize: 12.sp)),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                        ),
-                      ),
+                      _featureRow(theme, Icons.lock_outline, 'Secured by Paystack'),
+                      SizedBox(height: 10.h),
+                      _featureRow(theme, Icons.phone_android, 'MTN MoMo · Vodafone Cash · AirtelTigo'),
+                      SizedBox(height: 10.h),
+                      _featureRow(theme, Icons.credit_card, 'Visa · Mastercard · Bank transfer'),
+                      SizedBox(height: 10.h),
+                      _featureRow(theme, Icons.check_circle_outline, 'Instant booking confirmation'),
                     ],
                   ),
-                  SizedBox(height: 8.h),
-                  Center(
-                    child: TextButton(
-                      onPressed: _pickImage,
-                      child: Text(
-                        'Change Image',
-                        style: TextStyle(color: Colors.blue, fontSize: 12.sp),
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  Container(
-                    height: 200.h,
-                    width: 400.6.w,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_upload, size: 40.sp, color: Colors.grey.shade400),
-                        SizedBox(height: 8.h),
-                        SmallText(text: "No screenshot uploaded", color: Colors.grey.shade600),
-                        SizedBox(height: 16.h),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _takePhoto,
-                              icon: Icon(Icons.camera_alt, size: 16.sp),
-                              label: Text('Take Photo', style: TextStyle(fontSize: 12.sp)),
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-                            ElevatedButton.icon(
-                              onPressed: _pickImage,
-                              icon: Icon(Icons.photo_library, size: 16.sp),
-                              label: Text('Choose from Gallery', style: TextStyle(fontSize: 12.sp)),
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
                 SizedBox(height: 40.h),
 
-                // Action Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElvButtonWidget(
-                      text: "Back",
+                      text: 'Back',
                       isPrimary: false,
-                      onPressed: widget.onPreviousStep,
+                      onPressed: _isProcessing ? null : widget.onPreviousStep,
                     ),
-                    ElvButtonWidget(
-                      text: _isUploading ? "Processing..." : "Submit Payment",
-                      isPrimary: _paymentScreenshot != null && !_isUploading,
-                      onPressed: _isUploading ? null : _submitPayment,
-                    ),
+                    _isProcessing
+                        ? const CircularProgressIndicator()
+                        : FilledButton.icon(
+                            onPressed: _pay,
+                            icon: Icon(Icons.payment, size: 18.sp),
+                            label: Text(
+                              'Pay GHS ${amount.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: FilledButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24.w,
+                                vertical: 14.h,
+                              ),
+                            ),
+                          ),
                   ],
                 ),
-
-                // Debug info (remove in production)
-                if (_paymentScreenshot != null) ...[
-                  SizedBox(height: 16.h),
-                  Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: SmallText(
-                      text: "Screenshot ready: ${_paymentScreenshot!.name}",
-                      color: Colors.green.shade800,
-                      size: 10.sp,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -457,7 +292,6 @@ DateTime _parseCheckInDate(String dateString) {
 
         SizedBox(width: 50.w),
 
-        // Summary Section
         Expanded(
           flex: 1,
           child: BookingSummaryCard(hostel: widget.hostel, room: widget.room),
@@ -466,20 +300,30 @@ DateTime _parseCheckInDate(String dateString) {
     );
   }
 
-  Widget _buildPaymentDetail(String title, String value, {bool isBold = false}) {
+  Widget _summaryRow(ThemeData theme, String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SmallText(text: title, color: Colors.blueGrey),
-          SmallText(
-            text: value,
-            color: isBold ? Colors.blue : Colors.black,
-            size: isBold ? 12.sp : 10.sp,
+          SmallText(text: label, color: theme.colorScheme.onSurfaceVariant, size: 12.sp),
+          Flexible(
+            child: SmallText(text: value, color: theme.colorScheme.onSurface, size: 12.sp),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _featureRow(ThemeData theme, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.sp, color: theme.colorScheme.primary),
+        SizedBox(width: 10.w),
+        Flexible(
+          child: SmallText(text: text, color: theme.colorScheme.onSurface, size: 12.sp),
+        ),
+      ],
     );
   }
 }

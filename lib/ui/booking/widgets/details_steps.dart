@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
@@ -140,7 +140,7 @@ class _DetailsStepState extends State<DetailsStep> {
               borderRadius: BorderRadius.circular(20.r),
               boxShadow: [
                 BoxShadow(
-                  color: theme.shadowColor.withOpacity(0.08),
+                  color: theme.shadowColor.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(2, 4),
                 ),
@@ -153,7 +153,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 SizedBox(height: 10.h),
                 SmallText(
                   text: "Please fill in the details below to complete your booking.",
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 SizedBox(height: 30.h),
 
@@ -294,7 +294,7 @@ class _DetailsStepState extends State<DetailsStep> {
             color: theme?.colorScheme.surface,
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
-              color: isValid ? theme?.shadowColor.withOpacity(0.08) ?? Colors.grey.shade300 : Colors.red.shade400,
+              color: isValid ? theme?.shadowColor.withValues(alpha: 0.08) ?? Colors.grey.shade300 : Colors.red.shade400,
               width: isValid ? 1 : 1.5,
             ),
           ),
@@ -311,7 +311,7 @@ class _DetailsStepState extends State<DetailsStep> {
                 border: InputBorder.none,
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: theme?.colorScheme.onSurface.withOpacity(0.5) ?? Colors.grey.shade500,
+                  color: theme?.colorScheme.onSurface.withValues(alpha: 0.5) ?? Colors.grey.shade500,
                   fontSize: 12.sp,
                 ),
                 errorText: isValid ? null : "This field is required",

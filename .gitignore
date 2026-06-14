@@ -48,3 +48,14 @@ app.*.map.json
 /android/keystore.properties
 *.jks
 *.keystore
+
+# Android local config (contains SDK paths and secret keys)
+android/local.properties
+
+# Firebase credentials — regenerate via `flutterfire configure` if needed
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# App secrets (Paystack keys, etc.) — copy app_secrets.example.dart and fill in values
+lib/config/app_secrets.dart

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ElvButtonWidget extends StatefulWidget {
@@ -41,8 +41,8 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
           decoration: widget.isFilter?
            BoxDecoration(
             color: widget.isPrimary
-                ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-                : (_isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface),
+                ? (_isHovered ? primaryColor.withValues(alpha: 0.85) : primaryColor)
+                : (_isHovered ? theme.colorScheme.primary.withValues(alpha: 0.08) : theme.colorScheme.surface),
             border:(_isHovered? Border.all(
               color: widget.isPrimary ? primaryColor : theme.colorScheme.outline,
             ):null),
@@ -50,8 +50,8 @@ class _ElvButtonWidgetState extends State<ElvButtonWidget> {
           ):
            BoxDecoration(
             color: widget.isPrimary
-                ? (_isHovered ? primaryColor.withOpacity(0.85) : primaryColor)
-                : (_isHovered ? theme.colorScheme.primary.withOpacity(0.08) : theme.colorScheme.surface),
+                ? (_isHovered ? primaryColor.withValues(alpha: 0.85) : primaryColor)
+                : (_isHovered ? theme.colorScheme.primary.withValues(alpha: 0.08) : theme.colorScheme.surface),
             border:Border.all(
               color: widget.isPrimary ? primaryColor : theme.colorScheme.outline,
             ),

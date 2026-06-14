@@ -43,6 +43,10 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to show nearby hostels and provide directions.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app uses your location to show nearby hostels and provide directions.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to capture payment proof for hostel bookings.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

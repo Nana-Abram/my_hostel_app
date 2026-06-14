@@ -16,6 +16,8 @@ class HostelModel {
   final double reviewsCount;
   final String ownerId;
   final String? videoTourUrl;
+  final double? latitude;
+  final double? longitude;
 
   HostelModel({
     required this.id,
@@ -33,6 +35,8 @@ class HostelModel {
     required this.status,
     this.ownerId = '',
     this.videoTourUrl,
+    this.latitude,
+    this.longitude,
   });
 
   factory HostelModel.fromMap(Map<String, dynamic> data, String id) {
@@ -52,6 +56,8 @@ class HostelModel {
       status: data['status'],
       ownerId: data['ownerId'] ?? '',
       videoTourUrl: data['videoTourUrl'],
+      latitude: (data['latitude'] as num?)?.toDouble(),
+      longitude: (data['longitude'] as num?)?.toDouble(),
     );
   }
 
@@ -70,7 +76,9 @@ class HostelModel {
       "reviewsCount": reviewsCount,
       "status": status,
       "ownerId": ownerId,
-      if (videoTourUrl != null) "videoTourUrl": videoTourUrl,
+      "videoTourUrl": videoTourUrl,
+      "latitude": latitude,
+      "longitude": longitude,
     };
   }
 

@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isAuth() && role() == 'admin';
+    }
+
+    function isOwner() {
+      return isAuth() && role() == 'hostelOwner';
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      // Users can read their own doc; admins can read all
+      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      // Only the user themselves can create their own doc (set on signup)
+      allow create: if isAuth() && request.auth.uid == userId;
+      // Users can update their own doc; admins can update any
+      // Role field can only be changed by admins
+      allow update: if isAuth() && (
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Config (role PINs, app settings) ─────────────────────────────────────
+
+    match /config/{document} {
+      // Readable without auth so signup can validate PINs before account creation
+      allow read: if true;
+      // Only admins can change config
+      allow write: if isAdmin();
+    }
+
+    // ── Hostels ───────────────────────────────────────────────────────────────
+
+    match /hostels/{hostelId} {
+      allow read: if true;
+      allow create: if isAuth() && (isOwner() || isAdmin())
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    // ── Rooms ─────────────────────────────────────────────────────────────────
+
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow create: if isAuth() && (isOwner() || isAdmin());
+      // Owners/admins can change any field.
+      // Authenticated students may only update occupancy counters (set by the
+      // booking transaction) — they cannot touch price, type, capacity, etc.
+      allow update: if isAuth() && (
+        isOwner() || isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['occupiedSpaces', 'roomStatus', 'available'])
+      );
+      allow delete: if isAuth() && (isOwner() || isAdmin());
+    }
+
+    // ── Bookings ──────────────────────────────────────────────────────────────
+
+    match /bookings/{bookingId} {
+      // Student sees own bookings; hostel owner sees bookings for their hostel; admin sees all
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuth() && (
+        resource.data.userId  == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Notifications (per-user subcollection) ────────────────────────────────
+
+    match /users/{userId}/notifications/{notifId} {
+      allow read:   if isAuth() && request.auth.uid == userId;
+      allow create: if isAuth(); // backend/cloud functions write here
+      allow update: if isAuth() && request.auth.uid == userId;
+      allow delete: if isAuth() && request.auth.uid == userId;
+    }
+  }
+}
