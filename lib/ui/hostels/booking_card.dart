@@ -49,13 +49,14 @@ class _BookingCardWidgetState extends State<BookingCardWidget>
   Widget build(BuildContext context) {
     final hostel = widget.hostel;
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        width: 0.25.sw,
+        width: isMobile ? null : 0.25.sw,
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
           gradient: LinearGradient(

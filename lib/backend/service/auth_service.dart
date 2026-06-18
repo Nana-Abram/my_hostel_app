@@ -100,11 +100,18 @@ class AuthService {
         isEmailVerified: false,
       );
 
-      await _firestore
-          .collection('users')
-          .doc(firebaseUser.uid)
-          .set(userModel.toMap());
-      await firebaseUser.sendEmailVerification();
+      try {
+        await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set(userModel.toMap());
+        await firebaseUser.sendEmailVerification();
+      } catch (e) {
+        // Roll back the Auth account so the user can retry signup later
+        // without hitting email-already-in-use with no Firestore document.
+        try { await firebaseUser.delete(); } catch (_) {}
+        rethrow;
+      }
 
       return userModel;
     } on FirebaseAuthException catch (e) {

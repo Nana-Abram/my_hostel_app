@@ -552,26 +552,28 @@ class _BookingCardState extends State<BookingCard> {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(8.r),
-      child: ImageNetwork(
-        image: imageUrl,
-        height: 150.h,
-        width: double.infinity,
-        fitWeb: BoxFitWeb.cover,
-        fitAndroidIos: BoxFit.cover,
-        onLoading: Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) => ImageNetwork(
+          image: imageUrl,
           height: 150.h,
-          color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
-          child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)),
-        ),
-        onError: Container(
-          height: 150.h,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(8.r),
+          width: constraints.maxWidth,
+          fitWeb: BoxFitWeb.cover,
+          fitAndroidIos: BoxFit.cover,
+          onLoading: Container(
+            height: 150.h,
+            color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
+            child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)),
           ),
-          child: Center(
-            child: Icon(Icons.broken_image_outlined,
-                size: 32.w, color: theme.colorScheme.error),
+          onError: Container(
+            height: 150.h,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Center(
+              child: Icon(Icons.broken_image_outlined,
+                  size: 32.w, color: theme.colorScheme.error),
+            ),
           ),
         ),
       ),

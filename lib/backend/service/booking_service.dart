@@ -268,7 +268,9 @@ class BookingService {
       'confirmed': bookings.docs.where((doc) => doc.data()['status'] == 'confirmed').length,
       'checkedIn': bookings.docs.where((doc) => doc.data()['status'] == 'checked-in').length,
       'todayCheckIn': bookings.docs.where((doc) {
-        final checkIn = (doc.data()['checkInDate'] as Timestamp).toDate();
+        final ts = doc.data()['checkInDate'] as Timestamp?;
+        if (ts == null) return false;
+        final checkIn = ts.toDate();
         return doc.data()['status'] == 'confirmed' &&
             checkIn.year == now.year &&
             checkIn.month == now.month &&

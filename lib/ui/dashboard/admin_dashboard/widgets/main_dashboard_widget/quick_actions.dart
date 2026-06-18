@@ -85,7 +85,7 @@ class QuickActions extends StatelessWidget {
               action.subtitle,
               style: TextStyle(
                 fontSize: 11.sp,
-                color: Colors.blueGrey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],

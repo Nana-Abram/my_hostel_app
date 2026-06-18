@@ -21,6 +21,7 @@ class _HostelCardState extends State<HostelCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return HapticGestureDetector(
       onTap: () {
         context.push('/hostel-details', extra: widget.hostel);
@@ -34,7 +35,7 @@ class _HostelCardState extends State<HostelCard> {
         curve: Curves.easeOut,
         transform: Matrix4.identity()..scale(_isHovered ? 1.02 : 1.0),
         alignment: Alignment.topCenter,
-        width: 0.25.sw,
+        width: isMobile ? null : 0.25.sw,
 
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -55,15 +56,17 @@ class _HostelCardState extends State<HostelCard> {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             //Image + Price Tag
             Stack(
+              fit: StackFit.passthrough,
               children: [
                 widget.hostel.images.isNotEmpty
                     ? EnhancedCachedImage(
                         imageUrl: widget.hostel.images.first,
-                        height: 300.h,
-                        width: 0.25.sw,
+                        height: isMobile ? 190.0 : 300.h,
+                        width: isMobile ? 0.99.sw: 0.25.sw,
                         fit: BoxFit.cover,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(16.r),
@@ -72,8 +75,8 @@ class _HostelCardState extends State<HostelCard> {
                         showShimmer: true,
                       )
                     : Container(
-                        height: 300.h,
-                        width: 0.25.sw,
+                        height: isMobile ? 190.0 : 300.h,
+                        width: isMobile ? null : 0.25.sw,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           borderRadius: BorderRadius.only(

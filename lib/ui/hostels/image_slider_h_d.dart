@@ -9,6 +9,21 @@ class HostelImageCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    if (isMobile) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return EnhancedImageCarousel(
+            images: images,
+            height: 220.0,
+            width: constraints.maxWidth,
+            showIndicators: true,
+            showArrows: false,
+            borderRadius: BorderRadius.circular(16.r),
+          );
+        },
+      );
+    }
     return EnhancedImageCarousel(
       images: images,
       height: 400.h,

@@ -62,28 +62,12 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filter = ref.watch(filterProvider);
-    
-    return Container(
-      width: 0.25.sw,
-      height: 0.75.sh,
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: theme.dividerColor, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
-            blurRadius: 8,
-            spreadRadius: 2,
-            offset: const Offset(2, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    // Shared filter content (no scroll wrapper — parent handles it on mobile)
+    final filterContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
             /// HEADER WITH ACTIVE FILTER COUNT
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -317,8 +301,35 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
 
             SizedBox(height: 30.h),
           ],
-        ),
+        );
+
+    // Mobile: fills the bottom sheet — no fixed size, parent scroll handles it
+    if (isMobile) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+        child: filterContent,
+      );
+    }
+
+    // Desktop: styled fixed-size sidebar with its own internal scroll
+    return Container(
+      width: 0.25.sw,
+      height: 0.75.sh,
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: theme.dividerColor, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(2, 2),
+          ),
+        ],
       ),
+      child: SingleChildScrollView(child: filterContent),
     );
   }
 

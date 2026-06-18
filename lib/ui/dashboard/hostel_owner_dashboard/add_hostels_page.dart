@@ -286,178 +286,169 @@ void _onRoomSaved() {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-       appBar: AppBar(
-        title: Text('Edit Hostel'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _submit,
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    final formContainer = Container(
+      margin: EdgeInsets.all(isMobile ? 16.w : 20.w),
+      width: isMobile ? null : 0.4.sw,
+      padding: EdgeInsets.all(isMobile ? 20.w : 30.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.12),
+            blurRadius: 6,
           ),
         ],
       ),
-      backgroundColor: const Color(0xFFF9FAFB),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SmallText(
+              text: "Create New Hostel",
+              size: 20.sp,
+              color: theme.colorScheme.onSurface,
+            ),
+            SizedBox(height: 20.h),
 
-      body: 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SingleChildScrollView(
-                child: Container(
-                  margin: EdgeInsets.all(20.w),
-                  width: 0.4.sw,
-                  padding: EdgeInsets.all(30.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                      ),
-                    ],
+            _input("Hostel Name", nameCtrl),
+            _input("Campus", campusCtrl),
+            _input("Location", locationCtrl),
+            _coordinatesInput(),
+            _input("Starting Price (GHS)", startPriceCtrl, keyboard: TextInputType.number),
+            _input("Rating", ratingCtrl, keyboard: TextInputType.number),
+            _input("Review Count", reviewCountCtrl, keyboard: TextInputType.number),
+            _input("Owner Name", ownerNameCtrl),
+            _input("Total Rooms", totalRoomsCtrl, keyboard: TextInputType.number),
+            _input("Description", descriptionCtrl, maxLines: 3),
+
+            _buildVideoTourSection(),
+
+            SizedBox(height: 25.h),
+            Text(
+              "Amenities",
+              style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface),
+            ),
+            SizedBox(height: 10.h),
+            Wrap(
+              spacing: 10.w,
+              runSpacing: 10.h,
+              children: [
+                _amenityChip("Wi-Fi"),
+                _amenityChip("Kitchen"),
+                _amenityChip("Study Room"),
+                _amenityChip("Security"),
+                _amenityChip("Laundry"),
+                _amenityChip("Parking"),
+                _amenityChip("Gym"),
+                _amenityChip("Air Conditioning"),
+                _amenityChip("Pool"),
+                _amenityChip("DSTV"),
+              ],
+            ),
+
+            SizedBox(height: 30.h),
+            Text("Upload Images", style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurface)),
+            SizedBox(height: 10.h),
+            isUploading
+                ? const CircularProgressIndicator()
+                : InkWell(
+                    onTap: pickAndUploadImage,
+                    child: ElvButtonWidget(text: "Choose Image"),
                   ),
-                  
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SmallText(
-                          text: "Create New Hostel",
-                          size: 20.sp,
-                          color: Colors.black,
-                        ),
-                        SizedBox(height: 20.h),
-                            
-                        _input("Hostel Name", nameCtrl),
-                        _input("Campus", campusCtrl),
-                        _input("Location", locationCtrl),
-                        _coordinatesInput(),
-                        _input("Starting Price (GHS)", startPriceCtrl,
-                            keyboard: TextInputType.number),
-                        _input("Rating", ratingCtrl,
-                            keyboard: TextInputType.number),
-                        _input("Review Count", reviewCountCtrl,
-                            keyboard: TextInputType.number),
-                        _input("Owner Name", ownerNameCtrl),
-                        _input("Total Rooms", totalRoomsCtrl,
-                            keyboard: TextInputType.number),
-                        _input("Description", descriptionCtrl, maxLines: 3),
 
-                        // --- Video Tour Section ---
-                        _buildVideoTourSection(),
-                            
-                        SizedBox(height: 25.h),
-                                  
-                        Text(
-                          "Amenities",
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                        SizedBox(height: 10.h),
-                        Wrap(
-                          spacing: 10.w,
-                          runSpacing: 10.h,
-                          children: [
-                            _amenityChip("Wi-Fi"),
-                            _amenityChip("Kitchen"),
-                            _amenityChip("Study Room"),
-                            _amenityChip("Security"),
-                            _amenityChip("Laundry"),
-                            _amenityChip("Parking"),
-                            _amenityChip("Gym"),
-                            _amenityChip("Air Conditioning"),
-                            _amenityChip("Pool"),
-                            _amenityChip("DSTV"),
-                          ],
-                        ),
-                            
-                        SizedBox(height: 30.h),
-                        Text("Upload Images", style: TextStyle(fontSize: 14.sp)),
-                        SizedBox(height: 10.h),
-                            
-                        isUploading
-                            ? const CircularProgressIndicator()
-                            : InkWell(
-                              onTap: pickAndUploadImage,
-                              child: ElvButtonWidget(
-                                  text: "Choose Image",
-                                ),
-                            ),
-                            
-                        SizedBox(height: 10.h),
-                        // Image previews
-                    if (images.isNotEmpty) ...[
-                      Text("Selected Images (${images.length})", 
-                          style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
-                      SizedBox(height: 10.h),
-                      Wrap(
-                        spacing: 12.w,
-                        runSpacing: 12.h,
-                        children: images.map((img) => _imagePreview(img)).toList(),
-                      ),
-                    ],
-                            
-                        SizedBox(height: 40.h),
-
-                        // Banner shown while waiting for the owner to add a room
-                        if (_pendingHostelId != null) ...[
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(14.w),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade50,
-                              borderRadius: BorderRadius.circular(10.r),
-                              border: Border.all(color: Colors.orange.shade300),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.info_outline, color: Colors.orange[800], size: 20.sp),
-                                SizedBox(width: 10.w),
-                                Expanded(
-                                  child: Text(
-                                    'Hostel saved! Add at least one room on the right before guests can book it.',
-                                    style: TextStyle(fontSize: 12.sp, color: Colors.orange[900]),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                        ] else ...[
-                          _isLoading
-                              ? const Center(child: CircularProgressIndicator())
-                              : InkWell(
-                                  onTap: _submit,
-                                  child: ElvButtonWidget(
-                                    text: "Submit Hostel",
-                                    isPrimary: true,
-                                  ),
-                                ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+            SizedBox(height: 10.h),
+            if (images.isNotEmpty) ...[
+              Text(
+                "Selected Images (${images.length})",
+                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
-              AdminAddRoomPage(
-                lockedHostelId: _pendingHostelId,
-                lockedHostelName: _pendingHostelName,
-                onRoomSaved: _onRoomSaved,
+              SizedBox(height: 10.h),
+              Wrap(
+                spacing: 12.w,
+                runSpacing: 12.h,
+                children: images.map((img) => _imagePreview(img)).toList(),
               ),
             ],
-          ),
+
+            SizedBox(height: 40.h),
+
+            if (_pendingHostelId != null) ...[
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(14.w),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: Colors.orange.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.orange[800], size: 20.sp),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        isMobile
+                            ? 'Hostel saved! Add at least one room below before guests can book it.'
+                            : 'Hostel saved! Add at least one room on the right before guests can book it.',
+                        style: TextStyle(fontSize: 12.sp, color: Colors.orange[900]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.h),
+            ] else ...[
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : InkWell(
+                      onTap: _submit,
+                      child: ElvButtonWidget(text: "Submit Hostel", isPrimary: true),
+                    ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    final roomPanel = AdminAddRoomPage(
+      lockedHostelId: _pendingHostelId,
+      lockedHostelName: _pendingHostelName,
+      onRoomSaved: _onRoomSaved,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Hostel'),
+        actions: [
+          IconButton(icon: const Icon(Icons.save), onPressed: _submit),
+        ],
+      ),
+      body: isMobile
+          ? SingleChildScrollView(
+              child: Column(children: [formContainer, roomPanel]),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SingleChildScrollView(child: formContainer),
+                roomPanel,
+              ],
+            ),
     );
   }
 
-   Widget _imagePreview(String imageUrl) {
+  Widget _imagePreview(String imageUrl) {
+    final theme = Theme.of(context);
     return Container(
       width: 140.w,
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: theme.colorScheme.outline),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
@@ -480,10 +471,14 @@ void _onRoomSaved() {
   }
 
   Widget _coordinatesInput() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("GPS Coordinates (Optional — for map view)"),
+        Text(
+          "GPS Coordinates (Optional — for map view)",
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
         SizedBox(height: 6.h),
         Row(
           children: [
@@ -525,7 +520,7 @@ void _onRoomSaved() {
         SizedBox(height: 6.h),
         Text(
           "Find coordinates at maps.google.com — right-click the location and copy the numbers shown.",
-          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 10.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
         ),
         SizedBox(height: 20.h),
       ],
@@ -539,10 +534,11 @@ void _onRoomSaved() {
     int maxLines = 1,
     TextInputType keyboard = TextInputType.text,
   }) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+        Text(label, style: TextStyle(color: theme.colorScheme.onSurface)),
         SizedBox(height: 6.h),
         TextFormField(
           controller: ctrl,
@@ -563,25 +559,22 @@ void _onRoomSaved() {
 
   //  Amenity Chip Widget
   Widget _amenityChip(String title) {
+    final theme = Theme.of(context);
     final selected = amenities.contains(title);
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selected ? amenities.remove(title) : amenities.add(title);
-        });
-      },
+      onTap: () => setState(() => selected ? amenities.remove(title) : amenities.add(title)),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: selected ? Colors.blueAccent : Colors.grey.shade200,
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Text(
           title,
           style: TextStyle(
             fontSize: 12.sp,
-            color: selected ? Colors.white : Colors.black87,
+            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
           ),
         ),
       ),
@@ -590,6 +583,7 @@ void _onRoomSaved() {
 
   /// Video Tour section: pick from gallery OR paste a URL
   Widget _buildVideoTourSection() {
+    final theme = Theme.of(context);
     final hasVideo = videoTourUrlCtrl.text.trim().isNotEmpty;
 
     return Column(
@@ -597,7 +591,7 @@ void _onRoomSaved() {
       children: [
         Text(
           "Video Tour (Optional)",
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface),
         ),
         SizedBox(height: 10.h),
 
@@ -630,7 +624,7 @@ void _onRoomSaved() {
                       SizedBox(height: 4.h),
                       Text(
                         videoTourUrlCtrl.text.trim(),
-                        style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 10.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

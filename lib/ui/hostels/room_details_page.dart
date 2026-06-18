@@ -412,7 +412,7 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                   Text(
                                     widget.room.type,
                                     style: TextStyle(
-                                      fontSize: 26.sp,
+                                      fontSize: MediaQuery.sizeOf(context).width < 600 ? 18.sp : 26.sp,
                                       fontWeight: FontWeight.bold,
                                       color: theme.colorScheme.onSurface,
                                     ),
@@ -420,8 +420,10 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                   SizedBox(height: 8.h),
                                   Text(
                                     widget.hostel.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 15.sp,
+                                      fontSize: MediaQuery.sizeOf(context).width < 600 ? 13.sp : 15.sp,
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),

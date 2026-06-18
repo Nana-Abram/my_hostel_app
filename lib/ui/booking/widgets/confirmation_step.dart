@@ -100,10 +100,13 @@ class ConfirmationStep extends StatelessWidget {
             ),
             SizedBox(height: 30.h),
 
-            ElvButtonWidget(
-              text: "Back to Home",
-              isPrimary: true,
-              onPressed: onComplete,
+            SizedBox(
+              width: double.infinity,
+              child: ElvButtonWidget(
+                text: "Back to Home",
+                isPrimary: true,
+                onPressed: onComplete,
+              ),
             ),
           ],
         ),
@@ -116,9 +119,17 @@ class ConfirmationStep extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SmallText(text: title, color: Colors.blueGrey),
-          SmallText(text: value, color: Colors.black),
+          const SizedBox(width: 12),
+          Flexible(
+            child: SmallText(
+              text: value,
+              color: Colors.black,
+              overFlow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

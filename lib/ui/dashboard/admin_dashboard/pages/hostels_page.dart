@@ -55,6 +55,7 @@ class _HostelsManagementPageState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
@@ -69,7 +70,7 @@ class _HostelsManagementPageState
             builder: (context, ref, child) {
               final statsAsync = ref.watch(hostelsStatsProvider);
               return statsAsync.when(
-                data: (stats) => _buildHostelsStats(stats, theme),
+                data: (stats) => _buildHostelsStats(stats, theme, isMobile),
                 loading: () => _buildStatsLoading(theme),
                 error: (error, stack) => _buildStatsError(error, theme),
               );
@@ -80,7 +81,7 @@ class _HostelsManagementPageState
           _buildSearchAndFilters(theme),
           SizedBox(height: 16.h),
 
-          _buildHostelsList(theme),
+          _buildHostelsList(theme, isMobile),
         ],
       ),
     );
@@ -114,50 +115,41 @@ class _HostelsManagementPageState
 
   // ── Stats ─────────────────────────────────────────────────────────────────
 
-  Widget _buildHostelsStats(Map<String, dynamic> stats, ThemeData theme) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            theme: theme,
-            title: 'Total Hostels',
-            value: '${stats['totalHostels'] ?? 0}',
-            icon: Icons.business,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildStatCard(
-            theme: theme,
-            title: 'Verified',
-            value: '${stats['verifiedHostels'] ?? 0}',
-            icon: Icons.verified,
-            color: theme.colorScheme.secondary,
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildStatCard(
-            theme: theme,
-            title: 'Pending',
-            value: '${stats['pendingHostels'] ?? 0}',
-            icon: Icons.pending,
-            color: theme.colorScheme.tertiary,
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildStatCard(
-            theme: theme,
-            title: 'Suspended',
-            value: '${stats['suspendedHostels'] ?? 0}',
-            icon: Icons.pause_circle_outline,
-            color: theme.colorScheme.error,
-          ),
-        ),
-      ],
-    );
+  Widget _buildHostelsStats(Map<String, dynamic> stats, ThemeData theme, bool isMobile) {
+    final cards = [
+      _buildStatCard(theme: theme, title: 'Total Hostels', value: '${stats['totalHostels'] ?? 0}', icon: Icons.business, color: theme.colorScheme.primary),
+      _buildStatCard(theme: theme, title: 'Verified', value: '${stats['verifiedHostels'] ?? 0}', icon: Icons.verified, color: theme.colorScheme.secondary),
+      _buildStatCard(theme: theme, title: 'Pending', value: '${stats['pendingHostels'] ?? 0}', icon: Icons.pending, color: theme.colorScheme.tertiary),
+      _buildStatCard(theme: theme, title: 'Suspended', value: '${stats['suspendedHostels'] ?? 0}', icon: Icons.pause_circle_outline, color: theme.colorScheme.error),
+    ];
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(children: [
+            Expanded(child: cards[0]),
+            SizedBox(width: 12.w),
+            Expanded(child: cards[1]),
+          ]),
+          SizedBox(height: 12.h),
+          Row(children: [
+            Expanded(child: cards[2]),
+            SizedBox(width: 12.w),
+            Expanded(child: cards[3]),
+          ]),
+        ],
+      );
+    }
+
+    return Row(children: [
+      Expanded(child: cards[0]),
+      SizedBox(width: 12.w),
+      Expanded(child: cards[1]),
+      SizedBox(width: 12.w),
+      Expanded(child: cards[2]),
+      SizedBox(width: 12.w),
+      Expanded(child: cards[3]),
+    ]);
   }
 
   Widget _buildStatCard({
@@ -365,7 +357,7 @@ class _HostelsManagementPageState
 
   // ── Hostels list ──────────────────────────────────────────────────────────
 
-  Widget _buildHostelsList(ThemeData theme) {
+  Widget _buildHostelsList(ThemeData theme, bool isMobile) {
     return Consumer(
       builder: (context, ref, child) {
         final hostelsAsync = ref.watch(hostelsProvider);
@@ -377,54 +369,56 @@ class _HostelsManagementPageState
 
             return Column(
               children: [
-                // Table header
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16.w, vertical: 12.h),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(12.r)),
-                    border: Border(
-                      bottom: BorderSide(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                // Table header (desktop only)
+                if (!isMobile)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16.w, vertical: 12.h),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(12.r)),
+                      border: Border(
+                        bottom: BorderSide(
+                            color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 60.w),
+                        Expanded(
+                          flex: 2,
+                          child: Text('Hostel Info',
+                              style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ),
+                        Expanded(
+                          child: Text('Rooms',
+                              style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ),
+                        Expanded(
+                          child: Text('Status',
+                              style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ),
+                        SizedBox(width: 80.w),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 60.w),
-                      Expanded(
-                        flex: 2,
-                        child: Text('Hostel Info',
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.onSurfaceVariant)),
-                      ),
-                      Expanded(
-                        child: Text('Rooms',
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.onSurfaceVariant)),
-                      ),
-                      Expanded(
-                        child: Text('Status',
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.onSurfaceVariant)),
-                      ),
-                      SizedBox(width: 80.w),
-                    ],
-                  ),
-                ),
 
                 Container(
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(12)),
+                    borderRadius: isMobile
+                        ? BorderRadius.circular(12.r)
+                        : const BorderRadius.vertical(bottom: Radius.circular(12)),
                     boxShadow: [
                       BoxShadow(
                         color: theme.shadowColor.withValues(alpha: 0.05),
@@ -435,7 +429,7 @@ class _HostelsManagementPageState
                   ),
                   child: Column(
                     children: filtered
-                        .map((h) => _buildHostelListItem(h, theme))
+                        .map((h) => _buildHostelListItem(h, theme, isMobile))
                         .toList(),
                   ),
                 ),
@@ -449,71 +443,210 @@ class _HostelsManagementPageState
     );
   }
 
-  Widget _buildHostelListItem(HostelModel hostel, ThemeData theme) {
-    final imageUrl =
-        hostel.images.isNotEmpty ? hostel.images.first : null;
+  Widget _buildHostelListItem(HostelModel hostel, ThemeData theme, bool isMobile) {
+    final imageUrl = hostel.images.isNotEmpty ? hostel.images.first : null;
+    final statusColor = _statusColor(hostel.status, theme);
 
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        border: Border(
-            bottom: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.15))),
+    final imgSize = isMobile ? 100.w : 60.w;
+    final imgHeight = isMobile ? 100.h : 60.h;
+
+    final thumbnail = ClipRRect(
+      borderRadius: BorderRadius.circular(10.r),
+      child: SizedBox(
+        height: imgHeight,
+        width: imgSize,
+        child: imageUrl != null
+            ? ImageNetwork(
+                key: ValueKey(imageUrl),
+                image: imageUrl,
+                height: imgHeight,
+                width: imgSize,
+                fitWeb: BoxFitWeb.cover,
+                fitAndroidIos: BoxFit.cover,
+                onLoading: Container(
+                  color: theme.colorScheme.surfaceVariant,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: theme.colorScheme.primary),
+                  ),
+                ),
+                onError: Container(
+                  color: theme.colorScheme.surfaceVariant,
+                  child: Icon(Icons.broken_image_outlined,
+                      color: theme.colorScheme.onSurfaceVariant),
+                ),
+              )
+            : Container(
+                color: theme.colorScheme.surfaceVariant,
+                child: Icon(Icons.business_outlined,
+                    color: theme.colorScheme.onSurfaceVariant),
+              ),
       ),
-      child: Row(
-        children: [
-          // HOSTEL IMAGE
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
-            child: SizedBox(
-              height: 60.h,
-              width: 60.w,
-              child: imageUrl != null
-                  ? ImageNetwork(
-                      key: ValueKey(imageUrl),
-                      image: imageUrl,
-                      height: 60.h,
-                      width: 60.w,
-                      fitWeb: BoxFitWeb.cover,
-                      fitAndroidIos: BoxFit.cover,
-                      onLoading: Container(
-                        color: theme.colorScheme.surfaceVariant,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: theme.colorScheme.primary,
-                          ),
+    );
+
+    final actionMenu = PopupMenuButton<String>(
+      onSelected: (value) => _handleHostelAction(value, hostel),
+      color: theme.colorScheme.surface,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'view',
+          child: Row(children: [
+            Icon(Icons.visibility, size: 16.w,
+                color: theme.colorScheme.onSurfaceVariant),
+            SizedBox(width: 8.w),
+            Text('View Details',
+                style: TextStyle(color: theme.colorScheme.onSurface)),
+          ]),
+        ),
+        if (hostel.status.toLowerCase() == 'pending')
+          PopupMenuItem(
+            value: 'verify',
+            child: Row(children: [
+              Icon(Icons.verified, size: 16.w,
+                  color: theme.colorScheme.secondary),
+              SizedBox(width: 8.w),
+              Text('Verify',
+                  style: TextStyle(color: theme.colorScheme.onSurface)),
+            ]),
+          ),
+        PopupMenuItem(
+          value: 'suspend',
+          child: Row(children: [
+            Icon(Icons.pause_circle, size: 16.w,
+                color: theme.colorScheme.tertiary),
+            SizedBox(width: 8.w),
+            Text('Suspend',
+                style: TextStyle(color: theme.colorScheme.onSurface)),
+          ]),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(children: [
+            Icon(Icons.delete, size: 16.w, color: theme.colorScheme.error),
+            SizedBox(width: 8.w),
+            Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
+          ]),
+        ),
+      ],
+      child: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Icon(Icons.more_vert, size: 16.w,
+            color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+
+    final statusBadge = Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        _statusLabel(hostel.status),
+        style: TextStyle(
+            fontSize: 10.sp, color: statusColor, fontWeight: FontWeight.w600),
+      ),
+    );
+
+    final border = BoxDecoration(
+      border: Border(
+          bottom: BorderSide(
+              color: theme.colorScheme.outline.withValues(alpha: 0.15))),
+    );
+
+    if (isMobile) {
+      return Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: border,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            thumbnail,
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          hostel.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface),
                         ),
                       ),
-                      onError: Container(
-                        color: theme.colorScheme.surfaceVariant,
-                        child: Icon(Icons.broken_image_outlined,
-                            color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    )
-                  : Container(
-                      color: theme.colorScheme.surfaceVariant,
-                      child: Icon(Icons.business_outlined,
-                          color: theme.colorScheme.onSurfaceVariant),
-                    ),
+                      SizedBox(width: 8.w),
+                      statusBadge,
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(hostel.location,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 11.sp,
+                          color: theme.colorScheme.onSurfaceVariant)),
+                  Text('Owner: ${hostel.ownerName}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 10.sp,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, size: 12, color: Color(0xFFFFC107)),
+                      SizedBox(width: 2.w),
+                      Text(hostel.rating.toStringAsFixed(1),
+                          style: TextStyle(
+                              fontSize: 10.sp,
+                              color: const Color(0xFFFFC107),
+                              fontWeight: FontWeight.w600)),
+                      SizedBox(width: 8.w),
+                      Text('${hostel.totalRooms.toInt()} rooms',
+                          style: TextStyle(
+                              fontSize: 10.sp,
+                              color: theme.colorScheme.onSurfaceVariant)),
+                      const Spacer(),
+                      actionMenu,
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(width: 12.w),
+          ],
+        ),
+      );
+    }
 
-          // HOSTEL INFO
+    // Desktop: table row layout
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: border,
+      child: Row(
+        children: [
+          thumbnail,
+          SizedBox(width: 12.w),
           Expanded(
             flex: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  hostel.name,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+                Text(hostel.name,
+                    style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface)),
                 SizedBox(height: 2.h),
                 Text(hostel.location,
                     style: TextStyle(
@@ -525,122 +658,27 @@ class _HostelsManagementPageState
                         fontSize: 10.sp,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
                 SizedBox(height: 4.h),
-                Row(
-                  children: [
-                    const Icon(Icons.star, size: 12, color: Color(0xFFFFC107)),
-                    SizedBox(width: 2.w),
-                    Text(
-                      hostel.rating.toStringAsFixed(1),
+                Row(children: [
+                  const Icon(Icons.star, size: 12, color: Color(0xFFFFC107)),
+                  SizedBox(width: 2.w),
+                  Text(hostel.rating.toStringAsFixed(1),
                       style: TextStyle(
-                        fontSize: 10.sp,
-                        color: const Color(0xFFFFC107),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+                          fontSize: 10.sp,
+                          color: const Color(0xFFFFC107),
+                          fontWeight: FontWeight.w600)),
+                ]),
               ],
             ),
           ),
-
-          // ROOMS
           Expanded(
-            child: Text(
-              '${hostel.totalRooms.toInt()}',
-              style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface),
-            ),
-          ),
-
-          // STATUS badge
-          Expanded(
-            child: Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: _statusColor(hostel.status, theme).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                    color:
-                        _statusColor(hostel.status, theme).withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                _statusLabel(hostel.status),
-                textAlign: TextAlign.center,
+            child: Text('${hostel.totalRooms.toInt()}',
                 style: TextStyle(
-                  fontSize: 10.sp,
-                  color: _statusColor(hostel.status, theme),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface)),
           ),
-
-          // ACTION MENU
-          SizedBox(
-            width: 80.w,
-            child: PopupMenuButton<String>(
-              onSelected: (value) => _handleHostelAction(value, hostel),
-              color: theme.colorScheme.surface,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'view',
-                  child: Row(children: [
-                    Icon(Icons.visibility, size: 16.w,
-                        color: theme.colorScheme.onSurfaceVariant),
-                    SizedBox(width: 8.w),
-                    Text('View Details',
-                        style:
-                            TextStyle(color: theme.colorScheme.onSurface)),
-                  ]),
-                ),
-                if (hostel.status.toLowerCase() == 'pending')
-                  PopupMenuItem(
-                    value: 'verify',
-                    child: Row(children: [
-                      Icon(Icons.verified, size: 16.w,
-                          color: theme.colorScheme.secondary),
-                      SizedBox(width: 8.w),
-                      Text('Verify',
-                          style: TextStyle(
-                              color: theme.colorScheme.onSurface)),
-                    ]),
-                  ),
-                PopupMenuItem(
-                  value: 'suspend',
-                  child: Row(children: [
-                    Icon(Icons.pause_circle, size: 16.w,
-                        color: theme.colorScheme.tertiary),
-                    SizedBox(width: 8.w),
-                    Text('Suspend',
-                        style:
-                            TextStyle(color: theme.colorScheme.onSurface)),
-                  ]),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(children: [
-                    Icon(Icons.delete, size: 16.w,
-                        color: theme.colorScheme.error),
-                    SizedBox(width: 8.w),
-                    Text('Delete',
-                        style: TextStyle(color: theme.colorScheme.error)),
-                  ]),
-                ),
-              ],
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Icon(Icons.more_vert, size: 16.w,
-                    color: theme.colorScheme.onSurfaceVariant),
-              ),
-            ),
-          ),
+          Expanded(child: statusBadge),
+          SizedBox(width: 80.w, child: actionMenu),
         ],
       ),
     );

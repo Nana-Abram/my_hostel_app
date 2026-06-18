@@ -55,12 +55,14 @@ class BookingSummaryCard extends StatelessWidget {
                       topLeft: Radius.circular(20.r),
                       topRight: Radius.circular(20.r),
                     ),
-                    child: ImageNetwork(
-                      image: roomImage,
-                      height: 200.h,
-                      width: 450.w,
-                      fitAndroidIos: BoxFit.cover,
-                      fitWeb: BoxFitWeb.cover,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => ImageNetwork(
+                        image: roomImage,
+                        height: 200.h,
+                        width: constraints.maxWidth,
+                        fitAndroidIos: BoxFit.cover,
+                        fitWeb: BoxFitWeb.cover,
+                      ),
                     ),
                   )
                 : Center(

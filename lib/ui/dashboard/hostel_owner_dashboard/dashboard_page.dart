@@ -157,45 +157,22 @@ Widget _buildQuickStats({
   required int pendingRequests,
   required double totalEarnings,
 }) {
-  return Wrap(
-    spacing: 16.w,          // horizontal spacing
-    runSpacing: 16.h,       // vertical spacing
+  return Column(
     children: [
-      SizedBox(
-        width: 0.48.sw,     // controls width of each item (ScreenUtil)
-        child: _buildStatCard(
-          title: 'Total Hostels',
-          value: totalHostels.toString(),
-          icon: Icons.business,
-          color: Colors.blue,
-        ),
+      Row(
+        children: [
+          Expanded(child: _buildStatCard(title: 'Total Hostels', value: totalHostels.toString(), icon: Icons.business, color: Colors.blue)),
+          SizedBox(width: 16.w),
+          Expanded(child: _buildStatCard(title: 'Active Bookings', value: activeBookings.toString(), icon: Icons.calendar_today, color: Colors.green)),
+        ],
       ),
-      SizedBox(
-        width: 0.48.sw,
-        child: _buildStatCard(
-          title: 'Active Bookings',
-          value: activeBookings.toString(),
-          icon: Icons.calendar_today,
-          color: Colors.green,
-        ),
-      ),
-      SizedBox(
-        width: 0.48.sw,
-        child: _buildStatCard(
-          title: 'Pending Requests',
-          value: pendingRequests.toString(),
-          icon: Icons.pending_actions,
-          color: Colors.orange,
-        ),
-      ),
-      SizedBox(
-        width: 0.48.sw,
-        child: _buildStatCard(
-          title: 'Total Earnings',
-          value: 'GHS ${totalEarnings.toStringAsFixed(2)}',
-          icon: Icons.attach_money,
-          color: Colors.purple,
-        ),
+      SizedBox(height: 16.h),
+      Row(
+        children: [
+          Expanded(child: _buildStatCard(title: 'Pending Requests', value: pendingRequests.toString(), icon: Icons.pending_actions, color: Colors.orange)),
+          SizedBox(width: 16.w),
+          Expanded(child: _buildStatCard(title: 'Total Earnings', value: 'GHS ${totalEarnings.toStringAsFixed(0)}', icon: Icons.attach_money, color: Colors.purple)),
+        ],
       ),
     ],
   );
@@ -294,6 +271,7 @@ Widget _buildStatCard({
   // ---------------------------------------------------------------------------
 
   Widget _buildOccupancySection(List<String> hostelIds) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     if (hostelIds.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,36 +322,35 @@ Widget _buildStatCard({
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Summary cards — reuse existing _buildStatCard style
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        title: 'Total Spaces',
-                        value: totalSpaces.toString(),
-                        icon: Icons.hotel,
-                        color: Colors.blue,
+                if (isMobile)
+                  Wrap(
+                    spacing: 12.w,
+                    runSpacing: 12.h,
+                    children: [
+                      SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 40.w - 12.w) / 2,
+                        child: _buildStatCard(title: 'Total Spaces', value: totalSpaces.toString(), icon: Icons.hotel, color: Colors.blue),
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: _buildStatCard(
-                        title: 'Occupied',
-                        value: occupied.toString(),
-                        icon: Icons.person,
-                        color: Colors.red,
+                      SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 40.w - 12.w) / 2,
+                        child: _buildStatCard(title: 'Occupied', value: occupied.toString(), icon: Icons.person, color: Colors.red),
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: _buildStatCard(
-                        title: 'Available',
-                        value: available.toString(),
-                        icon: Icons.meeting_room,
-                        color: Colors.green,
+                      SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 40.w - 12.w) / 2,
+                        child: _buildStatCard(title: 'Available', value: available.toString(), icon: Icons.meeting_room, color: Colors.green),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(child: _buildStatCard(title: 'Total Spaces', value: totalSpaces.toString(), icon: Icons.hotel, color: Colors.blue)),
+                      SizedBox(width: 12.w),
+                      Expanded(child: _buildStatCard(title: 'Occupied', value: occupied.toString(), icon: Icons.person, color: Colors.red)),
+                      SizedBox(width: 12.w),
+                      Expanded(child: _buildStatCard(title: 'Available', value: available.toString(), icon: Icons.meeting_room, color: Colors.green)),
+                    ],
+                  ),
                 SizedBox(height: 16.h),
 
                 // Occupancy rate bar

@@ -1,1 +1,45 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"flutter-complete-app-d3215","appId":"1:748344550395:android:3233eca75c8dcfdb36615e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"flutter-complete-app-d3215","configurations":{"android":"1:748344550395:android:3233eca75c8dcfdb36615e","ios":"1:748344550395:ios:0da60a5b7ececd0036615e","web":"1:748344550395:web:faee4b71890e51ec36615e"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "hostelhub-ng",
+          "appId": "1:257885159178:android:787e179ff083880b7e84f3",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "hostelhub-ng",
+          "configurations": {
+            "android": "1:257885159178:android:787e179ff083880b7e84f3",
+            "ios": "1:257885159178:ios:f4d88e4c3ff323577e84f3",
+            "web": "1:257885159178:web:e931a9775923b2237e84f3"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "site": "hostelhub-gh",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

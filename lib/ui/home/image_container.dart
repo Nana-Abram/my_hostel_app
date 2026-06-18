@@ -52,6 +52,7 @@ class _ImageContainerState extends State<ImageContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return CarouselSlider.builder(
       carouselController: _carouselController,
       itemCount: _images.length,
@@ -63,8 +64,8 @@ class _ImageContainerState extends State<ImageContainer> {
         );
       },
       options: CarouselOptions(
-        height: 420.h,
-        viewportFraction: 0.32,
+        height: isMobile ? 220.0 : 420.h,
+        viewportFraction: isMobile ? 0.72 : 0.32,
         initialPage: 0,
         enableInfiniteScroll: true,
         autoPlay: false, // Handled by timer for better control

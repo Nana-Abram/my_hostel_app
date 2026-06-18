@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,52 +11,55 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const BookingAppBar({super.key});
 
   @override
+  Size get preferredSize => Size.fromHeight(120.h);
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
     final currentUser = authState.value;
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
-    return PreferredSize(
-      preferredSize: Size.fromHeight(120.h),
-      child: Container(
-        height: 120.h,
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withValues(alpha: 0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Logo and brand name
-            GestureDetector(
-              onTap: () => context.go('/'),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'H',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.sp,
-                          color: Colors.white,
-                        ),
+    return Container(
+      height: isMobile ? 64 : 120.h,
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 40.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              children: [
+                Container(
+                  width: isMobile ? 32 : 40.w,
+                  height: isMobile ? 32 : 40.w,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    borderRadius: BorderRadius.circular(isMobile ? 8 : 10.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'H',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 16 : 20.sp,
+                        color: Colors.white,
                       ),
                     ),
                   ),
+                ),
+                if (!isMobile) ...[
                   SizedBox(width: 10.w),
                   Text(
                     "HostelHub",
@@ -68,65 +71,86 @@ class BookingAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
+          ),
 
-            // Auth section - shows avatar if logged in, buttons if not
-            _buildAuthSection(context, currentUser),
-          ],
-        ),
+          // Auth section
+          _buildAuthSection(context, currentUser, isMobile),
+        ],
       ),
     );
   }
 
-  Widget _buildAuthSection(BuildContext context, UserModel? currentUser) {
+  Widget _buildAuthSection(BuildContext context, UserModel? currentUser, bool isMobile) {
     final theme = Theme.of(context);
+
     if (currentUser == null) {
-      // Show auth buttons when not logged in
       return Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ElvButtonWidget(
-            text: "Login", 
-            onPressed: () {
-              context.push('/login');
-            },
-          ),
-          SizedBox(width: 16.w),
-          ElvButtonWidget(
-            text: "Sign Up",
-            onPressed: () {
-              context.push('/signup');
-            },
-            isPrimary: true,
-          ),
+          isMobile
+              ? _mobileButton(context, "Login", false, () => context.push('/login'))
+              : ElvButtonWidget(text: "Login", onPressed: () => context.push('/login')),
+          SizedBox(width: isMobile ? 8 : 16.w),
+          isMobile
+              ? _mobileButton(context, "Sign Up", true, () => context.push('/signup'))
+              : ElvButtonWidget(
+                  text: "Sign Up",
+                  onPressed: () => context.push('/signup'),
+                  isPrimary: true,
+                ),
         ],
       );
     }
 
-    // Show user avatar when logged in
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'Hi, ${currentUser.fullName.split(' ').first}',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: theme.colorScheme.onSurface,
+        if (!isMobile) ...[
+          Text(
+            'Hi, ${currentUser.fullName.split(' ').first}',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
-        ),
-        SizedBox(width: 12.w),
+          SizedBox(width: 12.w),
+        ],
         UserAvatar(
           user: currentUser,
-          size: 40,
-          onTap: () {
-            // Optional: Navigate to profile
-            // context.push('/profile');
-          },
+          size: isMobile ? 32 : 40,
+          onTap: () {},
         ),
       ],
     );
   }
 
-    @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Widget _mobileButton(BuildContext context, String text, bool isPrimary, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: isPrimary ? theme.colorScheme.primary : Colors.transparent,
+          border: Border.all(
+            color: isPrimary ? theme.colorScheme.primary : theme.colorScheme.outline,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 }

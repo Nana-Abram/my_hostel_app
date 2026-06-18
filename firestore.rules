@@ -39,8 +39,9 @@ service cloud.firestore {
     // ── Config (role PINs, app settings) ─────────────────────────────────────
 
     match /config/{document} {
-      // Readable without auth so signup can validate PINs before account creation
-      allow read: if true;
+      // Auth required — _validateRolePin is called while the user is signed in
+      // (Firebase Auth token exists even before the Firestore user doc is created).
+      allow read: if isAuth();
       // Only admins can change config
       allow write: if isAdmin();
     }
@@ -61,12 +62,16 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuth() && (isOwner() || isAdmin());
       // Owners/admins can change any field.
-      // Authenticated students may only update occupancy counters (set by the
-      // booking transaction) — they cannot touch price, type, capacity, etc.
+      // Authenticated users (booking transaction) may only touch the three
+      // occupancy counters, and only by ±1 — prevents bulk manipulation.
       allow update: if isAuth() && (
         isOwner() || isAdmin() ||
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['occupiedSpaces', 'roomStatus', 'available'])
+        (request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['occupiedSpaces', 'roomStatus', 'available'])
+         && request.resource.data.occupiedSpaces is int
+         && request.resource.data.occupiedSpaces >= 0
+         && request.resource.data.occupiedSpaces >= resource.data.occupiedSpaces - 1
+         && request.resource.data.occupiedSpaces <= resource.data.occupiedSpaces + 1)
       );
       allow delete: if isAuth() && (isOwner() || isAdmin());
     }
@@ -81,10 +86,16 @@ service cloud.firestore {
         isAdmin()
       );
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      // Students may only cancel their own booking (set status to 'cancelled')
+      // or update non-sensitive fields. Status/payment changes require owner or admin.
       allow update: if isAuth() && (
-        resource.data.userId  == request.auth.uid ||
-        resource.data.ownerId == request.auth.uid ||
-        isAdmin()
+        (resource.data.userId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'cancellationReason', 'specialRequests'])
+          && (request.resource.data.status == 'cancelled'
+              || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])))
+        || resource.data.ownerId == request.auth.uid
+        || isAdmin()
       );
       allow delete: if isAdmin();
     }

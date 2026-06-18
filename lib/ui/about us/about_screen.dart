@@ -24,8 +24,6 @@ class AboutScreen extends StatelessWidget {
           SizedBox(height: r.spacingXXL),
           _buildFeatures(r, theme),
           SizedBox(height: r.spacingXXL),
-          _buildTeam(context, r, theme),
-          SizedBox(height: r.spacingXXL),
           _buildStats(r, theme),
           SizedBox(height: r.spacingXL),
           _buildCTA(context, r, theme),
@@ -256,90 +254,6 @@ class AboutScreen extends StatelessWidget {
   }
 
   // ── Team ──────────────────────────────────────────────────────────────────
-
-  Widget _buildTeam(BuildContext context, Responsive r, ThemeData theme) {
-    final team = [
-      (name: 'Kwabena Yeboah', role: 'Founder & CEO', image: 'assets/images/me.jpg'),
-      (name: 'Saaka Ahmed', role: 'Tech Lead', image: 'assets/images/top2.jpg'),
-      (name: 'Emily Davis', role: 'Student Relations', image: 'assets/images/h2.jpg'),
-      (name: 'Osei Frank', role: 'Partnerships', image: 'assets/images/vegas1.jpg'),
-    ];
-
-    final avatarSize = r.isMobile ? 80.0 : 110.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Meet Our Team',
-            style: TextStyle(
-                fontSize: r.h2,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface)),
-        SizedBox(height: r.spacingS),
-        Text(
-          'Passionate individuals dedicated to improving student living',
-          style: TextStyle(
-              fontSize: r.body,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-        ),
-        SizedBox(height: r.spacingXL),
-        Wrap(
-          spacing: r.spacingL,
-          runSpacing: r.spacingL,
-          children: team.map((m) {
-            return SizedBox(
-              width: r.isMobile ? (MediaQuery.sizeOf(context).width - r.pagePadding * 2 - r.spacingL) / 2 : 150,
-              child: Column(
-                children: [
-                  Container(
-                    width: avatarSize,
-                    height: avatarSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        width: 2,
-                      ),
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        m.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color:
-                              theme.colorScheme.primary.withValues(alpha: 0.1),
-                          child: Icon(Icons.person,
-                              size: avatarSize * 0.4,
-                              color: theme.colorScheme.primary),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: r.spacingM),
-                  Text(
-                    m.name,
-                    style: TextStyle(
-                        fontSize: r.h5,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: r.spacingXS),
-                  Text(
-                    m.role,
-                    style: TextStyle(
-                        fontSize: r.bodySmall,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
 

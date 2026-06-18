@@ -69,6 +69,7 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
@@ -77,20 +78,32 @@ class _UsersManagementPageState extends ConsumerState<UsersManagementPage> {
         children: [
           SizedBox(height: 8.h),
           // Page header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Users Management',
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
+          if (isMobile) ...[
+            Text(
+              'Users Management',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
-              _buildRoleFilter(theme),
-            ],
-          ),
+            ),
+            SizedBox(height: 12.h),
+            _buildRoleFilter(theme),
+          ] else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Users Management',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                _buildRoleFilter(theme),
+              ],
+            ),
           SizedBox(height: 20.h),
 
           // STATS

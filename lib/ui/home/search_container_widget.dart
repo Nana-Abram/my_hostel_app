@@ -201,12 +201,12 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
-        _navigateToFilteredResults(context); 
+        _navigateToFilteredResults(context);
       },
       child: Container(
-        margin: EdgeInsets.only(top: isMobile ? 20.h : 25.h),
-        width: 120.w,
-        height: 55.h,
+        margin: EdgeInsets.only(top: isMobile ? 12.h : 25.h),
+        width: isMobile ? double.infinity : 120.w,
+        height: isMobile ? 48 : 55.h,
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,
           borderRadius: BorderRadius.circular(8.r),
@@ -214,8 +214,9 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search, color: theme.colorScheme.onPrimary, size: 24.r),
-            SizedBox(width: 5.w),
+            Icon(Icons.search, color: theme.colorScheme.onPrimary,
+                size: isMobile ? 22 : 24.r),
+            SizedBox(width: isMobile ? 6 : 5.w),
             SmallText(text: "Search", color: theme.colorScheme.onPrimary),
           ],
         ),

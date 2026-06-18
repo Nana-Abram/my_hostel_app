@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -26,18 +26,20 @@ class StudentDashboard extends ConsumerWidget {
 
     final dashboardAsync = ref.watch(studentDashboardProvider(currentUser.id));
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Dashboard Header
-            _buildDashboardHeader(context, currentUser),
+            _buildDashboardHeader(context, currentUser, isMobile),
 
-            // Dashboard Content
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 20.h),
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 40.w,
+                vertical: 20.h,
+              ),
               child: dashboardAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(
@@ -45,12 +47,12 @@ class StudentDashboard extends ConsumerWidget {
                     children: [
                       Icon(Icons.error_outline, color: theme.colorScheme.error, size: 50.sp),
                       SizedBox(height: 16.h),
-                      Text('Error loading dashboard'),
+                      const Text('Error loading dashboard'),
                     ],
                   ),
                 ),
                 data: (dashboardData) =>
-                    _buildDashboardContent(context, dashboardData),
+                    _buildDashboardContent(context, dashboardData, isMobile),
               ),
             ),
           ],
@@ -59,10 +61,37 @@ class StudentDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildDashboardHeader(BuildContext context, UserModel user) {
+  Widget _buildDashboardHeader(BuildContext context, UserModel user, bool isMobile) {
     final theme = Theme.of(context);
+
+    final titleColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BigText(
+          text: "My Dashboard",
+          color: theme.colorScheme.onSurface,
+          size: isMobile ? 20.sp : 24.sp,
+        ),
+        SizedBox(height: 4.h),
+        SmallText(
+          text: "Welcome back, ${user.fullName.split(' ').first}",
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ],
+    );
+
+    final bookButton = ElvButtonWidget(
+      text: "Book New Hostel",
+      isPrimary: true,
+      onPressed: () => GoRouter.of(context).goNamed('home'),
+    );
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 30.h),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 40.w,
+        vertical: isMobile ? 16 : 30.h,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         boxShadow: [
@@ -73,103 +102,81 @@ class StudentDashboard extends ConsumerWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            child: Row(
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BigText(
-                      text: "My Dashboard",
-                      color: theme.colorScheme.onSurface,
-                      size: 24.sp,
-                    ),
-                    SizedBox(height: 4.h),
-                    SmallText(
-                      text: "Welcome back, ${user.fullName}",
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
+                titleColumn,
+                SizedBox(height: 12.h),
+                SizedBox(width: double.infinity, child: bookButton),
               ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [titleColumn, bookButton],
             ),
-          ),
-
-          ElvButtonWidget(
-            text: "Book New Hostel",
-            isPrimary: true,
-            onPressed: () {
-              GoRouter.of(context).goNamed('home');
-            }, // Navigate to hostels tab
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildDashboardContent(
     BuildContext context,
     StudentDashboardData data,
+    bool isMobile,
   ) {
     return Column(
       children: [
-        // Statistics Cards
-        _buildStatisticsSection(data),
+        _buildStatisticsSection(data, isMobile),
         SizedBox(height: 30.h),
-
-        // Recent Bookings
         _buildRecentBookingsSection(context, data),
         SizedBox(height: 30.h),
-
-        // Upcoming Bookings
         _buildUpcomingBookingsSection(context, data),
       ],
     );
   }
 
-  Widget _buildStatisticsSection(StudentDashboardData data) {
+  Widget _buildStatisticsSection(StudentDashboardData data, bool isMobile) {
     final List<Color> cardColors = [
-      const Color(0xFF2196F3), // blue
-      const Color(0xFFFF9800), // orange  
-      const Color(0xFF4CAF50), // green
-      const Color(0xFF9C27B0), // purple
+      const Color(0xFF2196F3),
+      const Color(0xFFFF9800),
+      const Color(0xFF4CAF50),
+      const Color(0xFF9C27B0),
     ];
-    
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
-      crossAxisSpacing: 20.w,
-      mainAxisSpacing: 20.h,
-      childAspectRatio: 1.5,
+      crossAxisCount: isMobile ? 2 : 4,
+      crossAxisSpacing: isMobile ? 12 : 20.w,
+      mainAxisSpacing: isMobile ? 12 : 20.h,
+      childAspectRatio: isMobile ? 1.3 : 1.5,
       children: [
         _buildStatCard(
           icon: Icons.bookmark,
           title: 'Total Bookings',
           value: data.totalBookings.toString(),
           color: cardColors[0],
+          isMobile: isMobile,
         ),
         _buildStatCard(
           icon: Icons.pending_actions,
           title: 'Pending',
           value: data.pendingBookings.toString(),
           color: cardColors[1],
+          isMobile: isMobile,
         ),
         _buildStatCard(
           icon: Icons.check_circle,
           title: 'Confirmed',
           value: data.confirmedBookings.toString(),
           color: cardColors[2],
+          isMobile: isMobile,
         ),
         _buildStatCard(
           icon: Icons.attach_money,
           title: 'Total Spent',
-          value: 'GHS ${data.totalSpent.toStringAsFixed(2)}',
+          value: 'GHS ${data.totalSpent.toStringAsFixed(0)}',
           color: cardColors[3],
+          isMobile: isMobile,
         ),
       ],
     );
@@ -180,12 +187,13 @@ class StudentDashboard extends ConsumerWidget {
     required String title,
     required String value,
     required Color color,
+    required bool isMobile,
   }) {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
         return Container(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(isMobile ? 12 : 20.w),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16.r),
@@ -201,17 +209,25 @@ class StudentDashboard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.all(isMobile ? 8 : 10.w),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 24.sp),
+                child: Icon(icon, color: color, size: isMobile ? 20 : 24.sp),
               ),
-              SizedBox(height: 12.h),
-              BigText(text: value, color: theme.colorScheme.onSurface, size: 20.sp),
+              SizedBox(height: isMobile ? 8 : 12.h),
+              BigText(
+                text: value,
+                color: theme.colorScheme.onSurface,
+                size: isMobile ? 16.sp : 20.sp,
+              ),
               SizedBox(height: 4.h),
-              SmallText(text: title, color: theme.colorScheme.onSurfaceVariant, size: 11.sp),
+              SmallText(
+                text: title,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: isMobile ? 10.sp : 11.sp,
+              ),
             ],
           ),
         );
@@ -260,7 +276,6 @@ class StudentDashboard extends ConsumerWidget {
             ],
           ),
           SizedBox(height: 16.h),
-
           if (data.recentBookings.isEmpty)
             _buildEmptyState(
               icon: Icons.bookmark_border,
@@ -317,7 +332,6 @@ class StudentDashboard extends ConsumerWidget {
             ],
           ),
           SizedBox(height: 16.h),
-
           if (data.upcomingBookings.isEmpty)
             _buildEmptyState(
               icon: Icons.calendar_today,
@@ -339,6 +353,8 @@ class StudentDashboard extends ConsumerWidget {
 
   Widget _buildBookingItem(BuildContext context, BookingModel booking) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
@@ -348,38 +364,38 @@ class StudentDashboard extends ConsumerWidget {
         border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status indicator
+          // Status bar
           Container(
-            width: 8.w,
-            height: 40.h,
+            width: 6,
+            height: isMobile ? 80 : 40.h,
             decoration: BoxDecoration(
               color: _getStatusColor(booking.status),
               borderRadius: BorderRadius.circular(4.r),
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
 
-          // Booking details
+          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: BigText(
                         text: booking.hostelName,
                         color: theme.colorScheme.onSurface,
-                        size: 14.sp,
+                        size: 13.sp,
                       ),
                     ),
+                    SizedBox(width: 8.w),
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: _getStatusColor(booking.status).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6.r),
@@ -387,7 +403,7 @@ class StudentDashboard extends ConsumerWidget {
                       child: Text(
                         booking.status.toUpperCase(),
                         style: TextStyle(
-                          fontSize: 10.sp,
+                          fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
                           color: _getStatusColor(booking.status),
                         ),
@@ -402,29 +418,47 @@ class StudentDashboard extends ConsumerWidget {
                   size: 11.sp,
                 ),
                 SizedBox(height: 8.h),
-                Row(
-                  children: [
-                    IconAndTextWidget(
-                      icon: Icons.calendar_today,
-                      text: _formatDate(booking.checkInDate),
-                      iconColor: theme.colorScheme.onSurfaceVariant,
-                      textSize: 10.sp,
-                    ),
-                    SizedBox(width: 16.w),
-                    IconAndTextWidget(
-                      icon: Icons.attach_money,
-                      text: 'GHS ${booking.totalPrice.toStringAsFixed(2)}',
-                      iconColor: theme.colorScheme.onSurfaceVariant,
-                      textSize: 10.sp,
-                    ),
-                  ],
-                ),
+                // Date + price — wrap on mobile
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IconAndTextWidget(
+                            icon: Icons.calendar_today,
+                            text: _formatDate(booking.checkInDate),
+                            iconColor: theme.colorScheme.onSurfaceVariant,
+                            textSize: 10.sp,
+                          ),
+                          SizedBox(height: 4.h),
+                          IconAndTextWidget(
+                            icon: Icons.attach_money,
+                            text: 'GHS ${booking.totalPrice.toStringAsFixed(2)}',
+                            iconColor: theme.colorScheme.onSurfaceVariant,
+                            textSize: 10.sp,
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          IconAndTextWidget(
+                            icon: Icons.calendar_today,
+                            text: _formatDate(booking.checkInDate),
+                            iconColor: theme.colorScheme.onSurfaceVariant,
+                            textSize: 10.sp,
+                          ),
+                          SizedBox(width: 16.w),
+                          IconAndTextWidget(
+                            icon: Icons.attach_money,
+                            text: 'GHS ${booking.totalPrice.toStringAsFixed(2)}',
+                            iconColor: theme.colorScheme.onSurfaceVariant,
+                            textSize: 10.sp,
+                          ),
+                        ],
+                      ),
               ],
             ),
           ),
 
-          // View button
-          SizedBox(width: 12.w),
           IconButton(
             icon: Icon(Icons.chevron_right, size: 20.sp),
             onPressed: () => _viewBookingDetails(context, booking),
@@ -461,7 +495,11 @@ class StudentDashboard extends ConsumerWidget {
               SizedBox(height: 8.h),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 20.h),
               ElevatedButton(
@@ -486,15 +524,15 @@ class StudentDashboard extends ConsumerWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return const Color(0xFFFF9800); // orange
+        return const Color(0xFFFF9800);
       case 'confirmed':
-        return const Color(0xFF4CAF50); // green
+        return const Color(0xFF4CAF50);
       case 'checked-in':
-        return const Color(0xFF2196F3); // blue
+        return const Color(0xFF2196F3);
       case 'cancelled':
-        return const Color(0xFFF44336); // red
+        return const Color(0xFFF44336);
       default:
-        return const Color(0xFF9E9E9E); // grey
+        return const Color(0xFF9E9E9E);
     }
   }
 
@@ -503,11 +541,10 @@ class StudentDashboard extends ConsumerWidget {
   }
 
   void _viewBookingDetails(BuildContext context, BookingModel booking) {
-    // Navigate to booking details page
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Booking Details'),
+        title: const Text('Booking Details'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,15 +554,14 @@ class StudentDashboard extends ConsumerWidget {
             Text('Check-in: ${_formatDate(booking.checkInDate)}'),
             Text('Status: ${booking.status}'),
             Text('Amount: GHS ${booking.totalPrice.toStringAsFixed(2)}'),
-            if (booking.specialRequests != null &&
-                booking.specialRequests!.isNotEmpty)
+            if (booking.specialRequests != null && booking.specialRequests!.isNotEmpty)
               Text('Special Requests: ${booking.specialRequests}'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
+            child: const Text('Close'),
           ),
         ],
       ),

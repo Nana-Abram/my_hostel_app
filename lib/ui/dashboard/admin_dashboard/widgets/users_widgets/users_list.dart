@@ -17,6 +17,8 @@ class UsersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
     if (users.isEmpty) {
       return _buildEmptyUsersState(theme);
     }
@@ -35,68 +37,58 @@ class UsersList extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // TABLE HEADER
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              border: Border(bottom: BorderSide(color: theme.dividerColor)),
+          // TABLE HEADER (desktop only)
+          if (!isMobile)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                border: Border(bottom: BorderSide(color: theme.dividerColor)),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(width: 40.w),
+                  Expanded(
+                    flex: 2,
+                    child: Text('User',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant)),
+                  ),
+                  Expanded(
+                    child: Text('Role',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant)),
+                  ),
+                  Expanded(
+                    child: Text('Status',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant)),
+                  ),
+                  Expanded(
+                    child: Text('Last Login',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant)),
+                  ),
+                  SizedBox(width: 80.w),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                SizedBox(width: 40.w), // Avatar space
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'User',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Role',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Status',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Last Login',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 80.w), // Actions space
-              ],
-            ),
-          ),
 
           // USERS LIST
           ...users.map((user) => UserListItem(
-            user: user,
-            onAction: onUserAction,
-          )),
+                user: user,
+                onAction: onUserAction,
+              )),
         ],
       ),
     );
@@ -121,7 +113,7 @@ class UsersList extends StatelessWidget {
           Text(
             'There are no users in the system yet.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey),
+            style: TextStyle(fontSize: 14.sp, color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ),

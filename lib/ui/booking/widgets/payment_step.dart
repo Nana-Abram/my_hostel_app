@@ -55,31 +55,29 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
   Future<void> _pay() async {
     setState(() => _isProcessing = true);
 
-    // Await the FutureProvider's actual resolved value, not a loading snapshot
-    final currentUser = await ref.read(guaranteedUserProvider.future);
-
-    if (!mounted) return;
-
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: const Text('Please log in to complete booking'),
-            action: SnackBarAction(
-              label: 'Login',
-              onPressed: () {
-                final url = '/booking/${widget.hostel.id}/${widget.room.id}';
-                context.push('/login?redirect=${Uri.encodeComponent(url)}');
-              },
-            ),
-          ),
-        );
-      setState(() => _isProcessing = false);
-      return;
-    }
-
     try {
+      // Await the FutureProvider's actual resolved value, not a loading snapshot
+      final currentUser = await ref.read(guaranteedUserProvider.future);
+
+      if (!mounted) return;
+
+      if (currentUser == null) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: const Text('Please log in to complete booking'),
+              action: SnackBarAction(
+                label: 'Login',
+                onPressed: () {
+                  final url = '/booking/${widget.hostel.id}/${widget.room.id}';
+                  context.push('/login?redirect=${Uri.encodeComponent(url)}');
+                },
+              ),
+            ),
+          );
+        return;
+      }
       final reference = _paystackService.generateReference();
       String? result;
 
@@ -156,13 +154,10 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
     final theme = Theme.of(context);
     final amount = widget.room.price;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: EdgeInsets.all(40.w),
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    final paymentCard = Container(
+            padding: EdgeInsets.all(isMobile ? 20 : 40.w),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(20.r),
@@ -287,15 +282,25 @@ class _PaymentStepState extends ConsumerState<PaymentStep> {
                 ),
               ],
             ),
-          ),
-        ),
+          );
 
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          paymentCard,
+          SizedBox(height: 24.h),
+          BookingSummaryCard(hostel: widget.hostel, room: widget.room),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 2, child: paymentCard),
         SizedBox(width: 50.w),
-
-        Expanded(
-          flex: 1,
-          child: BookingSummaryCard(hostel: widget.hostel, room: widget.room),
-        ),
+        Expanded(flex: 1, child: BookingSummaryCard(hostel: widget.hostel, room: widget.room)),
       ],
     );
   }

@@ -31,33 +31,43 @@ class HostelDetailsPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: BookingAppBar(),
       body: hostelAsync.when(
-        loading: () => SingleChildScrollView(
-          padding: EdgeInsets.all(40.w),
-          child: Column(
-            children: [
-              const SkeletonCard(height: 400),
-              SizedBox(height: 24.h),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        const SkeletonCard(height: 200),
-                        SizedBox(height: 16.h),
-                        const SkeletonCard(height: 200),
-                      ],
-                    ),
+        loading: () {
+          final isMobileLoad = MediaQuery.sizeOf(context).width < 600;
+          return SingleChildScrollView(
+            padding: isMobileLoad ? const EdgeInsets.all(16) : EdgeInsets.all(40.w),
+            child: Column(
+              children: [
+                SkeletonCard(height: isMobileLoad ? 220 : 400),
+                SizedBox(height: 24.h),
+                if (isMobileLoad) ...[
+                  const SkeletonCard(height: 180),
+                  SizedBox(height: 16.h),
+                  const SkeletonCard(height: 180),
+                  SizedBox(height: 16.h),
+                  const SkeletonCard(height: 250),
+                ] else
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          children: [
+                            const SkeletonCard(height: 200),
+                            SizedBox(height: 16.h),
+                            const SkeletonCard(height: 200),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 24.w),
+                      const Expanded(
+                        child: SkeletonCard(height: 300),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 24.w),
-                  const Expanded(
-                    child: SkeletonCard(height: 300),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        },
         error: (error, stackTrace) => NetworkErrorState(
           onRetry: () {
             // Trigger a rebuild by invalidating the provider
@@ -81,8 +91,11 @@ class HostelDetailsPage extends ConsumerWidget {
 
   Widget _buildHostelContent(BuildContext context, HostelModel hostel, AsyncValue<List<dynamic>> roomsAsync) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
+      margin: isMobile
+          ? const EdgeInsets.symmetric(horizontal: 16, vertical: 16)
+          : EdgeInsets.symmetric(horizontal: 50.w, vertical: 30.h),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +164,10 @@ class HostelDetailsPage extends ConsumerWidget {
       children: [
         _buildHostelDetailsAndRooms(hostel, roomsAsync, theme),
         SizedBox(height: 30.h),
-        BookingCardWidget(hostel: hostel),
+        SizedBox(
+          width: double.infinity,
+          child: BookingCardWidget(hostel: hostel),
+        ),
       ],
     );
   }
@@ -164,7 +180,10 @@ class HostelDetailsPage extends ConsumerWidget {
         SmallText(text: hostel.name, color: theme.colorScheme.onSurface, size: 16.sp),
         SizedBox(height: 15.h),
         
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             IconAndTextWidget(
               icon: Icons.star,
@@ -172,9 +191,7 @@ class HostelDetailsPage extends ConsumerWidget {
               iconColor: theme.colorScheme.tertiary,
               textColor: theme.colorScheme.onSurface,
             ),
-            SizedBox(width: 5.w),
             SmallText(text: "(${hostel.reviewsCount} reviews)"),
-            SizedBox(width: 10.w),
             IconAndTextWidget(
               icon: Icons.location_on_outlined,
               text: hostel.campus,

@@ -287,27 +287,28 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     final hostelsAsync = ref.watch(hostelsStreamProvider);
 
     return SingleChildScrollView(
       child: Container(
-        margin: EdgeInsets.all(20.w),
-          width: 0.4.sw,
-          padding: EdgeInsets.all(30.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14.r),
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-          ),
-          child: 
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SmallText(
-                        text: "Add New Room",
-                        size: 20.sp,
-                        color: Colors.black,
-                      ),
+        margin: EdgeInsets.all(isMobile ? 16.w : 20.w),
+        width: isMobile ? null : 0.4.sw,
+        padding: EdgeInsets.all(isMobile ? 20.w : 30.w),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [BoxShadow(color: theme.shadowColor.withValues(alpha: 0.12), blurRadius: 6)],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SmallText(
+              text: "Add New Room",
+              size: 20.sp,
+              color: theme.colorScheme.onSurface,
+            ),
                       SizedBox(height: 20.h),
 
                       // ── Locked-hostel banner ──────────────────────────────
@@ -316,13 +317,13 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                           width: double.infinity,
                           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10.r),
-                            border: Border.all(color: Colors.green.shade300),
+                            border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.check_circle, color: Colors.green[700], size: 18.sp),
+                              Icon(Icons.check_circle, color: Colors.green, size: 18.sp),
                               SizedBox(width: 10.w),
                               Expanded(
                                 child: Text(
@@ -330,7 +331,7 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                                   style: TextStyle(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.green[800],
+                                    color: Colors.green,
                                   ),
                                 ),
                               ),
@@ -344,59 +345,59 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => const Text("Error loading hostels"),
                 data: (hostels) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Hostel dropdown — hidden when a hostel is locked in
-                        if (widget.lockedHostelId == null) ...[
-                          DropdownButtonFormField(
-                            hint: const Text("Select Hostel"),
-                            value: selectedHostel,
-                            items: hostels
-                                .map(
-                                  (h) => DropdownMenuItem(
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Hostel dropdown — hidden when a hostel is locked in
+                      if (widget.lockedHostelId == null) ...[
+                        DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          hint: const Text("Select Hostel"),
+                          value: selectedHostel,
+                          items: hostels
+                              .map((h) => DropdownMenuItem(
                                     value: h.id,
-                                    child: Text(h.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() => selectedHostel = v),
-                          ),
-                          SizedBox(height: 20.h),
-                        ],
-                      
-                        ///  Room Type selector
-                        DropdownButtonFormField(
-                          hint: const Text("Room Type"),
-                          value: selectedType,
-                          items: types
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
+                                    child: Text(h.name, overflow: TextOverflow.ellipsis),
+                                  ))
                               .toList(),
-                          onChanged: (v) => setState(() => selectedType = v),
+                          onChanged: (v) => setState(() => selectedHostel = v),
                         ),
-                        DropdownButtonFormField(
-                          hint: const Text("Gender"),
-                          value: selectedGender,
-                          items: gender
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedGender = v),
-                        ),
-                        DropdownButtonFormField(
-                          hint: const Text("AVailability"),
-                          value: selectedAvailability,
-                          items: availability
-                              .map(
-                                (t) => DropdownMenuItem(value: t, child: Text(t)),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => selectedAvailability= v),
-                        ),
+                        SizedBox(height: 20.h),
+                      ],
+
+                      ///  Room Type selector
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text("Room Type"),
+                        value: selectedType,
+                        items: types
+                            .map((t) => DropdownMenuItem(
+                                  value: t,
+                                  child: Text(t, overflow: TextOverflow.ellipsis),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedType = v),
+                      ),
+                      SizedBox(height: 16.h),
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text("Gender"),
+                        value: selectedGender,
+                        items: gender
+                            .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedGender = v),
+                      ),
+                      SizedBox(height: 16.h),
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text("Availability"),
+                        value: selectedAvailability,
+                        items: availability
+                            .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedAvailability = v),
+                      ),
                         
                         SizedBox(height: 20.h),
                       
@@ -546,8 +547,7 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                           child: const Text("Save Room"),
                         ),
                       ],
-                    ),
-                  );
+                    );
                 },
               ),
             ],
@@ -558,26 +558,27 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
   }
 
   Widget _buildVideoSection() {
+    final theme = Theme.of(context);
     final hasVideo = videoUrl != null && videoUrl!.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Video Tour (Optional)",
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
         SizedBox(height: 10.h),
         if (hasVideo) ...[
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.green.shade300),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
             ),
             child: Row(
               children: [
-                Icon(Icons.videocam, color: Colors.green[700], size: 28.sp),
+                Icon(Icons.videocam, color: Colors.green, size: 28.sp),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
@@ -587,10 +588,10 @@ class _AdminAddRoomPageState extends ConsumerState<AdminAddRoomPage> {
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13.sp,
-                              color: Colors.green[700])),
+                              color: Colors.green)),
                       SizedBox(height: 4.h),
                       Text(videoUrl!,
-                          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
+                          style: TextStyle(fontSize: 10.sp, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                     ],

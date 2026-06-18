@@ -33,18 +33,25 @@ class MyApp extends ConsumerWidget {
     // before any provider was ready → auth state appeared null → double-login.
     final router = AppRouter.createRouter(ref);
 
+    // Pick design size based on actual screen width so ScreenUtil's .w/.h/.sp
+    // scale correctly on both mobile and desktop.
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final designSize = screenWidth < 600
+        ? const Size(390, 844)   // mobile — 1:1 with standard phone screen
+        : const Size(1440, 1024); // desktop — keeps existing desktop layouts
+
     return AdaptiveTheme(
       light: AppTheme.lightTheme(),
       dark: AppTheme.darkTheme(),
       // Follow the device theme automatically; user can override in settings.
       initial: AdaptiveThemeMode.system,
       builder: (theme, darkTheme) => ScreenUtilInit(
-        designSize: const Size(1440, 1024),
+        designSize: designSize,
         minTextAdapt: true,
         builder: (context, child) {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
-            title: 'My Hostel App',
+            title: 'HostelHub',
             theme: theme,
             darkTheme: darkTheme,
             routerConfig: router,

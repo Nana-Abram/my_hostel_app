@@ -59,3 +59,9 @@ lib/firebase_options.dart
 
 # App secrets (Paystack keys, etc.) — copy app_secrets.example.dart and fill in values
 lib/config/app_secrets.dart
+
+# iOS local secrets — copy local.xcconfig.example to local.xcconfig and fill in values
+ios/Flutter/local.xcconfig
+
+# Firebase CLI local deploy cache
+.firebase/

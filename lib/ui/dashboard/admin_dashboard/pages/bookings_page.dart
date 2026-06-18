@@ -51,6 +51,7 @@ class _BookingsManagementPageState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
@@ -66,7 +67,7 @@ class _BookingsManagementPageState
             builder: (context, ref, child) {
               final statsAsync = ref.watch(bookingStatsProvider);
               return statsAsync.when(
-                data: (stats) => _buildStats(stats, theme),
+                data: (stats) => _buildStats(stats, theme, isMobile),
                 loading: () => _buildStatsLoading(theme),
                 error: (error, _) => _buildStatsError(error, theme),
               );
@@ -77,7 +78,7 @@ class _BookingsManagementPageState
           _buildSearchAndFilter(theme),
           SizedBox(height: 16.h),
 
-          _buildBookingsList(theme),
+          _buildBookingsList(theme, isMobile),
         ],
       ),
     );
@@ -111,52 +112,38 @@ class _BookingsManagementPageState
 
   // ── Stats ──────────────────────────────────────────────────────────────────
 
-  Widget _buildStats(Map<String, dynamic> stats, ThemeData theme) {
+  Widget _buildStats(Map<String, dynamic> stats, ThemeData theme, bool isMobile) {
+    final cards = [
+      _buildStatCard(theme: theme, title: 'Total', value: '${stats['total'] ?? 0}', icon: Icons.receipt_long_outlined, color: theme.colorScheme.primary),
+      _buildStatCard(theme: theme, title: 'Confirmed', value: '${stats['confirmed'] ?? 0}', icon: Icons.check_circle_outline, color: theme.colorScheme.secondary),
+      _buildStatCard(theme: theme, title: 'Pending', value: '${stats['pending'] ?? 0}', icon: Icons.hourglass_empty_outlined, color: theme.colorScheme.tertiary),
+      _buildStatCard(theme: theme, title: 'Cancelled', value: '${stats['cancelled'] ?? 0}', icon: Icons.cancel_outlined, color: theme.colorScheme.error),
+    ];
+
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                theme: theme,
-                title: 'Total',
-                value: '${stats['total'] ?? 0}',
-                icon: Icons.receipt_long_outlined,
-                color: theme.colorScheme.primary,
-              ),
-            ),
+        if (isMobile) ...[
+          Row(children: [
+            Expanded(child: cards[0]),
             SizedBox(width: 12.w),
-            Expanded(
-              child: _buildStatCard(
-                theme: theme,
-                title: 'Confirmed',
-                value: '${stats['confirmed'] ?? 0}',
-                icon: Icons.check_circle_outline,
-                color: theme.colorScheme.secondary,
-              ),
-            ),
+            Expanded(child: cards[1]),
+          ]),
+          SizedBox(height: 12.h),
+          Row(children: [
+            Expanded(child: cards[2]),
             SizedBox(width: 12.w),
-            Expanded(
-              child: _buildStatCard(
-                theme: theme,
-                title: 'Pending',
-                value: '${stats['pending'] ?? 0}',
-                icon: Icons.hourglass_empty_outlined,
-                color: theme.colorScheme.tertiary,
-              ),
-            ),
+            Expanded(child: cards[3]),
+          ]),
+        ] else
+          Row(children: [
+            Expanded(child: cards[0]),
             SizedBox(width: 12.w),
-            Expanded(
-              child: _buildStatCard(
-                theme: theme,
-                title: 'Cancelled',
-                value: '${stats['cancelled'] ?? 0}',
-                icon: Icons.cancel_outlined,
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ],
-        ),
+            Expanded(child: cards[1]),
+            SizedBox(width: 12.w),
+            Expanded(child: cards[2]),
+            SizedBox(width: 12.w),
+            Expanded(child: cards[3]),
+          ]),
         SizedBox(height: 12.h),
         _buildRevenueCard(stats, theme),
       ],
@@ -435,7 +422,7 @@ class _BookingsManagementPageState
 
   // ── Bookings list ──────────────────────────────────────────────────────────
 
-  Widget _buildBookingsList(ThemeData theme) {
+  Widget _buildBookingsList(ThemeData theme, bool isMobile) {
     return Consumer(
       builder: (context, ref, child) {
         final bookingsAsync = ref.watch(allBookingsProvider);
@@ -447,12 +434,13 @@ class _BookingsManagementPageState
 
             return Column(
               children: [
-                _buildTableHeader(theme),
+                if (!isMobile) _buildTableHeader(theme),
                 Container(
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(12)),
+                    borderRadius: isMobile
+                        ? BorderRadius.circular(12.r)
+                        : const BorderRadius.vertical(bottom: Radius.circular(12)),
                     boxShadow: [
                       BoxShadow(
                         color: theme.shadowColor.withValues(alpha: 0.05),
@@ -463,7 +451,7 @@ class _BookingsManagementPageState
                   ),
                   child: Column(
                     children: filtered
-                        .map((b) => _buildBookingRow(b, theme))
+                        .map((b) => _buildBookingRow(b, theme, isMobile))
                         .toList(),
                   ),
                 ),
@@ -526,177 +514,197 @@ class _BookingsManagementPageState
     );
   }
 
-  Widget _buildBookingRow(BookingModel booking, ThemeData theme) {
+  Widget _buildBookingRow(BookingModel booking, ThemeData theme, bool isMobile) {
     final statusColor = _statusColor(booking.status, theme);
 
+    final border = BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+            color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+      ),
+    );
+
+    final avatar = CircleAvatar(
+      radius: 14.w,
+      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+      child: Text(
+        booking.userName.isNotEmpty ? booking.userName[0].toUpperCase() : '?',
+        style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary),
+      ),
+    );
+
+    final statusBadge = Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        _statusLabel(booking.status),
+        style: TextStyle(
+            fontSize: 10.sp, color: statusColor, fontWeight: FontWeight.w600),
+      ),
+    );
+
+    final actionMenu = PopupMenuButton<String>(
+      onSelected: (action) => _handleAction(action, booking),
+      color: theme.colorScheme.surface,
+      itemBuilder: (ctx) => [
+        PopupMenuItem(
+          value: 'view',
+          child: Row(children: [
+            Icon(Icons.visibility_outlined,
+                size: 16.w, color: theme.colorScheme.onSurfaceVariant),
+            SizedBox(width: 8.w),
+            Text('View Details',
+                style: TextStyle(color: theme.colorScheme.onSurface)),
+          ]),
+        ),
+        if (booking.status == 'pending')
+          PopupMenuItem(
+            value: 'confirm',
+            child: Row(children: [
+              Icon(Icons.check_circle_outline,
+                  size: 16.w, color: theme.colorScheme.secondary),
+              SizedBox(width: 8.w),
+              Text('Confirm',
+                  style: TextStyle(color: theme.colorScheme.onSurface)),
+            ]),
+          ),
+        if (booking.status != 'cancelled')
+          PopupMenuItem(
+            value: 'cancel',
+            child: Row(children: [
+              Icon(Icons.cancel_outlined,
+                  size: 16.w, color: theme.colorScheme.error),
+              SizedBox(width: 8.w),
+              Text('Cancel',
+                  style: TextStyle(color: theme.colorScheme.error)),
+            ]),
+          ),
+      ],
+      child: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Icon(Icons.more_vert,
+            size: 16.w, color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+
+    if (isMobile) {
+      return Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: border,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            avatar,
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(booking.userName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface)),
+                      ),
+                      SizedBox(width: 8.w),
+                      statusBadge,
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(booking.hostelName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 11.sp,
+                          color: theme.colorScheme.onSurfaceVariant)),
+                  Text(booking.roomType,
+                      style: TextStyle(
+                          fontSize: 11.sp,
+                          color: theme.colorScheme.onSurfaceVariant)),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Text('GHS ${booking.totalPrice.toStringAsFixed(0)}',
+                          style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface)),
+                      const Spacer(),
+                      actionMenu,
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Desktop: table row
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-              color: theme.colorScheme.outline.withValues(alpha: 0.12)),
-        ),
-      ),
+      decoration: border,
       child: Row(
         children: [
-          // Student / Hostel info
           Expanded(
             flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14.w,
-                      backgroundColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.1),
-                      child: Text(
-                        booking.userName.isNotEmpty
-                            ? booking.userName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            booking.userName,
-                            style: TextStyle(
+                avatar,
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(booking.userName,
+                          style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            booking.hostelName,
-                            style: TextStyle(
+                              color: theme.colorScheme.onSurface),
+                          overflow: TextOverflow.ellipsis),
+                      Text(booking.hostelName,
+                          style: TextStyle(
                               fontSize: 11.sp,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                              color: theme.colorScheme.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-
-          // Room type
           Expanded(
             flex: 2,
-            child: Text(
-              booking.roomType,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  color: theme.colorScheme.onSurface),
-            ),
-          ),
-
-          // Amount
-          Expanded(
-            child: Text(
-              'GHS ${booking.totalPrice.toStringAsFixed(0)}',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-
-          // Status badge
-          Expanded(
-            child: Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12.r),
-                border:
-                    Border.all(color: statusColor.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                _statusLabel(booking.status),
-                textAlign: TextAlign.center,
+            child: Text(booking.roomType,
                 style: TextStyle(
-                  fontSize: 10.sp,
-                  color: statusColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+                    fontSize: 12.sp, color: theme.colorScheme.onSurface)),
           ),
-
-          // Actions
-          SizedBox(
-            width: 48.w,
-            child: PopupMenuButton<String>(
-              onSelected: (action) => _handleAction(action, booking),
-              color: theme.colorScheme.surface,
-              itemBuilder: (ctx) => [
-                PopupMenuItem(
-                  value: 'view',
-                  child: Row(children: [
-                    Icon(Icons.visibility_outlined,
-                        size: 16.w,
-                        color: theme.colorScheme.onSurfaceVariant),
-                    SizedBox(width: 8.w),
-                    Text('View Details',
-                        style: TextStyle(
-                            color: theme.colorScheme.onSurface)),
-                  ]),
-                ),
-                if (booking.status == 'pending')
-                  PopupMenuItem(
-                    value: 'confirm',
-                    child: Row(children: [
-                      Icon(Icons.check_circle_outline,
-                          size: 16.w,
-                          color: theme.colorScheme.secondary),
-                      SizedBox(width: 8.w),
-                      Text('Confirm',
-                          style: TextStyle(
-                              color: theme.colorScheme.onSurface)),
-                    ]),
-                  ),
-                if (booking.status != 'cancelled')
-                  PopupMenuItem(
-                    value: 'cancel',
-                    child: Row(children: [
-                      Icon(Icons.cancel_outlined,
-                          size: 16.w,
-                          color: theme.colorScheme.error),
-                      SizedBox(width: 8.w),
-                      Text('Cancel',
-                          style:
-                              TextStyle(color: theme.colorScheme.error)),
-                    ]),
-                  ),
-              ],
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Icon(Icons.more_vert,
-                    size: 16.w,
-                    color: theme.colorScheme.onSurfaceVariant),
-              ),
-            ),
+          Expanded(
+            child: Text('GHS ${booking.totalPrice.toStringAsFixed(0)}',
+                style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface)),
           ),
+          Expanded(child: statusBadge),
+          SizedBox(width: 48.w, child: actionMenu),
         ],
       ),
     );
@@ -985,6 +993,35 @@ class _BookingsManagementPageState
   }
 
   Future<void> _confirmBooking(BookingModel booking) async {
+    final theme = Theme.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Confirm Booking',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(
+          'Confirm the booking for ${booking.userName} at ${booking.hostelName}? '
+          'This will decrement room availability and notify the student.',
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.secondary,
+              foregroundColor: theme.colorScheme.onSecondary,
+            ),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     try {
       await AdminBookingService().confirmBooking(booking.id);
       if (!mounted) return;

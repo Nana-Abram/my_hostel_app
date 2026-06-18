@@ -136,7 +136,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           // Current step content
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 40.h),
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.sizeOf(context).width < 600 ? 16 : 60.w,
+                vertical: MediaQuery.sizeOf(context).width < 600 ? 16 : 40.h,
+              ),
               child: _buildCurrentStep(hostel, room),
             ),
           ),

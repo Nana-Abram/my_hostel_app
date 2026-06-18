@@ -38,6 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
           // ── Hero carousel ────────────────────────────────────────────────
           _buildHero(r, theme),
 
+          // On mobile the search box lives below the hero, not overlaid on it
+          if (r.isMobile)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: r.pagePadding, vertical: r.spacingM),
+              child: const SearchContainer(),
+            ),
+
           SizedBox(height: r.spacingXL),
 
           // ── Feature cards ─────────────────────────────────────────────────
@@ -121,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        // Overlay: headline + search
+        // Overlay: headline + search (search shown in overlay on desktop only)
         Padding(
           padding: EdgeInsets.symmetric(horizontal: r.pagePadding),
           child: Column(
@@ -138,8 +146,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
                 size: r.h3,
               ),
-              SizedBox(height: r.spacingM),
-              const SearchContainer(),
+              if (!r.isMobile) ...[
+                SizedBox(height: r.spacingM),
+                const SearchContainer(),
+              ],
             ],
           ),
         ),

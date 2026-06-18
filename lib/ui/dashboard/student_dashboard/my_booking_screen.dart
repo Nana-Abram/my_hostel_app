@@ -91,25 +91,44 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        return Container(
-          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
-          child: Wrap(
-            spacing: 8.w,
-            children: filters.map((filter) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+          child: Row(
+            children: filters.asMap().entries.map((entry) {
+              final i = entry.key;
+              final filter = entry.value;
               final isSelected = _selectedFilter == filter['value'];
-              return ChoiceChip(
-                label: Text(filter['label']!),
-                selected: isSelected,
-                onSelected: (selected) {
-                  HapticUtils.selectionClick();
-                  setState(() {
-                    _selectedFilter = filter['value']!;
-                  });
-                },
-                selectedColor: theme.colorScheme.primary,
-                labelStyle: TextStyle(
-                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-                  fontSize: 12.sp,
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticUtils.selectionClick();
+                    setState(() => _selectedFilter = filter['value']!);
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: i < filters.length - 1 ? 8 : 0),
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: isSelected
+                          ? null
+                          : Border.all(color: theme.dividerColor),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      filter['label']!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
+                        fontSize: 12.sp,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                  ),
                 ),
               );
             }).toList(),

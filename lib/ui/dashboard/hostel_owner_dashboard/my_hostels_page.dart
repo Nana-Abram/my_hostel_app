@@ -189,78 +189,91 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
   }
 
 Widget _buildHostelCard(HostelModel hostel) {
+  final isMobile = MediaQuery.sizeOf(context).width < 600;
+  final infoColumn = Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        hostel.name,
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      SizedBox(height: 4.h),
+      Row(
+        children: [
+          Icon(Icons.school, color: Colors.blue, size: 14.sp),
+          SizedBox(width: 4.w),
+          Expanded(
+            child: Text(hostel.campus, style: TextStyle(fontSize: 12.sp), overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+      SizedBox(height: 4.h),
+      Row(
+        children: [
+          Icon(Icons.room, color: Colors.green, size: 14.sp),
+          SizedBox(width: 4.w),
+          Expanded(
+            child: Text(hostel.location, style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]), overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    ],
+  );
+
   return Card(
     elevation: 4,
     margin: EdgeInsets.only(bottom: 20.h),
     child: Padding(
-      padding: EdgeInsets.all(20.0.w),
+      padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              // Hostel Image
-  
-              SizedBox(
-                width: 180.w,
-                height: 120.h,
-                child: ImageNetwork(
-                          image: hostel.images.isNotEmpty ? hostel.images.first : '', 
-                          height: 120.h, 
-                          width: 180.w,
-                          onError: Icon(Icons.business, color: Colors.grey[400], size: 80.w),
-                          fitAndroidIos: BoxFit.cover,
-                          fitWeb: BoxFitWeb.cover,
-                          borderRadius: BorderRadius.circular(8.r),
-                          backgroundColor: Colors.blue[50],
-                          ),
-              ),
-  
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hostel.name,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        Icon(Icons.school, color: Colors.blue, size: 14.sp),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Text(
-                            hostel.campus,
-                            style: TextStyle(fontSize: 12.sp),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        Icon(Icons.room, color: Colors.green, size: 14.sp),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Text(
-                            hostel.location,
-                            style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+          if (isMobile) ...[
+            // Full-width image on top
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: SizedBox(
+                width: double.infinity,
+                height: 160.h,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => ImageNetwork(
+                    image: hostel.images.isNotEmpty ? hostel.images.first : '',
+                    height: 160.h,
+                    width: constraints.maxWidth,
+                    onError: Icon(Icons.business, color: Colors.grey[400], size: 48.w),
+                    fitAndroidIos: BoxFit.cover,
+                    fitWeb: BoxFitWeb.cover,
+                    backgroundColor: Colors.blue[50],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: 12.h),
+            infoColumn,
+          ] else ...[
+            Row(
+              children: [
+                SizedBox(
+                  width: 180.w,
+                  height: 120.h,
+                  child: ImageNetwork(
+                    image: hostel.images.isNotEmpty ? hostel.images.first : '',
+                    height: 120.h,
+                    width: 180.w,
+                    onError: Icon(Icons.business, color: Colors.grey[400], size: 80.w),
+                    fitAndroidIos: BoxFit.cover,
+                    fitWeb: BoxFitWeb.cover,
+                    borderRadius: BorderRadius.circular(8.r),
+                    backgroundColor: Colors.blue[50],
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(child: infoColumn),
+              ],
+            ),
+          ],
           SizedBox(height: 12.h),
           Row(
             children: [

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
@@ -16,21 +17,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _notificationsEnabled = true;
   bool _emailNotifications = true;
   bool _pushNotifications = false;
-  bool _darkMode = false;
-  String _language = 'English';
-  String _currency = 'GHS - Ghanaian Cedi';
-
-  static const _languageItems = ['English', 'French', 'Spanish', 'Arabic'];
-  static const _currencyItems = [
-    'GHS - Ghanaian Cedi',
-    'USD - US Dollar',
-    'EUR - Euro',
-    'GBP - British Pound',
-  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
       appBar: widget.isAppBarVisible
           ? AppBar(
@@ -66,19 +57,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   title: 'Privacy & Security',
                   subtitle: 'Manage your privacy settings',
                   onTap: _privacySettings,
-                ),
-                _buildSettingItem(
-                  theme: theme,
-                  icon: Icons.language_outlined,
-                  title: 'Language',
-                  subtitle: _language,
-                  trailing: _buildDropdownButton(
-                    theme: theme,
-                    currentValue: _language,
-                    items: _languageItems,
-                    onChanged: _changeLanguage,
-                  ),
-                  onTap: () {},
                 ),
               ],
             ),
@@ -131,37 +109,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   icon: Icons.dark_mode_outlined,
                   title: 'Dark Mode',
                   subtitle: 'Switch to dark theme',
-                  value: _darkMode,
-                  onChanged: (value) => setState(() => _darkMode = value),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-
-            _buildSection(
-              theme: theme,
-              title: 'Payment & Currency',
-              icon: Icons.payments_outlined,
-              children: [
-                _buildSettingItem(
-                  theme: theme,
-                  icon: Icons.currency_exchange_outlined,
-                  title: 'Default Currency',
-                  subtitle: _currency,
-                  trailing: _buildDropdownButton(
-                    theme: theme,
-                    currentValue: _currency,
-                    items: _currencyItems,
-                    onChanged: _changeCurrency,
-                  ),
-                  onTap: () {},
-                ),
-                _buildSettingItem(
-                  theme: theme,
-                  icon: Icons.credit_card_outlined,
-                  title: 'Payment Methods',
-                  subtitle: 'Manage your payment options',
-                  onTap: _paymentMethods,
+                  value: isDark,
+                  onChanged: (value) {
+                    if (value) {
+                      AdaptiveTheme.of(context).setDark();
+                    } else {
+                      AdaptiveTheme.of(context).setLight();
+                    }
+                  },
                 ),
               ],
             ),
@@ -389,41 +344,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildDropdownButton({
-    required ThemeData theme,
-    required String currentValue,
-    required List<String> items,
-    required Function(String) onChanged,
-  }) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: currentValue,
-        dropdownColor: theme.colorScheme.surface,
-        items: items
-            .map((value) => DropdownMenuItem(
-                  value: value,
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ))
-            .toList(),
-        onChanged: (value) {
-          if (value != null) onChanged(value);
-        },
-        style: TextStyle(fontSize: 12.sp, color: theme.colorScheme.onSurface),
-        icon: Icon(
-          Icons.arrow_drop_down,
-          size: 20.w,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
-
   Widget _buildLogoutButton(ThemeData theme) {
     return SizedBox(
       width: double.infinity,
@@ -448,20 +368,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   // ── Action methods ─────────────────────────────────────────────────────────
-
-  void _changeLanguage(String language) {
-    setState(() => _language = language);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Language changed to $language')),
-    );
-  }
-
-  void _changeCurrency(String currency) {
-    setState(() => _currency = currency);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Currency changed to $currency')),
-    );
-  }
 
   void _editProfile() {
     final currentUser = ref.read(authProvider).value;
@@ -488,12 +394,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _privacySettings() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Privacy & Security settings coming soon')),
-    );
-  }
-
-  void _paymentMethods() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Payment Methods management coming soon')),
     );
   }
 

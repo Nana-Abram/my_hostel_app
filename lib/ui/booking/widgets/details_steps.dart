@@ -127,138 +127,142 @@ class _DetailsStepState extends State<DetailsStep> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Form Section
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: EdgeInsets.all(40.w),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(20.r),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.shadowColor.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(2, 4),
-                ),
-              ],
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    final formCard = Container(
+      padding: EdgeInsets.all(isMobile ? 20 : 40.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BigText(text: "Book Your Room", color: theme.colorScheme.onSurface),
+          SizedBox(height: 10.h),
+          SmallText(
+            text: "Please fill in the details below to complete your booking.",
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+          SizedBox(height: 30.h),
+
+          _buildTextField(
+            theme,
+            label: "Full Name *",
+            controller: _fullNameController,
+            isValid: _fullNameValid,
+            fieldName: 'fullName',
+            hintText: "Enter your full name",
+          ),
+          SizedBox(height: 20.h),
+
+          _buildTextField(
+            theme,
+            label: "Email Address *",
+            controller: _emailController,
+            isValid: _emailValid,
+            fieldName: 'email',
+            hintText: "Enter your email address",
+            keyboardType: TextInputType.emailAddress,
+          ),
+          SizedBox(height: 20.h),
+
+          _buildTextField(
+            theme,
+            label: "Phone Number *",
+            controller: _phoneController,
+            isValid: _phoneValid,
+            fieldName: 'phone',
+            hintText: "Enter your phone number",
+            keyboardType: TextInputType.phone,
+          ),
+          SizedBox(height: 20.h),
+
+          _buildTextField(
+            theme,
+            label: "Check-in Date *",
+            controller: _checkInDateController,
+            isValid: _checkInDateValid,
+            fieldName: 'checkInDate',
+            hintText: "Select your check-in date",
+            readOnly: true,
+            onTap: () => _showDatePicker(context),
+          ),
+          SizedBox(height: 20.h),
+
+          _buildTextField(
+            theme,
+            label: "Special Requests (Optional)",
+            controller: _specialRequestsController,
+            isValid: true,
+            fieldName: 'specialRequests',
+            hintText: "Any special requirements or requests",
+            maxLines: 3,
+          ),
+          SizedBox(height: 40.h),
+
+          // Proceed button — full width on mobile
+          SizedBox(
+            width: double.infinity,
+            child: ElvButtonWidget(
+              text: "Proceed to Payment",
+              isPrimary: _isFormValid,
+              onPressed: _isFormValid ? _validateForm : null,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BigText(text: "Book Your Room", color: theme.colorScheme.onSurface),
-                SizedBox(height: 10.h),
-                SmallText(
-                  text: "Please fill in the details below to complete your booking.",
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-                SizedBox(height: 30.h),
+          ),
 
-                // Form fields
-                _buildTextField(
-                  theme,
-                  label: "Full Name *",
-                  controller: _fullNameController,
-                  isValid: _fullNameValid,
-                  fieldName: 'fullName',
-                  hintText: "Enter your full name",
-                ),
-                SizedBox(height: 20.h),
-
-                _buildTextField(
-                  theme,
-                  label: "Email Address *",
-                  controller: _emailController,
-                  isValid: _emailValid,
-                  fieldName: 'email',
-                  hintText: "Enter your email address",
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: 20.h),
-
-                _buildTextField(
-                  theme,
-                  label: "Phone Number *",
-                  controller: _phoneController,
-                  isValid: _phoneValid,
-                  fieldName: 'phone',
-                  hintText: "Enter your phone number",
-                  keyboardType: TextInputType.phone,
-                ),
-                SizedBox(height: 20.h),
-
-                _buildTextField(
-                  theme,
-                  label: "Check-in Date *",
-                  controller: _checkInDateController,
-                  isValid: _checkInDateValid,
-                  fieldName: 'checkInDate',
-                  hintText: "Select your check-in date",
-                  readOnly: true,
-                  onTap: () => _showDatePicker(context),
-                ),
-                SizedBox(height: 20.h),
-
-                _buildTextField(
-                  theme,
-                  label: "Special Requests (Optional)",
-                  controller: _specialRequestsController,
-                  isValid: true,
-                  fieldName: 'specialRequests',
-                  hintText: "Any special requirements or requests",
-                  maxLines: 3,
-                ),
-                SizedBox(height: 40.h),
-
-                // Proceed button
-                Center(
-                  child: ElvButtonWidget(
-                    text: "Proceed to Payment",
-                    isPrimary: _isFormValid,
-                    onPressed: _isFormValid ? _validateForm : null,
-                  ),
-                ),
-
-                // Validation message
-                if (!_isFormValid) ...[
-                  SizedBox(height: 16.h),
-                  Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: Colors.orange.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info, color: Colors.orange, size: 16.sp),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: SmallText(
-                            text: "Please fill in all required fields (*) to continue",
-                            color: Colors.orange.shade800,
-                            size: 10.sp,
-                          ),
-                        ),
-                      ],
+          if (!_isFormValid) ...[
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: Colors.orange, size: 16.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: SmallText(
+                      text: "Please fill in all required fields (*) to continue",
+                      color: Colors.orange.shade800,
+                      size: 10.sp,
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
-          ),
-        ),
+          ],
+        ],
+      ),
+    );
 
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          formCard,
+          SizedBox(height: 24.h),
+          BookingSummaryCard(hostel: widget.hostel, room: widget.room),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 2, child: formCard),
         SizedBox(width: 50.w),
-
-        // Summary Section
-        Expanded(
-          flex: 1,
-          child: BookingSummaryCard(hostel: widget.hostel, room: widget.room),
-        ),
+        Expanded(flex: 1, child: BookingSummaryCard(hostel: widget.hostel, room: widget.room)),
       ],
     );
   }
