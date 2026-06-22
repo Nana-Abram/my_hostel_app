@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -109,7 +109,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                         hint: "Single, Shared, etc.",
                         isFilter: true,
                         value: filter.roomType,
-                        items: [
+                        items: const [
                           "Single Room with washroom",
                           "Single Room self contain",
                           "Single Room with shared washroom",
@@ -175,7 +175,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
                           hint: "Single, Shared, etc.",
                           isFilter: true,
                           value: filter.roomType,
-                          items: [
+                          items: const [
                             "Single Room with washroom",
                             "Single Room self contain",
                             "Single Room with shared washroom",
@@ -232,7 +232,7 @@ class _SearchContainerState extends ConsumerState<SearchContainer> {
       appBarScreenState.onNavSelected(1);
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Showing filtered results in Hostels'),
           duration: Duration(seconds: 2),
         ),

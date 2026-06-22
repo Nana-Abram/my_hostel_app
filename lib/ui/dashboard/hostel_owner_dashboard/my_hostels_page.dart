@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
@@ -25,7 +25,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
     final authState = ref.watch(authProvider);
 
     return authState.when(
-      loading: () => Scaffold(
+      loading: () => const Scaffold(
        
         body: Center(child: CircularProgressIndicator()),
       ),
@@ -41,7 +41,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                 onPressed: () {
                   ref.invalidate(authProvider);
                 },
-                child: Text('Retry'),
+                child: const Text('Retry'),
               ),
             ],
           ),
@@ -59,7 +59,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
 
         return Scaffold(
           body: hostelsAsync.when(
-            loading: () => Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +71,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                       // ignore: unused_result
                       ref.refresh(hostelsByOwnerProvider(currentUserId));
                     },
-                    child: Text('Retry'),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
@@ -130,7 +130,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
                 context.go('/login');
               },
               style: ElevatedButton.styleFrom(),
-              child: Text('Sign In'),
+              child: const Text('Sign In'),
             ),
           ],
         ),
@@ -149,7 +149,7 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
             size: 80,
             color: Colors.grey[400],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'No Hostels Added',
             style: TextStyle(
@@ -158,20 +158,20 @@ class _MyHostelsPageState extends ConsumerState<MyHostelsPage> {
               color: Colors.grey[600],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Add your first hostel to get started',
             style: TextStyle(
               color: Colors.grey[500],
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => _onAddHostelPressed(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue[700],
             ),
-            child: Text('Add Hostel'),
+            child: const Text('Add Hostel'),
           ),
         ],
       ),
@@ -232,21 +232,17 @@ Widget _buildHostelCard(HostelModel hostel) {
         children: [
           if (isMobile) ...[
             // Full-width image on top
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.r),
-              child: SizedBox(
-                width: double.infinity,
-                height: 160.h,
-                child: LayoutBuilder(
-                  builder: (context, constraints) => ImageNetwork(
-                    image: hostel.images.isNotEmpty ? hostel.images.first : '',
-                    height: 160.h,
-                    width: constraints.maxWidth,
-                    onError: Icon(Icons.business, color: Colors.grey[400], size: 48.w),
-                    fitAndroidIos: BoxFit.cover,
-                    fitWeb: BoxFitWeb.cover,
-                    backgroundColor: Colors.blue[50],
-                  ),
+            SizedBox(
+              width: double.infinity,
+              height: 160.h,
+              child: LayoutBuilder(
+                builder: (context, constraints) => EnhancedCachedImage(
+                  imageUrl: hostel.images.isNotEmpty ? hostel.images.first : '',
+                  height: 160.h,
+                  width: constraints.maxWidth,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(8.r),
+                  errorWidget: Icon(Icons.business, color: Colors.grey[400], size: 48.w),
                 ),
               ),
             ),
@@ -258,15 +254,13 @@ Widget _buildHostelCard(HostelModel hostel) {
                 SizedBox(
                   width: 180.w,
                   height: 120.h,
-                  child: ImageNetwork(
-                    image: hostel.images.isNotEmpty ? hostel.images.first : '',
+                  child: EnhancedCachedImage(
+                    imageUrl: hostel.images.isNotEmpty ? hostel.images.first : '',
                     height: 120.h,
                     width: 180.w,
-                    onError: Icon(Icons.business, color: Colors.grey[400], size: 80.w),
-                    fitAndroidIos: BoxFit.cover,
-                    fitWeb: BoxFitWeb.cover,
+                    fit: BoxFit.cover,
                     borderRadius: BorderRadius.circular(8.r),
-                    backgroundColor: Colors.blue[50],
+                    errorWidget: Icon(Icons.business, color: Colors.grey[400], size: 80.w),
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -340,8 +334,8 @@ Widget _buildHostelCard(HostelModel hostel) {
                 child: Tooltip(
                   message: 'Edit Hostel Details',
                   child: OutlinedButton.icon(
-                    icon: Icon(Icons.edit, size: 16),
-                    label: Text('Edit'),
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Edit'),
                     onPressed: () => _onEditHostelPressed(hostel),
                   ),
                 ),
@@ -351,8 +345,8 @@ Widget _buildHostelCard(HostelModel hostel) {
                 child: Tooltip(
                   message: 'View Hostel Details',
                   child: OutlinedButton.icon(
-                    icon: Icon(Icons.visibility, size: 16),
-                    label: Text('View'),
+                    icon: const Icon(Icons.visibility, size: 16),
+                    label: const Text('View'),
                     onPressed: () => _onViewHostelPressed(hostel),
                   ),
                 ),
@@ -362,8 +356,8 @@ Widget _buildHostelCard(HostelModel hostel) {
                 child: Tooltip(
                   message: 'Delete Hostel',
                   child: OutlinedButton.icon(
-                  icon: Icon(Icons.delete, size: 16),
-                  label: Text('Delete'),
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Delete'),
                   onPressed: () => _onDeleteHostelPressed(hostel),
                 ),
               ),
@@ -379,7 +373,7 @@ Widget _buildHostelCard(HostelModel hostel) {
   void _onAddHostelPressed() {
       Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => AddHostelPage()),
+    MaterialPageRoute(builder: (context) => const AddHostelPage()),
   );
   }
 

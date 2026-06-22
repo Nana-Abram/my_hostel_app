@@ -358,7 +358,7 @@ void _onRoomSaved() {
                 ? const CircularProgressIndicator()
                 : InkWell(
                     onTap: pickAndUploadImage,
-                    child: ElvButtonWidget(text: "Choose Image"),
+                    child: const ElvButtonWidget(text: "Choose Image"),
                   ),
 
             SizedBox(height: 10.h),
@@ -407,7 +407,7 @@ void _onRoomSaved() {
                   ? const Center(child: CircularProgressIndicator())
                   : InkWell(
                       onTap: _submit,
-                      child: ElvButtonWidget(text: "Submit Hostel", isPrimary: true),
+                      child: const ElvButtonWidget(text: "Submit Hostel", isPrimary: true),
                     ),
             ],
           ],
@@ -651,7 +651,7 @@ void _onRoomSaved() {
                 SizedBox(
                   width: 22.w,
                   height: 22.h,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: const CircularProgressIndicator(strokeWidth: 2),
                 ),
                 SizedBox(width: 12.w),
                 Text("Uploading video...", style: TextStyle(fontSize: 12.sp)),
@@ -705,7 +705,7 @@ void _onRoomSaved() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Enter Video URL"),
+        title: const Text("Enter Video URL"),
         content: TextField(
           controller: urlCtrl,
           keyboardType: TextInputType.url,
@@ -714,13 +714,13 @@ void _onRoomSaved() {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            prefixIcon: Icon(Icons.link),
+            prefixIcon: const Icon(Icons.link),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           ElevatedButton(
             onPressed: () {
@@ -729,7 +729,7 @@ void _onRoomSaved() {
               });
               Navigator.pop(ctx);
             },
-            child: Text("Save"),
+            child: const Text("Save"),
           ),
         ],
       ),

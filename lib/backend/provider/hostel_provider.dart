@@ -2,19 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/filter_model.dart';
+import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
 import 'package:my_hostel_app/backend/service/hostel_service.dart';
 
 final hostelServiceProvider = Provider<HostelService>((ref) => HostelService());
 
-final hostelsStreamProvider = StreamProvider<List<HostelModel>>((ref) {
+final hostelsStreamProvider = StreamProvider.autoDispose<List<HostelModel>>((ref) {
   final service = ref.read(hostelServiceProvider);
   return service.getAllHostelsStream();
 });
 
 // ADD: Provider for hostels by owner
-final hostelsByOwnerProvider = StreamProvider.family<List<HostelModel>, String>((ref, ownerId) {
+final hostelsByOwnerProvider = StreamProvider.autoDispose.family<List<HostelModel>, String>((ref, ownerId) {
   final service = ref.read(hostelServiceProvider);
   return service.getHostelsByOwner(ownerId);
 });
@@ -82,7 +83,7 @@ final hostelNotifierProvider = StateNotifierProvider<HostelNotifier, AsyncValue<
 
 
 
-final filteredHostelsProvider = Provider<List<HostelModel>>((ref) {
+final filteredHostelsProvider = Provider.autoDispose<List<HostelModel>>((ref) {
   final filter = ref.watch(filterProvider);
   final hostelsAsync = ref.watch(hostelsStreamProvider);
   final roomsAsync = ref.watch(roomsStreamProvider);
@@ -100,28 +101,39 @@ final filteredHostelsProvider = Provider<List<HostelModel>>((ref) {
   final hostels = hostelsAsync.value ?? [];
   final rooms = roomsAsync.value ?? [];
 
+  // Group rooms by hostelId once (O(m)) instead of re-scanning the full
+  // rooms list inside the per-hostel filter below (which was O(n*m)).
+  final roomsByHostelId = <String, List<RoomModel>>{};
+  for (final room in rooms) {
+    roomsByHostelId.putIfAbsent(room.hostelId, () => []).add(room);
+  }
+
+  final normalizedQuery = (filter.searchQuery != null && filter.searchQuery!.isNotEmpty)
+      ? filter.searchQuery!.toLowerCase()
+      : null;
+  final normalizedCampus =
+      (filter.campus != null && filter.campus!.isNotEmpty) ? filter.campus!.toLowerCase() : null;
+
   // Filter hostels
   var filteredHostels = hostels.where((hostel) {
     // Search query filter
-    if (filter.searchQuery != null && filter.searchQuery!.isNotEmpty) {
-      final query = filter.searchQuery!.toLowerCase();
-      final matchesSearch = hostel.name.toLowerCase().contains(query) ||
-          hostel.description.toLowerCase().contains(query) ||
-          hostel.location.toLowerCase().contains(query) ||
-          hostel.campus.toLowerCase().contains(query);
+    if (normalizedQuery != null) {
+      final matchesSearch = hostel.name.toLowerCase().contains(normalizedQuery) ||
+          hostel.description.toLowerCase().contains(normalizedQuery) ||
+          hostel.location.toLowerCase().contains(normalizedQuery) ||
+          hostel.campus.toLowerCase().contains(normalizedQuery);
       if (!matchesSearch) return false;
     }
 
     // Get all rooms for this hostel
-    final hostelRooms = rooms.where((room) => room.hostelId == hostel.id).toList();
-    
+    final hostelRooms = roomsByHostelId[hostel.id] ?? const [];
+
     // If no rooms found for this hostel, skip it
     if (hostelRooms.isEmpty) return false;
 
     // HOSTEL-LEVEL FILTERS
-    final campusMatch = filter.campus == null || 
-                        filter.campus!.isEmpty || 
-                        hostel.campus.toLowerCase().contains(filter.campus!.toLowerCase());
+    final campusMatch =
+        normalizedCampus == null || hostel.campus.toLowerCase().contains(normalizedCampus);
 
     final amenitiesMatch = filter.amenities.isEmpty || 
                           filter.amenities.every(hostel.amenities.contains);

@@ -38,7 +38,7 @@ class AvatarAndTextWiget extends StatelessWidget {
             backgroundColor: color,
             child: Text(circleText, style: TextStyle(fontSize: 18.sp, fontWeight:FontWeight.bold, color: theme.colorScheme.onPrimary),),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
            SizedBox(
                 width: 0.08.sw,
                 child: Divider(

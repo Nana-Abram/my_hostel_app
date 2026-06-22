@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:my_hostel_app/ui/core/dimensions.dart';
 
 class NavButtonWidget extends StatefulWidget {
@@ -35,7 +35,7 @@ class _NavButtonWidgetState extends State<NavButtonWidget> {
         onTap: widget.onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          margin: EdgeInsets.symmetric(horizontal: 12),
+          margin: const EdgeInsets.symmetric(horizontal: 12),
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
           decoration: BoxDecoration(
             border: widget.isActive

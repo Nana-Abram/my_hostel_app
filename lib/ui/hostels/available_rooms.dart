@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/ui/hostels/hostels_card.dart';
@@ -68,21 +67,18 @@ class AvailableRooms extends ConsumerWidget {
       children: [
         // Full-width image header
         LayoutBuilder(
-          builder: (context, constraints) => ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16.r),
-              topRight: Radius.circular(16.r),
-            ),
-            child: Hero(
-              tag: 'room-${room.id}',
-              child: ImageNetwork(
-                image: room.image,
-                height: 160,
-                width: constraints.maxWidth,
-                fitAndroidIos: BoxFit.cover,
-                fitWeb: BoxFitWeb.cover,
-                onTap: () => _openRoomDetails(context),
+          builder: (context, constraints) => Hero(
+            tag: 'room-${room.id}',
+            child: EnhancedCachedImage(
+              imageUrl: room.image,
+              height: 160,
+              width: constraints.maxWidth,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
               ),
+              onTap: () => _openRoomDetails(context),
             ),
           ),
         ),
@@ -255,21 +251,18 @@ class AvailableRooms extends ConsumerWidget {
         SizedBox(
           width: isHostelOwner ? 180.w : 150.w,
           height: isHostelOwner ? 220.h : 200.h,
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16.r),
-              bottomLeft: Radius.circular(16.r),
-            ),
-            child: Hero(
-              tag: 'room-${room.id}',
-              child: ImageNetwork(
-                image: room.image,
-                height: isHostelOwner ? 220.h : 200.h,
-                width: isHostelOwner ? 180.w : 150.w,
-                fitAndroidIos: BoxFit.cover,
-                fitWeb: BoxFitWeb.cover,
-                onTap: () => _openRoomDetails(context),
+          child: Hero(
+            tag: 'room-${room.id}',
+            child: EnhancedCachedImage(
+              imageUrl: room.image,
+              height: isHostelOwner ? 220.h : 200.h,
+              width: isHostelOwner ? 180.w : 150.w,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.r),
+                bottomLeft: Radius.circular(16.r),
               ),
+              onTap: () => _openRoomDetails(context),
             ),
           ),
         ),

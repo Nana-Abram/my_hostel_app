@@ -5,7 +5,7 @@ import 'package:my_hostel_app/backend/service/room_service.dart';
 final roomServiceProvider = Provider((ref) => RoomService());
 
 /// STREAM OF ALL ROOMS (Corrected!)
-final roomsStreamProvider = StreamProvider<List<RoomModel>>((ref) {
+final roomsStreamProvider = StreamProvider.autoDispose<List<RoomModel>>((ref) {
   final service = ref.read(roomServiceProvider);  // FIXED HERE
   return service.getAllRoomsStream();
 });

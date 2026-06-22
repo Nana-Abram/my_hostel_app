@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/provider/notification_provider.dart';
@@ -170,24 +170,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               radius: 18.w,
               backgroundColor: theme.colorScheme.primaryContainer,
               child: user.profileImage != null
-                  ? ClipOval(
-                      child: ImageNetwork(
-                        key: ValueKey(user.profileImage),
-                        image: user.profileImage!,
-                        height: 36.w,
-                        width: 36.w,
-                        fitAndroidIos: BoxFit.cover,
-                        fitWeb: BoxFitWeb.cover,
-                        backgroundColor: Colors.transparent,
-                        onLoading: CircularProgressIndicator(
-                          color: theme.colorScheme.primary,
-                        ),
-                        onError: Icon(
-                          Icons.error,
-                          color: theme.colorScheme.error,
-                        ),
-                        onTap: _showProfileMenu,
+                  ? EnhancedCachedImage(
+                      key: ValueKey(user.profileImage),
+                      imageUrl: user.profileImage!,
+                      height: 36.w,
+                      width: 36.w,
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(18.w),
+                      errorWidget: Icon(
+                        Icons.error,
+                        color: theme.colorScheme.error,
                       ),
+                      onTap: _showProfileMenu,
                     )
                   : InkWell(
                       onTap: _showProfileMenu,
@@ -461,22 +455,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           radius: 24.w,
           backgroundColor: theme.colorScheme.primaryContainer,
           child: user.profileImage != null
-              ? ClipOval(
-                  child: ImageNetwork(
-                    key: ValueKey(user.profileImage),
-                    image: user.profileImage!,
-                    height: 48.w,
-                    width: 48.w,
-                    fitAndroidIos: BoxFit.cover,
-                    fitWeb: BoxFitWeb.cover,
-                    backgroundColor: Colors.transparent,
-                    onLoading: CircularProgressIndicator(
-                      color: theme.colorScheme.primary,
-                    ),
-                    onError: Icon(
-                      Icons.error,
-                      color: theme.colorScheme.error,
-                    ),
+              ? EnhancedCachedImage(
+                  key: ValueKey(user.profileImage),
+                  imageUrl: user.profileImage!,
+                  height: 48.w,
+                  width: 48.w,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(24.w),
+                  errorWidget: Icon(
+                    Icons.error,
+                    color: theme.colorScheme.error,
                   ),
                 )
               : Text(

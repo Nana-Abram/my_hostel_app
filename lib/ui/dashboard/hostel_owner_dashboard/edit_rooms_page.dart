@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
@@ -520,15 +520,12 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
               width: 200.w,
               child: Stack(
                 children: [
-                  ClipRRect(
+                  EnhancedCachedImage(
+                    imageUrl: existingImageUrls[index],
+                    height: 200.h,
+                    width: 200.w,
+                    fit: BoxFit.cover,
                     borderRadius: BorderRadius.circular(12.r),
-                    child: ImageNetwork(
-                      image: existingImageUrls[index],
-                      height: 200.h,
-                      width: 200.w,
-                      fitAndroidIos: BoxFit.cover,
-                      fitWeb: BoxFitWeb.cover,
-                    ),
                   ),
                   Positioned(
                     top: 5,

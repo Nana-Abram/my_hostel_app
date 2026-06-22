@@ -34,10 +34,10 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Google Maps JS API must load synchronously before Flutter bootstrap -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI2Xn1ZRqOiYnMQJwHUlp0MgMsZKFp8Y"></script>
-  <!-- Paystack inline.js must load synchronously before Flutter bootstrap -->
-  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <!-- Google Maps JS API: only needed on the map view, loaded non-blocking.
+       google_maps_flutter_web waits for this to finish before rendering a map. -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI2Xn1ZRqOiYnMQJwHUlp0MgMsZKFp8Y" async defer></script>
+  <!-- Paystack inline.js: only needed at checkout, loaded on-demand from paystack_web_impl.dart -->
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

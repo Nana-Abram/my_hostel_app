@@ -28,13 +28,13 @@ class HostelOwnerDashboardState extends State<HostelOwnerDashboard> {
       case 0:
         return DashboardPage(onIndexChanged: widget.onIndexChanged);
       case 1:
-        return MyHostelsPage();
+        return const MyHostelsPage();
       case 2:
-        return OwnerBookingsPage();
+        return const OwnerBookingsPage();
       case 3:
-        return EarningsPage();
+        return const EarningsPage();
       case 4:
-        return ProfilePage();
+        return const ProfilePage();
       default:
         return DashboardPage(onIndexChanged: widget.onIndexChanged);
     }

@@ -1,4 +1,4 @@
-﻿import 'dart:math' show max;
+import 'dart:math' show max;
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -157,11 +157,11 @@ class SkeletonHostelCard extends StatelessWidget {
           color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         ),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image skeleton
-          const SkeletonLoader(
+          SkeletonLoader(
             width: double.infinity,
             height: 180,
             borderRadius: BorderRadius.only(
@@ -170,31 +170,31 @@ class SkeletonHostelCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title
-                const SkeletonLoader(
+                SkeletonLoader(
                   width: double.infinity,
                   height: 18,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 // Location
-                const SkeletonLoader(
+                SkeletonLoader(
                   width: 120,
                   height: 14,
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 // Rating and price row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SkeletonLoader(
+                    SkeletonLoader(
                       width: 60,
                       height: 16,
                     ),
-                    const SkeletonLoader(
+                    SkeletonLoader(
                       width: 80,
                       height: 20,
                     ),
@@ -224,25 +224,25 @@ class SkeletonStatCard extends StatelessWidget {
           color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         ),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SkeletonLoader(
+              SkeletonLoader(
                 width: 40,
                 height: 40,
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              const SkeletonLoader(
+              SkeletonLoader(
                 width: 60,
                 height: 24,
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const SkeletonLoader(
+          SizedBox(height: 16),
+          SkeletonLoader(
             width: 100,
             height: 14,
           ),

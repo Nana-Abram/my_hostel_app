@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:my_hostel_app/ui/core/responsive.dart';
 
 class ContactScreen extends StatelessWidget {
@@ -14,7 +14,7 @@ class ContactScreen extends StatelessWidget {
           horizontal: r.pagePadding, vertical: r.spacingXL),
       child: Column(
         children: [
-          _buildHeader(r, theme),
+          _buildHeader(context, r, theme),
           SizedBox(height: r.spacingXXL),
           _buildContactMethods(context, r, theme),
           SizedBox(height: r.spacingXXL),
@@ -28,7 +28,7 @@ class ContactScreen extends StatelessWidget {
 
   // ── Header ────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(Responsive r, ThemeData theme) {
+  Widget _buildHeader(BuildContext context, Responsive r, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,8 +51,13 @@ class ContactScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: AspectRatio(
             aspectRatio: r.isMobile ? 16 / 9 : 21 / 7,
-            child:
-                Image.asset('assets/images/contact2.jpg', fit: BoxFit.cover),
+            child: Image.asset(
+              'assets/images/contact2.jpg',
+              fit: BoxFit.cover,
+              cacheWidth: (MediaQuery.sizeOf(context).width *
+                      MediaQuery.devicePixelRatioOf(context))
+                  .round(),
+            ),
           ),
         ),
       ],
@@ -120,7 +125,7 @@ class ContactScreen extends StatelessWidget {
                     theme: theme,
                   ),
                 ))
-            .toList(),
+            ,
       ],
     );
 
@@ -308,12 +313,12 @@ class _ContactCard extends StatelessWidget {
                         fontSize: r.h5,
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface)),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(subtitle,
                     style: TextStyle(
                         fontSize: r.bodySmall,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(contact,
                     style: TextStyle(
                         fontSize: r.body,

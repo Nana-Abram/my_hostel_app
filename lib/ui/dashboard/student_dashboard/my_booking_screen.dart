@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -226,7 +226,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _viewBookingDetails(context, booking),
-                    child: Text('View Details'),
+                    child: const Text('View Details'),
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -238,7 +238,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                         backgroundColor: Colors.red.shade50,
                         foregroundColor: Colors.red,
                       ),
-                      child: Text('Cancel'),
+                      child: const Text('Cancel'),
                     ),
                   ),
               ],
@@ -270,7 +270,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Booking Details'),
+        title: const Text('Booking Details'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,7 +290,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -322,12 +322,12 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Cancel Booking'),
-        content: Text('Are you sure you want to cancel this booking?'),
+        title: const Text('Cancel Booking'),
+        content: const Text('Are you sure you want to cancel this booking?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('No'),
+            child: const Text('No'),
           ),
           TextButton(
             onPressed: _isCancelling
@@ -359,7 +359,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                       }
                     }
                   },
-            child: Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
+            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

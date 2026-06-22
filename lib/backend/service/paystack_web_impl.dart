@@ -2,6 +2,34 @@
 import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:js' as js;
+
+const _paystackScriptId = 'paystack-inline-js';
+
+/// Loads Paystack's inline.js on first use instead of blocking every page
+/// load with it — checkout is a rare action relative to browsing.
+Future<void> _ensurePaystackScriptLoaded() {
+  if (js.context.hasProperty('PaystackPop')) {
+    return Future.value();
+  }
+  final existing = html.document.getElementById(_paystackScriptId);
+  if (existing != null) {
+    // Already injected by a previous call; wait for it to finish loading.
+    final completer = Completer<void>();
+    existing.addEventListener('load', (_) => completer.complete());
+    if (js.context.hasProperty('PaystackPop')) completer.complete();
+    return completer.future;
+  }
+
+  final completer = Completer<void>();
+  final script = html.ScriptElement()
+    ..id = _paystackScriptId
+    ..src = 'https://js.paystack.co/v1/inline.js';
+  script.addEventListener('load', (_) => completer.complete());
+  html.document.head!.append(script);
+  return completer.future;
+}
 
 Future<String?> processPaystackWebPayment({
   required String publicKey,
@@ -9,7 +37,9 @@ Future<String?> processPaystackWebPayment({
   required int amountInPesewas,
   required String reference,
   required String customerName,
-}) {
+}) async {
+  await _ensurePaystackScriptLoaded();
+
   final completer = Completer<String?>();
   late html.EventListener listener;
 

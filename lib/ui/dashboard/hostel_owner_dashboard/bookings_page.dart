@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
@@ -6,7 +6,6 @@ import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 import 'package:my_hostel_app/ui/dashboard/hostel_owner_dashboard/booking_card.dart';
-import 'package:my_hostel_app/ui/widgets/icon_and_text_widget.dart';
 
 class OwnerBookingsPage extends ConsumerStatefulWidget {
   const OwnerBookingsPage({super.key});

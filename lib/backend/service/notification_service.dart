@@ -65,7 +65,15 @@ class NotificationService {
 
   // ── Initialise ────────────────────────────────────────────────────────────
 
-  Future<void> initialize() async {
+  // Memoized so callers that need the token (saveFCMToken) can await the same
+  // in-flight initialization instead of racing it when init runs in the background.
+  Future<void>? _initFuture;
+
+  Future<void> initialize() {
+    return _initFuture ??= _doInitialize();
+  }
+
+  Future<void> _doInitialize() async {
     try {
       final settings = await _fcm.requestPermission(
         alert: true,
@@ -295,6 +303,7 @@ class NotificationService {
   }
 
   Future<void> saveFCMToken(String userId) async {
+    await _initFuture;
     if (_fcmToken == null) return;
     try {
       await _firestore.collection('users').doc(userId).update({

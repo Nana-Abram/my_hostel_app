@@ -5,12 +5,12 @@ import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/core/app_logger.dart';
 
-final usersProvider = StreamProvider<List<UserModel>>((ref) {
+final usersProvider = StreamProvider.autoDispose<List<UserModel>>((ref) {
   final usersService = UsersService();
   return usersService.getUsersStream();
 });
 
-final usersStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final usersStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final usersService = UsersService();
   return await usersService.getUsersStats();
 });

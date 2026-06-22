@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           // ── Hero carousel ────────────────────────────────────────────────
-          _buildHero(r, theme),
+          _buildHero(context, r, theme),
 
           // On mobile the search box lives below the hero, not overlaid on it
           if (r.isMobile)
@@ -73,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Hero ──────────────────────────────────────────────────────────────────
 
-  Widget _buildHero(Responsive r, ThemeData theme) {
+  Widget _buildHero(BuildContext context, Responsive r, ThemeData theme) {
+    final cacheWidth =
+        (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context))
+            .round();
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -83,7 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(img, fit: BoxFit.cover, width: double.infinity),
+                Image.asset(
+                  img,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  cacheWidth: cacheWidth,
+                ),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

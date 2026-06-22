@@ -3,12 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/ui/core/app_logger.dart';
 
-final hostelsProvider = StreamProvider<List<HostelModel>>((ref) {
+final hostelsProvider = StreamProvider.autoDispose<List<HostelModel>>((ref) {
   final hostelsService = HostelsService();
   return hostelsService.getHostelsStream();
 });
 
-final hostelsStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final hostelsStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final hostelsService = HostelsService();
   return await hostelsService.getHostelsStats();
 });

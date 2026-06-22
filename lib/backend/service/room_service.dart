@@ -9,22 +9,26 @@ class RoomService {
     await _db.collection('rooms').add(room.toMap());
   }
 
+  // Cache-first (falls back to server if there's no cached result yet).
   Future<List<RoomModel>> getRoomsByHostel(String hostelId) async {
-    final snapshot = await _db
-        .collection('rooms')
-        .where('hostelId', isEqualTo: hostelId)
-        .get();
+    final query = _db.collection('rooms').where('hostelId', isEqualTo: hostelId);
+    final snapshot = await query
+        .get(const GetOptions(source: Source.cache))
+        .catchError((_) async => await query.get());
 
     return snapshot.docs
         .map((doc) => RoomModel.fromMap(doc.data(), doc.id))
         .toList();
   }
 
-  // ✅ FIXED: Get single room by document ID
+  // ✅ FIXED: Get single room by document ID (cache-first)
   Future<RoomModel?> getRoomById(String roomId) async {
     try {
-      final doc = await _db.collection('rooms').doc(roomId).get();
-      
+      final ref = _db.collection('rooms').doc(roomId);
+      final doc = await ref
+          .get(const GetOptions(source: Source.cache))
+          .catchError((_) => ref.get());
+
       if (doc.exists && doc.data() != null) {
         return RoomModel.fromMap(doc.data()!, doc.id);
       }

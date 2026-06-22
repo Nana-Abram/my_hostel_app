@@ -61,7 +61,13 @@ class AboutScreen extends StatelessWidget {
           child: AspectRatio(
             // Taller on mobile, wider on desktop
             aspectRatio: r.isMobile ? 16 / 9 : 21 / 7,
-            child: Image.asset('assets/images/new.jpg', fit: BoxFit.cover),
+            child: Image.asset(
+              'assets/images/new.jpg',
+              fit: BoxFit.cover,
+              cacheWidth: (MediaQuery.sizeOf(context).width *
+                      MediaQuery.devicePixelRatioOf(context))
+                  .round(),
+            ),
           ),
         ),
       ],

@@ -133,7 +133,7 @@ class ImageCompressionService {
   static ImageCompressionPreset getPreset(CompressionPresetType type) {
     switch (type) {
       case CompressionPresetType.thumbnail:
-        return ImageCompressionPreset(
+        return const ImageCompressionPreset(
           quality: 70,
           maxWidth: 400,
           maxHeight: 400,
@@ -141,7 +141,7 @@ class ImageCompressionService {
         );
       
       case CompressionPresetType.medium:
-        return ImageCompressionPreset(
+        return const ImageCompressionPreset(
           quality: 80,
           maxWidth: 1024,
           maxHeight: 1024,
@@ -149,7 +149,7 @@ class ImageCompressionService {
         );
       
       case CompressionPresetType.high:
-        return ImageCompressionPreset(
+        return const ImageCompressionPreset(
           quality: 85,
           maxWidth: 1920,
           maxHeight: 1080,
@@ -157,7 +157,7 @@ class ImageCompressionService {
         );
       
       case CompressionPresetType.original:
-        return ImageCompressionPreset(
+        return const ImageCompressionPreset(
           quality: 95,
           maxWidth: 4096,
           maxHeight: 4096,

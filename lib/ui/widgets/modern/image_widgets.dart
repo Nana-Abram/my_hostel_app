@@ -1,10 +1,20 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_network/image_network.dart';
 
-/// Enhanced cached network image with progressive loading, error handling, and shimmer effect
-class EnhancedCachedImage extends StatefulWidget {
+/// Enhanced cached network image with progressive loading, error handling, and shimmer effect.
+///
+/// On mobile/desktop this is backed by [CachedNetworkImage] so images are cached to disk
+/// (no re-download on revisit) and decoded at [width]x[height] instead of full resolution.
+///
+/// On web it falls back to [ImageNetwork], which renders via a native HTML `<img>` element.
+/// Flutter Web's Skia/CanvasKit image codec can't decode a meaningful fraction of real-world
+/// JPEGs (throws `EncodingError: The source image cannot be decoded`) — the browser's native
+/// decoder handles them fine, which is what ImageNetwork uses under the hood for web.
+class EnhancedCachedImage extends StatelessWidget {
   final String imageUrl;
   final double? width;
   final double? height;
@@ -28,83 +38,82 @@ class EnhancedCachedImage extends StatefulWidget {
     this.onTap,
   });
 
-  @override
-  State<EnhancedCachedImage> createState() => _EnhancedCachedImageState();
-}
+  Widget _buildPlaceholder() {
+    return placeholder ??
+        (showShimmer
+            ? Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  width: width,
+                  height: height,
+                  color: Colors.grey[300],
+                ),
+              )
+            : Container(
+                width: width,
+                height: height,
+                color: Colors.grey[200],
+                child: Center(
+                  child: SizedBox(
+                    width: 24.w,
+                    height: 24.h,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ));
+  }
 
-class _EnhancedCachedImageState extends State<EnhancedCachedImage> {
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Show shimmer for a short time, then fade it out
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
+  Widget _buildErrorWidget() {
+    return errorWidget ??
+        Icon(
+          Icons.broken_image_outlined,
+          size: 48.w,
+          color: Colors.grey[600],
+        );
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Stack(
-        children: [
-          // The actual image
-          ImageNetwork(
-            image: widget.imageUrl,
-            height: widget.height ?? 200,
-            width: widget.width ?? 200,
-            duration: 500,
-            fitAndroidIos: widget.fit,
-            fitWeb: widget.fit == BoxFit.cover ? BoxFitWeb.cover : BoxFitWeb.contain,
-            borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            onLoading: const SizedBox.shrink(), // Hide default loading
-            onError: widget.errorWidget ??
-                Icon(
-                  Icons.broken_image_outlined,
-                  size: 48.w,
-                  color: Colors.grey[600],
-                ),
+    if (kIsWeb) {
+      return GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: borderRadius ?? BorderRadius.zero,
+          child: ImageNetwork(
+            image: imageUrl,
+            height: height ?? 200,
+            width: width ?? 200,
+            fitWeb: fit == BoxFit.cover ? BoxFitWeb.cover : BoxFitWeb.contain,
+            onLoading: _buildPlaceholder(),
+            onError: _buildErrorWidget(),
           ),
-          
-          // Shimmer overlay (shows while loading)
-          if (_isLoading)
-            Positioned.fill(
-              child: widget.placeholder ??
-                  (widget.showShimmer
-                      ? Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: widget.borderRadius ?? BorderRadius.zero,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: widget.borderRadius ?? BorderRadius.zero,
-                          ),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24.w,
-                              height: 24.h,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        )),
-            ),
-        ],
+        ),
+      );
+    }
+
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final hasFiniteWidth = width != null && width!.isFinite;
+    final hasFiniteHeight = height != null && height!.isFinite;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: borderRadius ?? BorderRadius.zero,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          width: width,
+          height: height,
+          fit: fit,
+          memCacheWidth: hasFiniteWidth ? (width! * dpr).round() : null,
+          memCacheHeight: hasFiniteHeight ? (height! * dpr).round() : null,
+          fadeInDuration: const Duration(milliseconds: 200),
+          placeholder: (context, url) => _buildPlaceholder(),
+          errorWidget: (context, url, error) => _buildErrorWidget(),
+        ),
       ),
     );
   }
@@ -231,16 +240,16 @@ class _ImageLightboxState extends State<ImageLightbox> {
                 child: Center(
                   child: Hero(
                     tag: 'image_${widget.images[index]}',
-                    child: ImageNetwork(
-                      image: widget.images[index],
-                      height: double.infinity,
+                    child: EnhancedCachedImage(
+                      imageUrl: widget.images[index],
                       width: double.infinity,
-                      fitAndroidIos: BoxFit.contain,
-                      fitWeb: BoxFitWeb.contain,
-                      onLoading: const Center(
+                      height: double.infinity,
+                      fit: BoxFit.contain,
+                      showShimmer: false,
+                      placeholder: const Center(
                         child: CircularProgressIndicator(color: Colors.white),
                       ),
-                      onError: const Icon(
+                      errorWidget: const Icon(
                         Icons.error_outline,
                         color: Colors.white,
                         size: 48,

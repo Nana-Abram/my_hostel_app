@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/admin_hostel_provider.dart';
 
@@ -450,38 +450,31 @@ class _HostelsManagementPageState
     final imgSize = isMobile ? 100.w : 60.w;
     final imgHeight = isMobile ? 100.h : 60.h;
 
-    final thumbnail = ClipRRect(
-      borderRadius: BorderRadius.circular(10.r),
-      child: SizedBox(
-        height: imgHeight,
-        width: imgSize,
-        child: imageUrl != null
-            ? ImageNetwork(
-                key: ValueKey(imageUrl),
-                image: imageUrl,
-                height: imgHeight,
-                width: imgSize,
-                fitWeb: BoxFitWeb.cover,
-                fitAndroidIos: BoxFit.cover,
-                onLoading: Container(
-                  color: theme.colorScheme.surfaceVariant,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: theme.colorScheme.primary),
-                  ),
-                ),
-                onError: Container(
-                  color: theme.colorScheme.surfaceVariant,
-                  child: Icon(Icons.broken_image_outlined,
-                      color: theme.colorScheme.onSurfaceVariant),
-                ),
-              )
-            : Container(
+    final thumbnail = SizedBox(
+      height: imgHeight,
+      width: imgSize,
+      child: imageUrl != null
+          ? EnhancedCachedImage(
+              key: ValueKey(imageUrl),
+              imageUrl: imageUrl,
+              height: imgHeight,
+              width: imgSize,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(10.r),
+              errorWidget: Container(
+                color: theme.colorScheme.surfaceVariant,
+                child: Icon(Icons.broken_image_outlined,
+                    color: theme.colorScheme.onSurfaceVariant),
+              ),
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(10.r),
+              child: Container(
                 color: theme.colorScheme.surfaceVariant,
                 child: Icon(Icons.business_outlined,
                     color: theme.colorScheme.onSurfaceVariant),
               ),
-      ),
+            ),
     );
 
     final actionMenu = PopupMenuButton<String>(

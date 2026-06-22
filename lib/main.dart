@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -14,10 +16,12 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize notifications (background handler must be registered before
-  // any other Firebase call, so it stays here at the top level)
+  // Register the background handler before any other Firebase call, but
+  // don't block first frame on permission prompts / network token fetch —
+  // notifications aren't needed for the app to be usable, so let this run
+  // in the background while the UI is already showing.
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  await NotificationService().initialize();
+  unawaited(NotificationService().initialize());
 
   runApp(const ProviderScope(child: MyApp()));
 }

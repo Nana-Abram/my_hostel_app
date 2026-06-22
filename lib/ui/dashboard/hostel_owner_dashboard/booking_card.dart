@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 
@@ -550,30 +550,27 @@ class _BookingCardState extends State<BookingCard> {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8.r),
-      child: LayoutBuilder(
-        builder: (context, constraints) => ImageNetwork(
-          image: imageUrl,
+    return LayoutBuilder(
+      builder: (context, constraints) => EnhancedCachedImage(
+        imageUrl: imageUrl,
+        height: 150.h,
+        width: constraints.maxWidth,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(8.r),
+        placeholder: Container(
           height: 150.h,
-          width: constraints.maxWidth,
-          fitWeb: BoxFitWeb.cover,
-          fitAndroidIos: BoxFit.cover,
-          onLoading: Container(
-            height: 150.h,
-            color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
-            child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)),
+          color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
+          child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)),
+        ),
+        errorWidget: Container(
+          height: 150.h,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          onError: Container(
-            height: 150.h,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Center(
-              child: Icon(Icons.broken_image_outlined,
-                  size: 32.w, color: theme.colorScheme.error),
-            ),
+          child: Center(
+            child: Icon(Icons.broken_image_outlined,
+                size: 32.w, color: theme.colorScheme.error),
           ),
         ),
       ),

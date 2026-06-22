@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
@@ -92,12 +92,11 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                     itemBuilder: (context, index) {
                       return Hero(
                         tag: index == 0 ? 'room-${widget.room.id}' : 'room-${widget.room.id}-$index',
-                        child: ImageNetwork(
-                          image: images[index],
+                        child: EnhancedCachedImage(
+                          imageUrl: images[index],
                           height: 400.h,
                           width: 1.sw,
-                          fitAndroidIos: BoxFit.cover,
-                          fitWeb: BoxFitWeb.cover,
+                          fit: BoxFit.cover,
                         ),
                       );
                     },
@@ -363,15 +362,12 @@ class _RoomDetailsPageState extends ConsumerState<RoomDetailsPage> {
                                             ]
                                           : null,
                                     ),
-                                    child: ClipRRect(
+                                    child: EnhancedCachedImage(
+                                      imageUrl: images[index],
+                                      height: 80.h,
+                                      width: 80.w,
+                                      fit: BoxFit.cover,
                                       borderRadius: BorderRadius.circular(10.r),
-                                      child: ImageNetwork(
-                                        image: images[index],
-                                        height: 80.h,
-                                        width: 80.w,
-                                        fitAndroidIos: BoxFit.cover,
-                                        fitWeb: BoxFitWeb.cover,
-                                      ),
                                     ),
                                   ),
                                 );

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
 import 'package:my_hostel_app/backend/provider/auth_provider.dart';
 import 'package:my_hostel_app/backend/service/auth_service.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -289,14 +289,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     final imageUrl = widget.currentUser.profileImage;
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      return ImageNetwork(
+      return EnhancedCachedImage(
         key: ValueKey(imageUrl),
-        image: imageUrl,
+        imageUrl: imageUrl,
         height: size,
         width: size,
-        fitAndroidIos: BoxFit.cover,
-        fitWeb: BoxFitWeb.cover,
-        onError: _buildPlaceholderAvatar(theme, size),
+        fit: BoxFit.cover,
+        errorWidget: _buildPlaceholderAvatar(theme, size),
       );
     }
 

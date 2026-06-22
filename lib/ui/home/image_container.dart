@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -12,7 +12,7 @@ class ImageContainer extends StatefulWidget {
   State<ImageContainer> createState() => _ImageContainerState();
 }
 
-class _ImageContainerState extends State<ImageContainer> {
+class _ImageContainerState extends State<ImageContainer> with WidgetsBindingObserver {
   final CarouselSliderController _carouselController = CarouselSliderController();
   int _currentPage = 0;
   Timer? _autoScrollTimer;
@@ -30,10 +30,24 @@ class _ImageContainerState extends State<ImageContainer> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _startAutoScroll();
   }
 
+  // Pause the auto-scroll while the app is backgrounded instead of letting
+  // the timer keep firing page-flip animations the user can't see.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startAutoScroll();
+    } else {
+      _autoScrollTimer?.cancel();
+      _autoScrollTimer = null;
+    }
+  }
+
   void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
         _carouselController.nextPage(
@@ -46,6 +60,7 @@ class _ImageContainerState extends State<ImageContainer> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _autoScrollTimer?.cancel();
     super.dispose();
   }
@@ -200,6 +215,9 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
                         Image.asset(
                           widget.imagePath,
                           fit: BoxFit.cover,
+                          cacheWidth: (MediaQuery.sizeOf(context).width *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round(),
                         ),
                         
                         // Gradient overlay (subtle, appears on hover or center)
@@ -298,7 +316,7 @@ class _ImageCardState extends State<_ImageCard> with SingleTickerProviderStateMi
       appBarScreenState.onNavSelected(1);
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Showing filtered results in Hostels'),
           duration: Duration(seconds: 2),
         ),

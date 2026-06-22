@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final Uuid _uuid = Uuid();
+  final Uuid _uuid = const Uuid();
 
   // Upload payment screenshot and return download URL.
   Future<String> uploadPaymentScreenshot(XFile file, String bookingId) async {

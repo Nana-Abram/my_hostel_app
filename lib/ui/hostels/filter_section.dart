@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/provider/filter_provider.dart';
@@ -193,7 +193,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
               hint: "Select room type",
               value: filter.roomType,
               isFilter: true,
-              items: [
+              items: const [
                 "Single Room with washroom",
                 "Single Room self contain",
                 "Single Room with shared washroom",
@@ -216,7 +216,7 @@ class _FilterSectionState extends ConsumerState<FilterSection> {
               hint: "Select gender",
               isFilter: true,
               value: filter.gender,
-              items: ["Male", "Female", "Mixed"],
+              items: const ["Male", "Female", "Mixed"],
               onChanged: (val) {
                 ref.read(filterProvider.notifier).setGender(val);
               },

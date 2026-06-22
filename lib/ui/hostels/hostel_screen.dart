@@ -47,7 +47,10 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final filteredHostels = ref.watch(filteredHostelsProvider);
+    // Only the count is displayed on this screen (HostelGrid renders the
+    // actual cards via its own watch), so select just the length instead of
+    // rebuilding this whole screen whenever the list's contents/order change.
+    final filteredCount = ref.watch(filteredHostelsProvider.select((list) => list.length));
     final filter = ref.watch(filterProvider);
     final r = Responsive.of(context);
 
@@ -71,7 +74,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
 
             // ── Search & controls ─────────────────────────────────────────
             if (r.isMobile)
-              _buildMobileSearchRow(theme, filteredHostels, filter)
+              _buildMobileSearchRow(theme, filteredCount, filter)
             else ...[
               /// SEARCH BAR & SORT OPTIONS
               Row(
@@ -269,7 +272,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
               Row(
                 children: [
                   SmallText(
-                    text: "Found ${filteredHostels.length} ${filteredHostels.length == 1 ? 'hostel' : 'hostels'}",
+                    text: "Found $filteredCount ${filteredCount == 1 ? 'hostel' : 'hostels'}",
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     size: 14.sp,
                   ),
@@ -317,9 +320,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                             ref.invalidate(hostelsStreamProvider);
                             await Future.delayed(const Duration(milliseconds: 500));
                           },
-                          child: const SingleChildScrollView(
-                            child: Column(children: [HostelGrid()]),
-                          ),
+                          child: const HostelGrid(),
                         )
                       : Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,11 +337,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
                                   ref.invalidate(hostelsStreamProvider);
                                   await Future.delayed(const Duration(milliseconds: 500));
                                 },
-                                child: const SingleChildScrollView(
-                                  child: Column(
-                                    children: [HostelGrid()],
-                                  ),
-                                ),
+                                child: const HostelGrid(),
                               ),
                             ),
                           ],
@@ -355,7 +352,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
   // ── Mobile search row ─────────────────────────────────────────────────────
 
   Widget _buildMobileSearchRow(
-      ThemeData theme, List filteredHostels, HostelFilter filter) {
+      ThemeData theme, int filteredCount, HostelFilter filter) {
     return Column(
       children: [
         // Full-width search bar
@@ -428,7 +425,7 @@ class _HostelsScreenState extends ConsumerState<HostelsScreen> {
         Row(
           children: [
             SmallText(
-              text: "${filteredHostels.length} ${filteredHostels.length == 1 ? 'hostel' : 'hostels'}",
+              text: "$filteredCount ${filteredCount == 1 ? 'hostel' : 'hostels'}",
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               size: 13,
             ),

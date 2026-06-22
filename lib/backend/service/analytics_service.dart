@@ -12,7 +12,7 @@ class AnalyticsService {
       final totalUsers = usersSnapshot.docs.length;
       
       // Get active users (last 30 days)
-      final thirtyDaysAgo = DateTime.now().subtract(Duration(days: 30));
+      final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final activeUsers = usersSnapshot.docs
           .where((doc) {
             final lastActive = doc.data()['lastActive'] as Timestamp?;
@@ -69,67 +69,66 @@ class AnalyticsService {
     }
   }
 
-  // Get bookings over time for chart
+  // Get bookings over time for chart.
+  // Fetches the whole date range in a single query and buckets client-side,
+  // instead of firing one query per day/month (was up to 30 sequential reads).
   Future<List<Map<String, dynamic>>> getBookingsOverTime(String period) async {
     final now = DateTime.now();
-    List<Map<String, dynamic>> data = [];
-    
-    if (period == 'Last 7 Days') {
-      for (int i = 6; i >= 0; i--) {
-        final date = DateTime(now.year, now.month, now.day - i);
-        final nextDate = DateTime(date.year, date.month, date.day + 1);
-        
-        final querySnapshot = await _firestore
-            .collection('bookings')
-            .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(date))
-            .where('createdAt', isLessThan: Timestamp.fromDate(nextDate))
-            .get();
-        
-        data.add({
-          'label': _getDayName(date.weekday),
-          'value': querySnapshot.docs.length,
-          'date': date,
-        });
-      }
-    } else if (period == 'Last 30 Days') {
-      for (int i = 29; i >= 0; i--) {
-        final date = DateTime(now.year, now.month, now.day - i);
-        final nextDate = DateTime(date.year, date.month, date.day + 1);
-        
-        final querySnapshot = await _firestore
-            .collection('bookings')
-            .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(date))
-            .where('createdAt', isLessThan: Timestamp.fromDate(nextDate))
-            .get();
-        
-        data.add({
-          'label': '${date.day}',
-          'value': querySnapshot.docs.length,
-          'date': date,
-        });
-      }
-    } else if (period == 'This Year') {
-      // ignore: unused_local_variable
-      final startOfYear = DateTime(now.year, 1, 1);
-      
-      for (int i = 0; i < 12; i++) {
+
+    final DateTime rangeStart;
+    final int bucketCount;
+    switch (period) {
+      case 'Last 7 Days':
+        rangeStart = DateTime(now.year, now.month, now.day - 6);
+        bucketCount = 7;
+        break;
+      case 'Last 30 Days':
+        rangeStart = DateTime(now.year, now.month, now.day - 29);
+        bucketCount = 30;
+        break;
+      case 'This Year':
+        rangeStart = DateTime(now.year, 1, 1);
+        bucketCount = 12;
+        break;
+      default:
+        return [];
+    }
+
+    final querySnapshot = await _firestore
+        .collection('bookings')
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(rangeStart))
+        .get();
+
+    final createdDates = querySnapshot.docs
+        .map((doc) => (doc.data()['createdAt'] as Timestamp?)?.toDate())
+        .whereType<DateTime>()
+        .toList();
+
+    final data = <Map<String, dynamic>>[];
+
+    if (period == 'This Year') {
+      for (int i = 0; i < bucketCount; i++) {
         final monthStart = DateTime(now.year, i + 1, 1);
         final monthEnd = DateTime(now.year, i + 2, 1);
-        
-        final querySnapshot = await _firestore
-            .collection('bookings')
-            .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(monthStart))
-            .where('createdAt', isLessThan: Timestamp.fromDate(monthEnd))
-            .get();
-        
+        final count = createdDates
+            .where((d) => !d.isBefore(monthStart) && d.isBefore(monthEnd))
+            .length;
+        data.add({'label': _getMonthName(i + 1), 'value': count, 'date': monthStart});
+      }
+    } else {
+      for (int i = bucketCount - 1; i >= 0; i--) {
+        final date = DateTime(now.year, now.month, now.day - i);
+        final nextDate = DateTime(date.year, date.month, date.day + 1);
+        final count =
+            createdDates.where((d) => !d.isBefore(date) && d.isBefore(nextDate)).length;
         data.add({
-          'label': _getMonthName(i + 1),
-          'value': querySnapshot.docs.length,
-          'date': monthStart,
+          'label': period == 'Last 7 Days' ? _getDayName(date.weekday) : '${date.day}',
+          'value': count,
+          'date': date,
         });
       }
     }
-    
+
     return data;
   }
 
@@ -142,32 +141,33 @@ class AnalyticsService {
           .where('status', whereIn: ['confirmed', 'checked-in'])
           .get();
       
-      // Calculate revenue per hostel
+      // Calculate revenue and booking count per hostel in a single pass
+      // (previously did a second full scan over bookingsSnapshot.docs per hostel).
       final Map<String, double> hostelRevenue = {};
       final Map<String, String> hostelNames = {};
-      
+      final Map<String, int> hostelBookingCount = {};
+
       for (var doc in bookingsSnapshot.docs) {
         final data = doc.data();
         final hostelId = data['hostelId'] as String;
         final hostelName = data['hostelName'] as String;
         final amount = (data['totalPrice'] as num).toDouble();
-        
+
         hostelRevenue[hostelId] = (hostelRevenue[hostelId] ?? 0) + amount;
         hostelNames[hostelId] = hostelName;
+        hostelBookingCount[hostelId] = (hostelBookingCount[hostelId] ?? 0) + 1;
       }
-      
+
       // Sort by revenue
       final sortedHostels = hostelRevenue.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
-      
+
       return sortedHostels.take(limit).map((entry) {
         return {
           'id': entry.key,
           'name': hostelNames[entry.key] ?? 'Unknown Hostel',
           'revenue': entry.value,
-          'bookingCount': bookingsSnapshot.docs
-              .where((doc) => doc.data()['hostelId'] == entry.key)
-              .length,
+          'bookingCount': hostelBookingCount[entry.key] ?? 0,
         };
       }).toList();
     } catch (e) {
@@ -186,7 +186,7 @@ class AnalyticsService {
       int admins = 0;
       int totalActive = 0;
       
-      final thirtyDaysAgo = DateTime.now().subtract(Duration(days: 30));
+      final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       
       for (var doc in usersSnapshot.docs) {
         final data = doc.data();

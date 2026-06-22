@@ -1,4 +1,4 @@
-﻿// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -785,8 +785,8 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
         // Success icon
         Container(
           padding: EdgeInsets.all(18.w),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE8F5E9),
+          decoration: const BoxDecoration(
+            color: Color(0xFFE8F5E9),
             shape: BoxShape.circle,
           ),
           child: Icon(Icons.mark_email_read_outlined,
@@ -812,7 +812,7 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
               const TextSpan(text: 'We sent a password reset link to\n'),
               TextSpan(
                 text: email,
-                style: TextStyle(
+                style: const TextStyle(
                     color: _headingColor, fontWeight: FontWeight.w600),
               ),
               const TextSpan(

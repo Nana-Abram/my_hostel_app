@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 
 class UserAvatar extends StatelessWidget {
   final UserModel? user;
@@ -31,15 +31,13 @@ class UserAvatar extends StatelessWidget {
           children: [
             // Profile image if available
             if (user!.profileImage != null && user!.profileImage!.isNotEmpty)
-              ClipRRect(
+              EnhancedCachedImage(
+                imageUrl: user!.profileImage!,
+                height: size.w,
+                width: size.w,
                 borderRadius: BorderRadius.circular(size.w),
-                child: ImageNetwork(
-                  image: user!.profileImage!,
-                  height: size.w,
-                  width: size.w,
-                  onError: _buildInitialsAvatar(user!, theme),
-                  onTap: onTap,
-                ),
+                errorWidget: _buildInitialsAvatar(user!, theme),
+                onTap: onTap,
               )
             else
               _buildInitialsAvatar(user!, theme),

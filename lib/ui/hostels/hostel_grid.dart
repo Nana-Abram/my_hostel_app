@@ -15,27 +15,29 @@ class HostelGrid extends ConsumerWidget {
 
     return hostelsAsync.when(
       // Loading state - show skeleton loaders
-      loading: () => isMobile
-          ? Column(
-              children: List.generate(
-                3,
-                (index) => const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: SkeletonHostelCard(),
+      loading: () => SingleChildScrollView(
+        child: isMobile
+            ? Column(
+                children: List.generate(
+                  3,
+                  (index) => const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: SkeletonHostelCard(),
+                  ),
+                ),
+              )
+            : Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: List.generate(
+                  6,
+                  (index) => const SizedBox(
+                    width: 300,
+                    child: SkeletonHostelCard(),
+                  ),
                 ),
               ),
-            )
-          : Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              children: List.generate(
-                6,
-                (index) => const SizedBox(
-                  width: 300,
-                  child: SkeletonHostelCard(),
-                ),
-              ),
-            ),
+      ),
 
       // Error state - show error widget with retry
       error: (error, stack) => Center(
@@ -67,35 +69,40 @@ class HostelGrid extends ConsumerWidget {
           );
         }
 
-        // Mobile: one card per row in a Column
+        // Mobile: lazy list — only builds/lays out cards near the viewport
+        // instead of constructing every card up front (the previous Column
+        // + List.generate built the whole list eagerly on every filter change).
         if (isMobile) {
-          return Column(
-            children: List.generate(filteredList.length, (index) {
-              final hostel = filteredList[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: StaggeredAnimationWrapper(
-                  position: index,
-                  animationType: AnimationType.scaleAndFade,
+          return AnimatedListView(
+            padding: const EdgeInsets.only(bottom: 16),
+            children: [
+              for (final hostel in filteredList)
+                Padding(
+                  key: ValueKey(hostel.id),
+                  padding: const EdgeInsets.only(bottom: 16),
                   child: HostelCard(hostel: hostel),
                 ),
-              );
-            }),
+            ],
           );
         }
 
-        // Desktop/tablet: Wrap grid
-        return Wrap(
-          spacing: 20,
-          runSpacing: 20,
-          children: List.generate(filteredList.length, (index) {
-            final hostel = filteredList[index];
-            return StaggeredAnimationWrapper(
-              position: index,
-              animationType: AnimationType.scaleAndFade,
-              child: HostelCard(hostel: hostel),
-            );
-          }),
+        // Desktop/tablet: Wrap grid. Cards have content-driven (non-uniform)
+        // heights, so a true lazy SliverGrid isn't a safe drop-in replacement
+        // here without forcing a fixed aspect ratio — kept as Wrap for now.
+        return SingleChildScrollView(
+          child: Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            children: List.generate(filteredList.length, (index) {
+              final hostel = filteredList[index];
+              return StaggeredAnimationWrapper(
+                key: ValueKey(hostel.id),
+                position: index,
+                animationType: AnimationType.scaleAndFade,
+                child: HostelCard(hostel: hostel),
+              );
+            }),
+          ),
         );
       },
     );

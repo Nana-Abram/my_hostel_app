@@ -1,9 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/model/room_model.dart';
 import 'package:my_hostel_app/ui/widgets/big_text_widget.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
 class BookingSummaryCard extends StatelessWidget {
@@ -50,18 +50,15 @@ class BookingSummaryCard extends StatelessWidget {
               color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             ),
             child: roomImage.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => ImageNetwork(
-                        image: roomImage,
-                        height: 200.h,
-                        width: constraints.maxWidth,
-                        fitAndroidIos: BoxFit.cover,
-                        fitWeb: BoxFitWeb.cover,
+                ? LayoutBuilder(
+                    builder: (context, constraints) => EnhancedCachedImage(
+                      imageUrl: roomImage,
+                      height: 200.h,
+                      width: constraints.maxWidth,
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.r),
+                        topRight: Radius.circular(20.r),
                       ),
                     ),
                   )

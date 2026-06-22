@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
 import 'package:my_hostel_app/backend/service/booking_service.dart';
 
-final allBookingsProvider = StreamProvider<List<BookingModel>>((ref) {
+final allBookingsProvider = StreamProvider.autoDispose<List<BookingModel>>((ref) {
   return AdminBookingService().getAllBookingsStream();
 });
 
-final bookingStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final bookingStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   return AdminBookingService().getBookingStats();
 });
 

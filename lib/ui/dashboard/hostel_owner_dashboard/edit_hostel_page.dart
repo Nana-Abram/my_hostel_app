@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_network/image_network.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 import 'package:my_hostel_app/backend/model/hostel_model.dart';
 import 'package:my_hostel_app/backend/provider/hostel_provider.dart';
 import 'package:my_hostel_app/backend/provider/room_provider.dart';
@@ -811,16 +811,17 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: room.image.isNotEmpty
-                ? ImageNetwork(
-                    image: room.image,
-                    height: 80.h,
-                    width: 80.w,
-                    fitWeb: BoxFitWeb.cover,
-                  )
-                : Container(
+          room.image.isNotEmpty
+              ? EnhancedCachedImage(
+                  imageUrl: room.image,
+                  height: 80.h,
+                  width: 80.w,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(10.r),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Container(
                     height: 80.h,
                     width: 80.w,
                     color: theme.colorScheme.surfaceContainerHighest,
@@ -828,7 +829,7 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
                         size: 35.sp,
                         color: theme.colorScheme.onSurfaceVariant),
                   ),
-          ),
+                ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -1031,12 +1032,11 @@ class _EditHostelPageState extends ConsumerState<EditHostelPage> {
         children: [
           Stack(
             children: [
-              ImageNetwork(
-                image: imageUrl,
+              EnhancedCachedImage(
+                imageUrl: imageUrl,
                 height: 90.h,
                 width: 120.w,
-                fitWeb: BoxFitWeb.cover,
-                fitAndroidIos: BoxFit.cover,
+                fit: BoxFit.cover,
                 borderRadius: BorderRadius.circular(10.r),
               ),
               if (isMarkedForDeletion)

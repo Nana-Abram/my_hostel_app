@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -177,7 +177,7 @@ class _NotificationList extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 8.h),
       children: [
         if (today.isNotEmpty) ...[
-          _SectionHeader(label: 'Today'),
+          const _SectionHeader(label: 'Today'),
           ...today.map((n) => _NotificationTile(
                 notification: n,
                 onTap: () => onTap(n),
@@ -185,7 +185,7 @@ class _NotificationList extends StatelessWidget {
               )),
         ],
         if (yesterday.isNotEmpty) ...[
-          _SectionHeader(label: 'Yesterday'),
+          const _SectionHeader(label: 'Yesterday'),
           ...yesterday.map((n) => _NotificationTile(
                 notification: n,
                 onTap: () => onTap(n),
@@ -193,7 +193,7 @@ class _NotificationList extends StatelessWidget {
               )),
         ],
         if (earlier.isNotEmpty) ...[
-          _SectionHeader(label: 'Earlier'),
+          const _SectionHeader(label: 'Earlier'),
           ...earlier.map((n) => _NotificationTile(
                 notification: n,
                 onTap: () => onTap(n),

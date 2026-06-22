@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_network/image_network.dart';
 import 'package:my_hostel_app/backend/model/auth_model.dart';
+import 'package:my_hostel_app/ui/widgets/modern/image_widgets.dart';
 
 class UserListItem extends StatelessWidget {
   final UserModel user;
@@ -26,17 +26,13 @@ class UserListItem extends StatelessWidget {
       radius: 20.w,
       backgroundColor: roleColor.withValues(alpha: 0.1),
       child: user.profileImage != null
-          ? ClipOval(
-              child: ImageNetwork(
-                image: user.profileImage!,
-                height: 40.w,
-                width: 40.w,
-                fitAndroidIos: BoxFit.cover,
-                fitWeb: BoxFitWeb.cover,
-                backgroundColor: Colors.transparent,
-                onLoading: CircularProgressIndicator(color: theme.colorScheme.primary),
-                onError: Icon(Icons.error, color: theme.colorScheme.error),
-              ),
+          ? EnhancedCachedImage(
+              imageUrl: user.profileImage!,
+              height: 40.w,
+              width: 40.w,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(20.w),
+              errorWidget: Icon(Icons.error, color: theme.colorScheme.error),
             )
           : Text(
               user.fullName[0],

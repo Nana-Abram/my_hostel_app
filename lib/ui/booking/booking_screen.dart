@@ -58,15 +58,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: BookingAppBar(),
+      appBar: const BookingAppBar(),
       body: hostelAsync.when(
         loading: () => Center(
           child: Padding(
             padding: EdgeInsets.all(24.w),
-            child: Column(
+            child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const LoadingCard(
+                LoadingCard(
                   height: 200,
                   message: 'Loading booking details...',
                 ),

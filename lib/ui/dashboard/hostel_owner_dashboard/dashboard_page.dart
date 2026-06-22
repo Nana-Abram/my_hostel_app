@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/backend/model/booking_model.dart';
@@ -199,7 +199,7 @@ Widget _buildStatCard({
         BoxShadow(
           color: color.withValues(alpha: 0.25),
           blurRadius: 2,
-          offset: Offset(0, 4),
+          offset: const Offset(0, 4),
         ),
       ],
     ),

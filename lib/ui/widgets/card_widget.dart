@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_hostel_app/ui/widgets/small_text_widget.dart';
 
@@ -82,7 +82,7 @@ class _CardWidgetState extends State<CardWidget> {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             SmallText(
               text: widget.secondText,
               size: isMobile ? 12 : 11.sp,
